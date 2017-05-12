@@ -44,5 +44,6 @@ main.js.map
 
 __test/**/*
 
+dist
 typings
 @types
