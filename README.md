@@ -12,4 +12,4 @@
 - corpjs-serverless local 3000 ./lib/src/example/example1.js
     - http://localhost:3000/hello
 ### deploy to aws
-- corpjs-serverless deploy aws ./lib/src/example/example1.js
+- corpjs-serverless deploy aws ./lib/src/example/example1.js --aws-region eu-central-1 --aws-bucket corpjs-serverless

@@ -1,4 +1,5 @@
 import { Lambda } from 'aws-sdk'
+import { merge } from 'lodash'
 import { config } from '../utilities/config'
 import { bundle } from '../utilities/webpack'
 import { zip } from '../utilities/compress'
@@ -6,9 +7,23 @@ import { upload } from '../utilities/aws/s3Upload'
 
 import { getMetadata, constants } from '../../annotations'
 
-let lambda = new Lambda(config.aws.Lambda);
+let lambda = null;
+const initAWSSDK = (context) => {
+    if (!lambda) {
+        let awsConfig = merge({}, config.aws.Lambda)
+        if (context.awsRegion) {
+            awsConfig.region = context.awsRegion
+        }
+
+        lambda = new Lambda(awsConfig);
+    }
+    return lambda
+}
+
 
 export const createLambda = async (context) => {
+    initAWSSDK(context)
+
     await bundle(context)
     await zip(context)
     await upload(context)
@@ -36,10 +51,11 @@ export const createLambda = async (context) => {
 
 
 export const createLambdaFunction = (serviceDefinition, context) => {
+    initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
             Code: {
-                S3Bucket: config.S3.Bucket,
+                S3Bucket: context.awsBucket,
                 S3Key: context.S3Zip
             },
             Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
@@ -66,6 +82,7 @@ export const createLambdaFunction = (serviceDefinition, context) => {
 }
 
 export const getLambdaFunction = (serviceDefinition, context) => {
+    initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
             FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)
@@ -78,6 +95,7 @@ export const getLambdaFunction = (serviceDefinition, context) => {
 }
 
 export const deleteLambdaFunction = (serviceDefinition, context) => {
+    initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
             FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)
@@ -90,6 +108,7 @@ export const deleteLambdaFunction = (serviceDefinition, context) => {
 }
 
 export const publishLambdaFunction = (serviceDefinition, context) => {
+    initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
             FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)

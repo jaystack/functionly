@@ -2,8 +2,8 @@ var path = require('path')
 
 module.exports = {
     aws: {
-        S3: { apiVersion: '2006-03-01', region: "eu-central-1" },
-        Lambda: { apiVersion: '2015-03-31', region: "eu-central-1" }
+        S3: { apiVersion: '2006-03-01', signatureVersion: 'v4' },
+        Lambda: { apiVersion: '2015-03-31', signatureVersion: 'v4' }
     },
     webpack: {
         output: {
@@ -14,7 +14,6 @@ module.exports = {
         target: 'node'
     },
     S3: {
-        Bucket: 'molinio-lambda',
         ACL: 'public-read'
     }
 }
