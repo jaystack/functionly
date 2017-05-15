@@ -1,8 +1,8 @@
 import * as request from 'request'
 import { constants, getOwnMetadata, getMetadata, resolveHandler } from '../annotations'
 
-export const getInvoker = (serviceType) => {
-    let serviceInstance = new serviceType()
+export const getInvoker = (serviceType, params) => {
+    let serviceInstance = serviceType.factory(...params)
     let invoker = async (req, res, next) => {
         try {
             let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType.prototype, 'handle') || [];
@@ -28,7 +28,7 @@ const parameterResolver = (req, target) => {
     switch (target.type) {
         case 'service':
             let serviceType = resolveHandler(target.serviceTypeName)
-            return new serviceType()
+            return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
             if (req.body && req.body[target.from]) return req.body[target.from]
             if (req.query && req.query[target.from]) return req.query[target.from]
@@ -36,7 +36,7 @@ const parameterResolver = (req, target) => {
     }
 }
 
-export const invoke = async (serviceType, ...params) => {
+export const invoke = async (serviceType, params) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 

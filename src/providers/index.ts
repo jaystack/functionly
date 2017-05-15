@@ -6,7 +6,7 @@ import * as deploy from './deploy'
 
 let environments = { aws, local, deploy }
 
-export const getInvoker = (serviceType) => {
+export const getInvoker = (serviceType, params) => {
 
     if (!process.env.FUNCTIONAL_ENVIRONMENT || !environments[process.env.FUNCTIONAL_ENVIRONMENT]) {
         throw new Error(`missing environment: process.env.FUNCTIONAL_ENVIRONMENT`)
@@ -14,7 +14,7 @@ export const getInvoker = (serviceType) => {
 
     let currentEnvironment = environments[process.env.FUNCTIONAL_ENVIRONMENT]
 
-    let invoker = currentEnvironment.getInvoker(serviceType)
+    let invoker = currentEnvironment.getInvoker(serviceType, params)
 
     Object.defineProperty(invoker, 'serviceType', {
         enumerable: false,
@@ -26,12 +26,12 @@ export const getInvoker = (serviceType) => {
     return invoker
 }
 
-export const invoke = async (serviceType, ...params) => {
+export const invoke = async (serviceType, params) => {
     if (!process.env.FUNCTIONAL_ENVIRONMENT || !environments[process.env.FUNCTIONAL_ENVIRONMENT]) {
         throw new Error(`missing environment: process.env.FUNCTIONAL_ENVIRONMENT`)
     }
 
     let currentEnvironment = environments[process.env.FUNCTIONAL_ENVIRONMENT]
 
-    return await currentEnvironment.invoke(serviceType, ...params)
+    return await currentEnvironment.invoke(serviceType, params)
 }

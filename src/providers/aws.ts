@@ -3,8 +3,8 @@ import { constants, getOwnMetadata, getMetadata, resolveHandler } from '../annot
 
 let lambda = new Lambda();
 
-export const getInvoker = (serviceType) => {
-    let serviceInstance = new serviceType()
+export const getInvoker = (serviceType, params) => {
+    let serviceInstance = serviceType.factory(...params)
     let invoker = async (event, context, cb) => {
         try {
             let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType.prototype, 'handle') || [];
@@ -30,13 +30,13 @@ const parameterResolver = (event, context, target) => {
     switch (target.type) {
         case 'service':
             let serviceType = resolveHandler(target.serviceTypeName)
-            return new serviceType()
+            return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
             return event[target.from]
     }
 }
 
-export const invoke = async (serviceType, ...params) => {
+export const invoke = async (serviceType, params) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 

@@ -6,7 +6,7 @@ let map = new Map()
 export const handler = (memorySize?: number, timeout?: number) => {
     return (target: Function) => {
         defineMetadata(Class_NameKey, target.name, target);
-        map.set(target.name, target)
+        registerService(target.name, target)
         if (typeof memorySize === 'number') {
             defineMetadata(Class_MemorySizeKey, memorySize, target);
         }
@@ -14,6 +14,10 @@ export const handler = (memorySize?: number, timeout?: number) => {
             defineMetadata(Class_TimeoutKey, timeout, target);
         }
     }
+}
+
+export const registerService = (serviceName, serviceType) => {
+    map.set(serviceName, serviceType)
 }
 
 export const resolveHandler = (handlerName) => {
