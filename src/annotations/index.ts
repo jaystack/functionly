@@ -4,6 +4,7 @@ export * from './classes/handler'
 export * from './classes/environment'
 export * from './classes/tag'
 export * from './classes/resource'
+export * from './classes/log'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 

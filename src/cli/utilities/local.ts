@@ -31,6 +31,24 @@ const environmentConfigMiddleware = (serviceType) => {
     }
 }
 
+const logMiddleware = (serviceType) => {
+    return (req, res, next) => {
+        const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceType)
+        if (!isLoggingEnabled) return next()
+
+        console.log(`${serviceType.name}`, JSON.stringify({
+            date: new Date().toISOString(),
+            url: req.url,
+            query: req.query,
+            params: req.params,
+            body: req.body,
+            headers: req.headers
+        }, null, 2))
+
+        next()
+    }
+}
+
 
 export const local = async (context) => {
     let app = express()
@@ -42,6 +60,7 @@ export const local = async (context) => {
         for (let event of httpMetadata) {
             app[event.method](
                 event.path,
+                logMiddleware(serviceDefinition.service),
                 environmentConfigMiddleware(serviceDefinition.service),
                 serviceDefinition.invoker
             )
