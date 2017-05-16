@@ -31,18 +31,17 @@ export const createLambda = async (context) => {
     for (let serviceDefinition of context.publishedFunctions) {
         const serviceName = serviceDefinition.service.name
         if (serviceName) {
+            
+            console.log(`${serviceName} deploying...`)
             try {
                 await getLambdaFunction(serviceDefinition, context)
-                console.log('get success', serviceName)
                 await deleteLambdaFunction(serviceDefinition, context)
-                console.log('delete success', serviceName)
             } catch (e) {
-                console.log('not exists -> new', serviceName)
             }
 
             // await publishLambdaFunction(serviceDefinition, context)
             await createLambdaFunction(serviceDefinition, context)
-            console.log('create success', serviceName)
+            console.log('completed')
 
         }
     }

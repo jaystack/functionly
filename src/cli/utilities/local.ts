@@ -58,9 +58,7 @@ export const local = async (context) => {
 
         for (let event of httpMetadata) {
             const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceDefinition.service)
-            if (isLoggingEnabled) {
-                console.log(`${new Date().toISOString()} ${serviceDefinition.service.name} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
-            }
+            console.log(`${new Date().toISOString()} ${serviceDefinition.service.name} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
 
             if (event.cors) {
                 app.use(event.path, cors())
