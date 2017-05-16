@@ -5,6 +5,7 @@
   "main": "lib/src/index",
   "types": "lib/src/index.d.ts",
   "scripts": {
+    "start": "corpjs-serverless local 3000 ./lib/src/example/example1.js",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
