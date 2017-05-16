@@ -1,10 +1,5 @@
 import { FunctionalService, FunctionalApi, annotations, DynamoDB } from '../index' // 'corpjs-serverless'
-const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, resource, log } = annotations
-
-const sleep = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout))
-
-
-
+const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log } = annotations
 
 @role("arn:aws:iam::856324650258:role/service-role/Vektor-HW-Role")
 @runtime({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
@@ -19,7 +14,6 @@ export class UsersTable extends DynamoDB { }
 @injectable
 @apiGateway({ path: '/cart', method: 'post' })
 @description('PutToCart desc...')
-@resource(UsersTable)
 export class PutToCart extends BaseService {
 
     public async handle(
@@ -49,7 +43,6 @@ export class PutToCart extends BaseService {
 
 @apiGateway({ path: '/cart', method: 'get' })
 @description('ReadCart desc...')
-@resource(UsersTable)
 export class ReadCart extends BaseService {
 
     public async handle(

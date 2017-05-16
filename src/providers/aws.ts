@@ -7,7 +7,7 @@ export const getInvoker = (serviceType, params) => {
     let serviceInstance = serviceType.factory(...params)
     let invoker = async (event, context, cb) => {
         try {
-            let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType.prototype, 'handle') || [];
+            let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
 
             let params = []
             parameterMapping.forEach((target) => {
@@ -40,7 +40,7 @@ export const invoke = async (serviceType, params) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 
-        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType.prototype, 'handle') || [];
+        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
         parameterMapping.forEach((target) => {
             if (target && typeof target.parameterIndex === 'number' && target.type === 'param') {
                 lambdaParams[target.from] = params[target.parameterIndex]

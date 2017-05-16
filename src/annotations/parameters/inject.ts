@@ -2,7 +2,6 @@ import { Parameter_ParamKey, Class_EnvironmentKey } from '../constants'
 import { getOwnMetadata, defineMetadata, getMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
 import { resolveHandler } from '../classes/injectable'
-// import { environment } from '../classes/environment'
 
 export const inject = (name: any, ...params): any => {
     return (target, targetKey, parameterIndex: number) => {
@@ -19,5 +18,15 @@ export const inject = (name: any, ...params): any => {
         });
 
         defineMetadata(Parameter_ParamKey, [...existingParameters], target, targetKey);
+
+        let injectTarget = resolveHandler(name)
+        let injectMetadata = getMetadata(Class_EnvironmentKey, injectTarget) || {}
+        let metadata = getMetadata(Class_EnvironmentKey, target) || {}
+        if (injectMetadata) {
+            Object.keys(injectMetadata).forEach((key) => {
+                metadata[key] = injectMetadata[key]
+            })
+            defineMetadata(Class_EnvironmentKey, { ...metadata }, target);
+        }
     }
 }

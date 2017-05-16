@@ -1,10 +1,9 @@
-export * from './classes/injectable'
-export * from './classes/apiGateway'
-export * from './classes/environment'
-export * from './classes/tag'
-export * from './classes/resource'
-export * from './classes/log'
-export * from './classes/runtime'
+export { injectable, registerService, resolveHandler } from './classes/injectable'
+export { apiGateway } from './classes/apiGateway'
+export { environment, environmentTemplates } from './classes/environment'
+export { tag } from './classes/tag'
+export { log } from './classes/log'
+export { runtime } from './classes/runtime'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
@@ -13,10 +12,10 @@ export const description = simpleClassAnnotation<string>(Class_DescriptionKey)
 export const role = simpleClassAnnotation<string>(Class_RoleKey)
 
 
-export * from './parameters/param'
-export * from './parameters/inject'
+export { param } from './parameters/param'
+export { inject } from './parameters/inject'
 
 import * as _constants from './constants'
 export const constants = _constants
 
-export * from './metadata'
+export { defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata } from './metadata'
