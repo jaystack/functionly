@@ -6,13 +6,17 @@ export const environment = (key: string, value: string) => {
         let metadata = getMetadata(Class_EnvironmentKey, target) || {}
 
         let templatedKey = key;
+        let templatedValue = value;
         for (let template of environmentTemplates) {
             if (template.regexp.test(templatedKey)) {
                 templatedKey = templatedKey.replace(template.regexp, template.resolution(target))
             }
+            if (template.regexp.test(templatedValue)) {
+                templatedValue = templatedValue.replace(template.regexp, template.resolution(target))
+            }
         }
 
-        metadata[templatedKey] = value
+        metadata[templatedKey] = templatedValue
         defineMetadata(Class_EnvironmentKey, { ...metadata }, target);
     }
 }

@@ -1,13 +1,15 @@
 import * as aws from './aws'
+import * as local from './local'
 
-export const uploadServices = async (context) => {
+let environments = { aws, local }
 
-    switch (context.deployTarget) {
-        case 'aws':
-            await aws.createLambda(context)
-            break
-        default:
-            console.log(`unhandled deploy target: '${context.deployTarget}'`)
+export const createEnvironment = async (context) => {
+
+    let currentEnvironment = environments[context.deployTarget]
+
+    if (!currentEnvironment) {
+        throw new Error(`unhandled deploy target: '${context.deployTarget}'`)
     }
 
+    await currentEnvironment.createEnvironment(context)
 }

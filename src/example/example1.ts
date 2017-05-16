@@ -7,7 +7,7 @@ export class BaseService extends FunctionalService { }
 
 
 @injectable
-@environment('%ClassName%_TABLE_NAME', 'TestTable_corpjs_serverless')
+@environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_serverless')
 export class UsersTable extends DynamoDB { }
 
 

@@ -1,5 +1,5 @@
-import { uploadServices } from '../providers'
+import { createEnvironment } from '../providers'
 
 export const deploy = async (context) => {
-    await uploadServices(context)
+    await createEnvironment(context)
 }
