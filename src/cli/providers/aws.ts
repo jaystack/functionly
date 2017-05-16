@@ -29,7 +29,7 @@ export const createLambda = async (context) => {
     await upload(context)
 
     for (let serviceDefinition of context.publishedFunctions) {
-        const serviceName = getMetadata(constants.Class_NameKey, serviceDefinition.service)
+        const serviceName = serviceDefinition.service.name
         if (serviceName) {
             try {
                 await getLambdaFunction(serviceDefinition, context)
@@ -59,7 +59,7 @@ export const createLambdaFunction = (serviceDefinition, context) => {
                 S3Key: context.S3Zip
             },
             Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
-            FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service),
+            FunctionName: serviceDefinition.service.name,
             Handler: serviceDefinition.handler,
             MemorySize: getMetadata(constants.Class_MemorySizeKey, serviceDefinition.service),
             Publish: true,
@@ -85,7 +85,7 @@ export const getLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)
+            FunctionName: serviceDefinition.service.name
         };
         lambda.getFunction(params, function (err, data) {
             if (err) reject(err)
@@ -98,7 +98,7 @@ export const deleteLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)
+            FunctionName: serviceDefinition.service.name
         };
         lambda.deleteFunction(params, function (err, data) {
             if (err) reject(err)
@@ -111,7 +111,7 @@ export const publishLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getMetadata(constants.Class_NameKey, serviceDefinition.service)
+            FunctionName: serviceDefinition.service.name
         };
         lambda.publishVersion(params, function (err, data) {
             if (err) reject(err)

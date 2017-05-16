@@ -48,7 +48,7 @@ export const invoke = async (serviceType, params) => {
         })
 
         let invokeParams = {
-            FunctionName: getMetadata(constants.Class_NameKey, serviceType),
+            FunctionName: serviceType.name,
             Payload: JSON.stringify(lambdaParams)
         };
 

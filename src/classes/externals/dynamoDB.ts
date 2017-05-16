@@ -1,6 +1,5 @@
 import * as AWS from 'aws-sdk'
 import { merge, defaults } from 'lodash'
-import { handler } from '../../annotations'
 
 import { Service } from '../service'
 
@@ -11,7 +10,7 @@ const initAWSSDK = () => {
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2012-08-10'
             awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
-            awsConfig.endpoint = process.env.AWS_LOCAL_ENDPOINT || 'http://localhost:8000'
+            awsConfig.endpoint = process.env.DYNAMODB_LOCAL_ENDPOINT || 'http://localhost:8000'
         }
 
         dynamoDB = new AWS.DynamoDB(awsConfig);

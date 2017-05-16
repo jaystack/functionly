@@ -1,5 +1,6 @@
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
+import * as cors from 'cors'
 import { getMetadata, constants } from '../../annotations'
 import { config } from './config'
 
@@ -31,13 +32,11 @@ const environmentConfigMiddleware = (serviceType) => {
     }
 }
 
-const logMiddleware = (serviceType) => {
+const logMiddleware = (enabled, serviceType) => {
     return (req, res, next) => {
-        const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceType)
-        if (!isLoggingEnabled) return next()
+        if (!enabled) return next()
 
-        console.log(`${serviceType.name}`, JSON.stringify({
-            date: new Date().toISOString(),
+        console.log(`${new Date().toISOString()} ${serviceType.name}`, JSON.stringify({
             url: req.url,
             query: req.query,
             params: req.params,
@@ -55,12 +54,21 @@ export const local = async (context) => {
     app.use(bodyParser.json())
 
     for (let serviceDefinition of context.publishedFunctions) {
-        let httpMetadata = getMetadata(constants.Class_HttpKey, serviceDefinition.service)
+        let httpMetadata = getMetadata(constants.Class_ApiGatewayKey, serviceDefinition.service)
 
         for (let event of httpMetadata) {
+            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceDefinition.service)
+            if (isLoggingEnabled) {
+                console.log(`${new Date().toISOString()} ${serviceDefinition.service.name} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
+            }
+
+            if (event.cors) {
+                app.use(event.path, cors())
+            }
+
             app[event.method](
                 event.path,
-                logMiddleware(serviceDefinition.service),
+                logMiddleware(isLoggingEnabled, serviceDefinition.service),
                 environmentConfigMiddleware(serviceDefinition.service),
                 serviceDefinition.invoker
             )

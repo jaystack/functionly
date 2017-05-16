@@ -1,17 +1,16 @@
 export * from './classes/injectable'
-export * from './classes/http'
-export * from './classes/handler'
+export * from './classes/apiGateway'
 export * from './classes/environment'
 export * from './classes/tag'
 export * from './classes/resource'
 export * from './classes/log'
+export * from './classes/runtime'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
 import { Class_DescriptionKey, Class_RoleKey, Class_RuntimeKey } from './constants'
 export const description = simpleClassAnnotation<string>(Class_DescriptionKey)
 export const role = simpleClassAnnotation<string>(Class_RoleKey)
-export const runtime = simpleClassAnnotation<string>(Class_RuntimeKey)
 
 
 export * from './parameters/param'

@@ -47,7 +47,7 @@ export const invoke = async (serviceType, params) => {
             }
         })
 
-        let httpAttr = getMetadata(constants.Class_HttpKey, serviceType)[0]
+        let httpAttr = getMetadata(constants.Class_ApiGatewayKey, serviceType)[0]
         if (!httpAttr) {
             return reject(new Error('missing http configuration'))
         }
@@ -65,6 +65,12 @@ export const invoke = async (serviceType, params) => {
         }
 
         try {
+
+            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceType)
+            if (isLoggingEnabled) {
+                console.log(`${new Date().toISOString()} request to ${serviceType.name}`, JSON.stringify(invokeParams, null, 2))
+            }
+
             request(invokeParams, (error, response, body) => {
 
                 if (error) return reject(error)
