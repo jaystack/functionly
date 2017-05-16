@@ -6,8 +6,9 @@ export const runtime = (config: {
     memorySize?: number,
     timeout?: number
 }) => (target: Function) => {
-    defineMetadata(Class_RuntimeKey, config.type, target);
-
+    if (typeof config.type === 'string') {
+        defineMetadata(Class_RuntimeKey, config.type, target);
+    }
     if (typeof config.memorySize === 'number') {
         defineMetadata(Class_MemorySizeKey, config.memorySize, target);
     }
