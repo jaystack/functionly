@@ -7,7 +7,7 @@ module.exports = {
     },
     webpack: {
         output: {
-            path: path.join(__dirname, '../dist'),
+            path: path.join(process.cwd(), 'dist'),
             filename: "[name].js",
             libraryTarget: 'commonjs-module',
         },

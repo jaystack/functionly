@@ -1,10 +1,9 @@
-// export * from './classes/access'
+export * from './classes/injectable'
 export * from './classes/http'
-// export * from './classes/service'
 export * from './classes/handler'
 export * from './classes/environment'
 export * from './classes/tag'
-// export * from './classes/api'
+export * from './classes/resource'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
@@ -15,7 +14,7 @@ export const runtime = simpleClassAnnotation<string>(Class_RuntimeKey)
 
 
 export * from './parameters/param'
-export * from './parameters/service'
+export * from './parameters/inject'
 
 import * as _constants from './constants'
 export const constants = _constants

@@ -11,6 +11,7 @@ const initAWSSDK = () => {
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2012-08-10'
             awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
+            awsConfig.endpoint = process.env.AWS_LOCAL_ENDPOINT || 'http://localhost:8000'
         }
 
         dynamoDB = new AWS.DynamoDB(awsConfig);
@@ -18,7 +19,6 @@ const initAWSSDK = () => {
     return dynamoDB
 }
 
-@handler()
 export class DynamoDBNative extends Service {
     public static factory(): any {
         initAWSSDK()
@@ -27,7 +27,6 @@ export class DynamoDBNative extends Service {
     }
 }
 
-@handler()
 export class DynamoDBDocumentClient extends Service {
     public static factory(): any {
         initAWSSDK()
@@ -45,14 +44,13 @@ const promiseWrap = (func) => {
     })
 }
 
-@handler()
 export class DynamoDB extends Service {
     public static factory(TableName) {
         initAWSSDK()
 
         let db = new AWS.DynamoDB.DocumentClient({ service: dynamoDB })
         let initParams = {
-            TableName: TableName || process.env['DYNAMODB_TABLE_NAME']
+            TableName: TableName || process.env[`${this.name}_TABLE_NAME`]
         }
 
         const handler = (fnName) => async (params) => promiseWrap((done) => db[fnName](defaults({}, params, initParams), done))

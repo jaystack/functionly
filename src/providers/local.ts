@@ -26,7 +26,7 @@ export const getInvoker = (serviceType, params) => {
 
 const parameterResolver = (req, target) => {
     switch (target.type) {
-        case 'service':
+        case 'inject':
             let serviceType = resolveHandler(target.serviceTypeName)
             return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
@@ -55,8 +55,6 @@ export const invoke = async (serviceType, params) => {
         let invokeParams: any = {
             method: httpAttr.method || 'GET',
             url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
-            FunctionName: getMetadata(constants.Class_NameKey, serviceType),
-            PayLoad: JSON.stringify(lambdaParams)
         };
 
         if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {
@@ -70,7 +68,14 @@ export const invoke = async (serviceType, params) => {
             request(invokeParams, (error, response, body) => {
 
                 if (error) return reject(error)
-                return resolve(JSON.parse(body))
+
+                let result = body
+                try {
+                    result = JSON.parse(result)
+                }
+                catch (e) { }
+
+                return resolve(result)
 
             })
         } catch (e) {

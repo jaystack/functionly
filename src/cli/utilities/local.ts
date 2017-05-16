@@ -1,4 +1,5 @@
 import * as express from 'express'
+import * as bodyParser from 'body-parser'
 import { getMetadata, constants } from '../../annotations'
 import { config } from './config'
 
@@ -33,6 +34,7 @@ const environmentConfigMiddleware = (serviceType) => {
 
 export const local = async (context) => {
     let app = express()
+    app.use(bodyParser.json())
 
     for (let serviceDefinition of context.publishedFunctions) {
         let httpMetadata = getMetadata(constants.Class_HttpKey, serviceDefinition.service)

@@ -1,8 +1,10 @@
-import { Parameter_ParamKey } from '../constants'
-import { getOwnMetadata, defineMetadata } from '../metadata'
+import { Parameter_ParamKey, Class_EnvironmentKey } from '../constants'
+import { getOwnMetadata, defineMetadata, getMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
+import { resolveHandler } from '../classes/injectable'
+// import { environment } from '../classes/environment'
 
-export const service = (name: any, ...params): any => {
+export const inject = (name: any, ...params): any => {
     return (target, targetKey, parameterIndex: number) => {
         let parameterNames = getFunctionParameters(target, targetKey);
 
@@ -12,10 +14,10 @@ export const service = (name: any, ...params): any => {
         existingParameters.push({
             serviceTypeName: name || paramName,
             parameterIndex,
-            type: 'service',
+            type: 'inject',
             params
         });
 
-        defineMetadata(Parameter_ParamKey, existingParameters, target, targetKey);
+        defineMetadata(Parameter_ParamKey, [...existingParameters], target, targetKey);
     }
 }

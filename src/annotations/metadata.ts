@@ -12,6 +12,6 @@ export const getMetadataKeys = (target) => {
     return Reflect.getMetadataKeys(target)
 }
 
-export const getOwnMetadata = (metadataKey, target, propertyKey) => {
+export const getOwnMetadata = (metadataKey, target, propertyKey?) => {
     return Reflect.getOwnMetadata(metadataKey, target, propertyKey)
 }

@@ -28,7 +28,7 @@ export const getInvoker = (serviceType, params) => {
 
 const parameterResolver = (event, context, target) => {
     switch (target.type) {
-        case 'service':
+        case 'inject':
             let serviceType = resolveHandler(target.serviceTypeName)
             return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
