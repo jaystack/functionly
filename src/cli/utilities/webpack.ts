@@ -18,10 +18,10 @@ export const bundle = (context) => {
                 console.log(jsonStats.errors)
                 return reject(jsonStats.errors);
             }
-            if (jsonStats.warnings.length > 0) {
-                console.log('WEBPACK WARNINGS')
-                console.log(jsonStats.warnings)
-            }
+            // if (jsonStats.warnings.length > 0) {
+            //     console.log('WEBPACK WARNINGS')
+            //     console.log(jsonStats.warnings)
+            // }
 
             context.originalFiles = context.files
             context.files = []
