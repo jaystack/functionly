@@ -88,3 +88,19 @@ export const publishLambdaFunction = (serviceDefinition, context) => {
         });
     })
 }
+
+export const updateLambdaFunctionCode = (serviceDefinition, context) => {
+    initAWSSDK(context)
+    return new Promise((resolve, reject) => {
+        let params = {
+            FunctionName: serviceDefinition.service.name,
+            S3Bucket: context.awsBucket,
+            S3Key: context.S3Zip,
+            Publish: true
+        };
+        lambda.updateFunctionCode(params, function (err, data) {
+            if (err) reject(err)
+            else resolve(data);
+        });
+    })
+}

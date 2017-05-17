@@ -7,7 +7,8 @@ import {
     getLambdaFunction,
     deleteLambdaFunction,
     createLambdaFunction,
-    publishLambdaFunction
+    publishLambdaFunction,
+    updateLambdaFunctionCode
 } from '../utilities/aws/lambda'
 
 
@@ -24,14 +25,12 @@ export const createEnvironment = async (context) => {
             console.log(`${serviceName} deploying...`)
             try {
                 await getLambdaFunction(serviceDefinition, context)
-                await deleteLambdaFunction(serviceDefinition, context)
+                await updateLambdaFunctionCode(serviceDefinition, context)
             } catch (e) {
+                await createLambdaFunction(serviceDefinition, context)
             }
 
-            // await publishLambdaFunction(serviceDefinition, context)
-            await createLambdaFunction(serviceDefinition, context)
             console.log('completed')
-
         }
     }
 }
