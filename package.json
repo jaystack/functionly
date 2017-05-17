@@ -5,11 +5,13 @@
   "main": "lib/src/index",
   "types": "lib/src/index.d.ts",
   "scripts": {
-    "start": "corpjs-serverless local 3000 ./lib/src/example/example1.js",
+    "start": "npm run build && corpjs-serverless local 3000 ./lib/src/example/todoDB.js",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
-    "test:fast": "mocha --recursive lib/test/**/*.tests.js"
+    "test:fast": "mocha --recursive lib/test/**/*.tests.js",
+    "awsdeploy": "npm run build && corpjs-serverless deploy aws ./lib/src/example/todoDB.js --aws-region eu-central-1 --aws-bucket corpjs-serverless",
+    "localdeploy": "npm run build && corpjs-serverless deploy local ./lib/src/example/todoDB.js --aws-region eu-central-1"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "@types/winston": "0.0.30",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
+    "shortid": "^2.2.8",
     "typescript": "^2.3.0"
   },
   "dependencies": {
