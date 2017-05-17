@@ -44,6 +44,12 @@ const promiseWrap = (func) => {
 }
 
 export class DynamoDB extends Service {
+    public async put<T>(param: { Item: T }) {
+
+    }
+    public async scan(param?: any) {
+        
+    }
     public static factory(TableName) {
         initAWSSDK()
 
