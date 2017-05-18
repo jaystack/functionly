@@ -36,19 +36,19 @@ const parameterResolver = (event, context, target) => {
     }
 }
 
-export const invoke = async (serviceType, params) => {
+export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 
-        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
+        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceInstance.constructor, 'handle') || [];
         parameterMapping.forEach((target) => {
-            if (target && typeof target.parameterIndex === 'number' && target.type === 'param') {
-                lambdaParams[target.from] = params[target.parameterIndex]
+            if (params && target && target.type === 'param') {
+                lambdaParams[target.from] = params[target.from]
             }
         })
 
         let invokeParams = {
-            FunctionName: serviceType.name,
+            FunctionName: serviceInstance.constructor.name,
             Payload: JSON.stringify(lambdaParams)
         };
 

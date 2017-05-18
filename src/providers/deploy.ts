@@ -4,6 +4,6 @@ export const getInvoker = (serviceType, params) => {
     return invoker
 }
 
-export const invoke = async (serviceType, params) => {
+export const invoke = async (serviceInstance, params?, invokeConfig?) => {
 
 }

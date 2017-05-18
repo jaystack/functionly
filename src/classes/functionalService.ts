@@ -8,8 +8,8 @@ export class FunctionalService extends Service {
 
     }
 
-    public async invoke(...params) {
-        return await invoke(resolveHandler(this.constructor.name), params)
+    public async invoke(params?, invokeConfig?) {
+        return await invoke(this, params, invokeConfig)
     }
 
     public static createInvoker(...params) {

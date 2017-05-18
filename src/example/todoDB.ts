@@ -24,8 +24,8 @@ export class ValidateTodo extends TodoService {
         return { isValid }
     }
 
-    public async invoke(name: string, description: string, status: string) {
-        return await super.invoke(name, description, status)
+    public async invoke(params: { name: string, description: string, status: string }) {
+        return await super.invoke(params)
     }
 }
 
@@ -59,12 +59,12 @@ export class CreateTodo extends TodoService {
         @inject(PersistTodo) persistTodo: PersistTodo
     ) {
 
-        let validateResult = await validateTodo.invoke(name, description, status)
+        let validateResult = await validateTodo.invoke({ name, description, status })
         if (!validateResult.isValid) {
             throw new Error('Todo validation error')
         }
 
-        let persistTodoResult = await persistTodo.invoke(name, description, status)
+        let persistTodoResult = await persistTodo.invoke({ name, description, status })
 
         return { ok: 1, persistTodoResult }
     }

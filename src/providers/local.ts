@@ -36,18 +36,18 @@ const parameterResolver = (req, target) => {
     }
 }
 
-export const invoke = async (serviceType, params) => {
+export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 
-        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
+        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceInstance.constructor, 'handle') || [];
         parameterMapping.forEach((target) => {
-            if (target && typeof target.parameterIndex === 'number' && target.type === 'param') {
-                lambdaParams[target.from] = params[target.parameterIndex]
+            if (params && target && target.type === 'param') {
+                lambdaParams[target.from] = params[target.from]
             }
         })
 
-        let httpAttr = getMetadata(constants.Class_ApiGatewayKey, serviceType)[0]
+        let httpAttr = getMetadata(constants.Class_ApiGatewayKey, serviceInstance)[0]
         if (!httpAttr) {
             return reject(new Error('missing http configuration'))
         }
@@ -66,9 +66,9 @@ export const invoke = async (serviceType, params) => {
 
         try {
 
-            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceType)
+            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceInstance)
             if (isLoggingEnabled) {
-                console.log(`${new Date().toISOString()} request to ${serviceType.name}`, JSON.stringify(invokeParams, null, 2))
+                console.log(`${new Date().toISOString()} request to ${serviceInstance.contructor.name}`, JSON.stringify(invokeParams, null, 2))
             }
 
             request(invokeParams, (error, response, body) => {

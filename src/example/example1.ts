@@ -35,8 +35,8 @@ export class PutToCart extends BaseService {
         return { ok: 1, name, email: emailAddress, age }
     }
 
-    public async invoke(name: string, email: string, age: number) {
-        return await super.invoke(name, email, age)
+    public async invoke(params: { name: string, email: string, age: number }) {
+        return await super.invoke(params)
     }
 }
 
@@ -70,7 +70,7 @@ export class Hello extends BaseService {
         @inject(PutToCart) cart: PutToCart
     ) {
 
-        let puttoCartResult = await cart.invoke(name, email, age)
+        let puttoCartResult = await cart.invoke({ name, email, age })
 
         return { ok1: 1, puttoCartResult }
     }
