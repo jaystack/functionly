@@ -9,7 +9,6 @@ import { set } from 'lodash'
 
 export const serviceDiscovery = async (context) => {
     context.files = context.files || []
-    context.functions = context.functions || []
     context.publishedFunctions = context.publishedFunctions || []
 
     const path = context.serviceRoot
@@ -29,36 +28,32 @@ export const serviceDiscovery = async (context) => {
 }
 
 export const collectFromFile = (file, context) => {
-    let module = require(file)
+    const module = require(file)
 
-    let name = basename(file)
+    const name = basename(file)
     const ext = extname(name)
     const nameKey = name.substring(0, name.length - ext.length)
 
     Object.keys(module).forEach((key) => {
         let exportItem = module[key]
 
-        if (exportItem.createInvoker) {
-            context.functions.push({ service: exportItem })
+        if (exportItem.serviceType && exportItem.serviceType.createInvoker) {
+            const item = {
+                service: exportItem.serviceType,
+                exportName: key,
+                invoker: exportItem,
+                handler: `${nameKey}.${key}`,
+            }
 
             const setEnvAttrib = environment('FUNCTIONAL_ENVIRONMENT', context.deployTarget)
-            setEnvAttrib(exportItem)
+            setEnvAttrib(item.service)
+
 
             if (context.files.indexOf(file) < 0) {
                 context.files.push(file)
             }
 
-        } else if (exportItem.serviceType && exportItem.serviceType.createInvoker) {
-
-            let item = context.functions.find((it) => it.service === exportItem.serviceType)
-            if (item) {
-                item.exportName = key
-                item.invoker = exportItem
-
-                item.handler = `${nameKey}.${key}`
-                context.publishedFunctions.push(item)
-            }
-
+            context.publishedFunctions.push(item)
         }
 
     })
