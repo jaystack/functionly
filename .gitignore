@@ -44,3 +44,5 @@ main.js.map
 __test/**/*
 
 typings
+
+.vscode

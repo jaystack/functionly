@@ -8,7 +8,9 @@ import {
     deleteLambdaFunction,
     createLambdaFunction,
     publishLambdaFunction,
-    updateLambdaFunctionCode
+    updateLambdaFunctionCode,
+    updateLambdaFunctionConfiguration,
+    updateLambdaFunctionTags
 } from '../utilities/aws/lambda'
 
 
@@ -26,8 +28,14 @@ export const createEnvironment = async (context) => {
             try {
                 await getLambdaFunction(serviceDefinition, context)
                 await updateLambdaFunctionCode(serviceDefinition, context)
+                await updateLambdaFunctionConfiguration(serviceDefinition, context)
+                await updateLambdaFunctionTags(serviceDefinition, context)
             } catch (e) {
-                await createLambdaFunction(serviceDefinition, context)
+                if (e.code === "ResourceNotFoundException") {
+                    await createLambdaFunction(serviceDefinition, context)
+                } else {
+                    throw e
+                }
             }
 
             console.log('completed')
