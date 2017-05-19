@@ -1,8 +1,9 @@
 import * as AWS from 'aws-sdk'
-import { merge, defaults } from 'lodash'
+import { merge } from 'lodash'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
 import { Service } from '../service'
+import { constants, getMetadata } from '../../annotations'
 
 let dynamoDB = null;
 const initAWSSDK = () => {
@@ -27,7 +28,7 @@ export class DynamoDB extends Service {
         super()
         this._documentClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDB })
     }
-    
+
     public getDocumentClient() {
         return this._documentClient
     }
@@ -54,7 +55,7 @@ export class DynamoDB extends Service {
     }
     public async delete(params: Partial<DocumentClient.DeleteItemInput>) {
         return new Promise<DocumentClient.DeleteItemOutput>((resolve, reject) => {
-            this._documentClient.delete(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.delete(this.setDefaultValues(params, 'delete'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
@@ -62,7 +63,7 @@ export class DynamoDB extends Service {
     }
     public async get(params: Partial<DocumentClient.GetItemInput>) {
         return new Promise<DocumentClient.GetItemOutput>((resolve, reject) => {
-            this._documentClient.get(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.get(this.setDefaultValues(params, 'get'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
@@ -70,7 +71,7 @@ export class DynamoDB extends Service {
     }
     public async put(params: Partial<DocumentClient.PutItemInput>) {
         return new Promise<DocumentClient.PutItemOutput>((resolve, reject) => {
-            this._documentClient.put(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.put(this.setDefaultValues(params, 'put'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
@@ -78,7 +79,7 @@ export class DynamoDB extends Service {
     }
     public async query(params?: Partial<DocumentClient.QueryInput>) {
         return new Promise<DocumentClient.QueryOutput>((resolve, reject) => {
-            this._documentClient.query(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.query(this.setDefaultValues(params, 'query'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
@@ -86,7 +87,7 @@ export class DynamoDB extends Service {
     }
     public async scan(params?: Partial<DocumentClient.ScanInput>) {
         return new Promise<DocumentClient.ScanOutput>((resolve, reject) => {
-            this._documentClient.scan(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.scan(this.setDefaultValues(params, 'scan'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
@@ -94,17 +95,20 @@ export class DynamoDB extends Service {
     }
     public async update(params: Partial<DocumentClient.UpdateItemInput>) {
         return new Promise<DocumentClient.UpdateItemOutput>((resolve, reject) => {
-            this._documentClient.update(this.setDefaultValues(params), (err, result) => {
+            this._documentClient.update(this.setDefaultValues(params, 'update'), (err, result) => {
                 if (err) reject(err)
                 else resolve(result)
             })
         })
     }
 
-    private setDefaultValues(params) {
-        let initParams = {
-            TableName: process.env[`${this.constructor.name}_TABLE_NAME`]
+    protected setDefaultValues(params, command) {
+        const tableConfig = getMetadata(constants.Class_DynamoTableConfigurationKey, this) || {}
+        const tableName = (tableConfig[this.constructor.name] && tableConfig[this.constructor.name].TableName)
+        const initParams = {
+            TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName
         }
-        return defaults({}, params, initParams)
+
+        return merge({}, initParams, params)
     }
 }

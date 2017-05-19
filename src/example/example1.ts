@@ -1,5 +1,5 @@
 import { FunctionalService, FunctionalApi, annotations, DynamoDB } from '../index' // 'corpjs-serverless'
-const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log, functionName } = annotations
+const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log, functionName, dynamoTable } = annotations
 
 @role("arn:aws:iam::856324650258:role/corpjs-serverless")
 @runtime({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
@@ -7,7 +7,24 @@ export class BaseService extends FunctionalService { }
 
 
 @injectable
-@environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_serverless')
+// @environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_serverless')
+// OR
+@dynamoTable({
+    environmentKey: '%ClassName%_TABLE_NAME',
+    tableName: '%ClassName%_corpjs_serverless',
+    // config: {
+    //     AttributeDefinitions: [
+    //         { AttributeName: "id", AttributeType: "S" }
+    //     ],
+    //     KeySchema: [
+    //         { AttributeName: "id", KeyType: "HASH" }
+    //     ],
+    //     ProvisionedThroughput: {
+    //         ReadCapacityUnits: 2,
+    //         WriteCapacityUnits: 2
+    //     }
+    // }
+})
 export class UsersTable extends DynamoDB { }
 
 
@@ -25,7 +42,7 @@ export class PutToCart extends BaseService {
 
         await db.put({
             Item: {
-                "Id": Math.random().toString(),
+                "id": Math.random().toString(),
                 name,
                 email: emailAddress,
                 age

@@ -5,6 +5,7 @@ export { tag } from './classes/tag'
 export { log } from './classes/log'
 export { runtime } from './classes/runtime'
 export { functionName, getFunctionName } from './classes/functionName'
+export { dynamoTable, __dynamoDBDefaults } from './classes/dynamoTable'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
