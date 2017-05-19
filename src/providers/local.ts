@@ -2,19 +2,18 @@ import * as request from 'request'
 import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
 
 export const getInvoker = (serviceType, params) => {
-    let serviceInstance = serviceType.factory(...params)
-    let invoker = async (req, res, next) => {
+    const serviceInstance = serviceType.factory(...params)
+    const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
+        .filter(t => t && typeof t.parameterIndex === 'number');
+        
+    const invoker = async (req, res, next) => {
         try {
-            let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
-
-            let params = []
+            const params = []
             parameterMapping.forEach((target) => {
-                if (target && typeof target.parameterIndex === 'number') {
-                    params[target.parameterIndex] = parameterResolver(req, target)
-                }
+                params[target.parameterIndex] = parameterResolver(req, target)
             })
 
-            let r = await serviceInstance.handle.apply(serviceInstance, params)
+            const r = await serviceInstance.handle.apply(serviceInstance, params)
             res.send(r)
             return r
         } catch (e) {

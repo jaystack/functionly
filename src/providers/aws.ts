@@ -4,19 +4,18 @@ import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../anno
 let lambda = new Lambda();
 
 export const getInvoker = (serviceType, params) => {
-    let serviceInstance = serviceType.factory(...params)
-    let invoker = async (event, context, cb) => {
-        try {
-            let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [];
+    const serviceInstance = serviceType.factory(...params)
+    const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
+        .filter(t => t && typeof t.parameterIndex === 'number');
 
-            let params = []
+    const invoker = async (event, context, cb) => {
+        try {
+            const params = []
             parameterMapping.forEach((target) => {
-                if (target && typeof target.parameterIndex === 'number') {
-                    params[target.parameterIndex] = parameterResolver(event, context, target)
-                }
+                params[target.parameterIndex] = parameterResolver(event, context, target)
             })
 
-            let r = await serviceInstance.handle.apply(serviceInstance, params)
+            const r = await serviceInstance.handle.apply(serviceInstance, params)
             cb(null, r)
             return r
         } catch (e) {
