@@ -1,4 +1,4 @@
-export { injectable, registerService, resolveHandler } from './classes/injectable'
+export { injectable } from './classes/injectable'
 export { apiGateway } from './classes/apiGateway'
 export { environment, environmentTemplates } from './classes/environment'
 export { tag } from './classes/tag'

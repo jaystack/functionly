@@ -1,5 +1,5 @@
 import { Lambda } from 'aws-sdk'
-import { constants, getOwnMetadata, getMetadata, resolveHandler } from '../annotations'
+import { constants, getOwnMetadata, getMetadata } from '../annotations'
 
 let lambda = new Lambda();
 
@@ -29,7 +29,7 @@ export const getInvoker = (serviceType, params) => {
 const parameterResolver = (event, context, target) => {
     switch (target.type) {
         case 'inject':
-            let serviceType = resolveHandler(target.serviceTypeName)
+            let serviceType = target.serviceType
             return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
             return event[target.from]
