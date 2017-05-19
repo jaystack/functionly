@@ -81,7 +81,7 @@ export class GetAllTodos extends TodoService {
         @inject(TodoTable) db: DynamoDB
     ) {
 
-        let items = await db.scan()
+        let items: any = await db.scan()
 
         return { ok1: 1, items }
     }

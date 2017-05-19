@@ -4,7 +4,7 @@ import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../anno
 let lambda = new Lambda();
 
 export const getInvoker = (serviceType, params) => {
-    const serviceInstance = serviceType.factory(...params)
+    const serviceInstance = new serviceType(...params)
     const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
         .filter(t => t && typeof t.parameterIndex === 'number');
 
@@ -29,7 +29,7 @@ const parameterResolver = (event, context, target) => {
     switch (target.type) {
         case 'inject':
             let serviceType = target.serviceType
-            return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
+            return new serviceType(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
             return event[target.from]
     }

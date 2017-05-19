@@ -2,7 +2,7 @@ import * as request from 'request'
 import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
 
 export const getInvoker = (serviceType, params) => {
-    const serviceInstance = serviceType.factory(...params)
+    const serviceInstance = new serviceType(...params)
     const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
         .filter(t => t && typeof t.parameterIndex === 'number');
         
@@ -27,7 +27,7 @@ const parameterResolver = (req, target) => {
     switch (target.type) {
         case 'inject':
             let serviceType = target.serviceType
-            return serviceType.factory(...target.params.map((p) => typeof p === 'function' ? p() : p))
+            return new serviceType(...target.params.map((p) => typeof p === 'function' ? p() : p))
         default:
             if (req.body && req.body[target.from]) return req.body[target.from]
             if (req.query && req.query[target.from]) return req.query[target.from]
