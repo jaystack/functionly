@@ -1,7 +1,7 @@
 import { Lambda } from 'aws-sdk'
 import { merge, difference } from 'lodash'
 import { config } from '../../utilities/config'
-import { getMetadata, constants } from '../../../annotations'
+import { getMetadata, constants, getFunctionName } from '../../../annotations'
 
 
 let lambda = null;
@@ -28,7 +28,7 @@ export const createLambdaFunction = (serviceDefinition, context) => {
                 S3Key: context.S3Zip
             },
             Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
-            FunctionName: serviceDefinition.service.name,
+            FunctionName: getFunctionName(serviceDefinition.service),
             Handler: serviceDefinition.handler,
             MemorySize: getMetadata(constants.Class_MemorySizeKey, serviceDefinition.service),
             Publish: true,
@@ -54,7 +54,7 @@ export const getLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
         let params = {
-            FunctionName: serviceDefinition.service.name
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.getFunction(params, function (err, data) {
             if (err) reject(err)
@@ -67,7 +67,7 @@ export const deleteLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: serviceDefinition.service.name
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.deleteFunction(params, function (err, data) {
             if (err) reject(err)
@@ -80,7 +80,7 @@ export const publishLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: serviceDefinition.service.name
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.publishVersion(params, function (err, data) {
             if (err) reject(err)
@@ -93,7 +93,7 @@ export const updateLambdaFunctionCode = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: serviceDefinition.service.name,
+            FunctionName: getFunctionName(serviceDefinition.service),
             S3Bucket: context.awsBucket,
             S3Key: context.S3Zip,
             Publish: true
@@ -109,7 +109,7 @@ export const updateLambdaFunctionConfiguration = (serviceDefinition, context) =>
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: serviceDefinition.service.name,
+            FunctionName: getFunctionName(serviceDefinition.service),
             Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
             Environment: {
                 Variables: getMetadata(constants.Class_EnvironmentKey, serviceDefinition.service)

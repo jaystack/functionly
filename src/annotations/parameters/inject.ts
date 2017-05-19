@@ -1,11 +1,12 @@
 import { Parameter_ParamKey, Class_EnvironmentKey, Class_InjectableKey } from '../constants'
 import { getOwnMetadata, defineMetadata, getMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
+import { getFunctionName } from '../classes/functionName'
 
 export const inject = (type: any, ...params): any => {
     return (target, targetKey, parameterIndex: number) => {
         if (!getMetadata(Class_InjectableKey, type)) {
-            throw new Error(`${type.name} not marked as injectable`)
+            throw new Error(`type '${getFunctionName(type)}' not marked as injectable`)
         }
 
         let existingParameters: any[] = getOwnMetadata(Parameter_ParamKey, target, targetKey) || [];

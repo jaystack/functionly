@@ -1,5 +1,5 @@
 import * as request from 'request'
-import { constants, getOwnMetadata, getMetadata } from '../annotations'
+import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
 
 export const getInvoker = (serviceType, params) => {
     let serviceInstance = serviceType.factory(...params)
@@ -68,7 +68,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
 
             const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceInstance)
             if (isLoggingEnabled) {
-                console.log(`${new Date().toISOString()} request to ${serviceInstance.contructor.name}`, JSON.stringify(invokeParams, null, 2))
+                console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
             }
 
             request(invokeParams, (error, response, body) => {

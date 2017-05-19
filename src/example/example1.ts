@@ -1,5 +1,5 @@
 import { FunctionalService, FunctionalApi, annotations, DynamoDB } from '../index' // 'corpjs-serverless'
-const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log } = annotations
+const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log, functionName } = annotations
 
 @role("arn:aws:iam::856324650258:role/corpjs-serverless")
 @runtime({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
@@ -58,6 +58,7 @@ export class ReadCart extends BaseService {
 
 
 
+@functionName('Hello')
 @apiGateway({ path: '/hello', method: 'get' })
 @description('hello desc...')
 @tag('foo', 'bar')

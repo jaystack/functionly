@@ -1,4 +1,4 @@
-
+import { getFunctionName } from '../../annotations'
 import { bundle } from '../utilities/webpack'
 import { zip } from '../utilities/compress'
 import { upload } from '../utilities/aws/s3Upload'
@@ -21,7 +21,7 @@ export const createEnvironment = async (context) => {
     await collectAndCreateTables(context)
 
     for (let serviceDefinition of context.publishedFunctions) {
-        const serviceName = serviceDefinition.service.name
+        const serviceName = getFunctionName(serviceDefinition.service)
         if (serviceName) {
 
             console.log(`${serviceName} deploying...`)

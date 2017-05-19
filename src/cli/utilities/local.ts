@@ -1,7 +1,7 @@
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as cors from 'cors'
-import { getMetadata, constants } from '../../annotations'
+import { getMetadata, constants, getFunctionName } from '../../annotations'
 import { config } from './config'
 
 const environmentConfigMiddleware = (serviceType) => {
@@ -36,7 +36,7 @@ const logMiddleware = (enabled, serviceType) => {
     return (req, res, next) => {
         if (!enabled) return next()
 
-        console.log(`${new Date().toISOString()} ${serviceType.name}`, JSON.stringify({
+        console.log(`${new Date().toISOString()} ${getFunctionName(serviceType)}`, JSON.stringify({
             url: req.url,
             query: req.query,
             params: req.params,
@@ -58,7 +58,7 @@ export const local = async (context) => {
 
         for (let event of httpMetadata) {
             const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceDefinition.service)
-            console.log(`${new Date().toISOString()} ${serviceDefinition.service.name} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
+            console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
 
             if (event.cors) {
                 app.use(event.path, cors())

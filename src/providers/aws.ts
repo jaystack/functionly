@@ -1,5 +1,5 @@
 import { Lambda } from 'aws-sdk'
-import { constants, getOwnMetadata, getMetadata } from '../annotations'
+import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
 
 let lambda = new Lambda();
 
@@ -48,7 +48,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
         })
 
         let invokeParams = {
-            FunctionName: serviceInstance.constructor.name,
+            FunctionName: getFunctionName(serviceInstance),
             Payload: JSON.stringify(lambdaParams)
         };
 

@@ -4,6 +4,7 @@ export { environment, environmentTemplates } from './classes/environment'
 export { tag } from './classes/tag'
 export { log } from './classes/log'
 export { runtime } from './classes/runtime'
+export { functionName, getFunctionName } from './classes/functionName'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
