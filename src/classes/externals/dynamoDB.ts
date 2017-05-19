@@ -23,10 +23,16 @@ export class DynamoDB extends Service {
     private _documentClient: DocumentClient
     constructor() {
         initAWSSDK()
-        
+
         super()
         this._documentClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDB })
     }
+    
+    public getDocumentClient() {
+        return this._documentClient
+    }
+
+
     public async batchGet(params: DocumentClient.BatchGetItemInput) {
         return new Promise<DocumentClient.BatchGetItemOutput>((resolve, reject) => {
             this._documentClient.batchGet(params, (err, result) => {
