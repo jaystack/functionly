@@ -10,9 +10,9 @@ export class BaseService extends FunctionalService { }
 // @environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_serverless')
 // OR
 @dynamoTable({
-    environmentKey: '%ClassName%_TABLE_NAME',
     tableName: '%ClassName%_corpjs_serverless',
-    // config: {
+    // environmentKey: '%ClassName%_TABLE_NAME',
+    // nativeConfig: {
     //     AttributeDefinitions: [
     //         { AttributeName: "id", AttributeType: "S" }
     //     ],

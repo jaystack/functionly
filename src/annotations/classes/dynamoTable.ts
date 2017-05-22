@@ -26,13 +26,14 @@ export const __dynamoDBDefaults = {
 
 
 export const dynamoTable = (tableConfig: {
-    environmentKey: string,
     tableName: string,
-    config?: any
+    environmentKey?: string,
+    nativeConfig?: any
 }) => (target: Function) => {
     let tableDefinitions = getMetadata(Class_DynamoTableConfigurationKey, target) || [];
 
-    tableConfig.config = merge({}, __dynamoDBDefaults, tableConfig.config)
+    tableConfig.environmentKey = tableConfig.environmentKey || '%ClassName%_TABLE_NAME'
+    tableConfig.nativeConfig = merge({}, __dynamoDBDefaults, tableConfig.nativeConfig)
 
     const { templatedKey, templatedValue } = applyTemplates(tableConfig.environmentKey, tableConfig.tableName, target)
     tableDefinitions.push(merge({}, tableConfig, {

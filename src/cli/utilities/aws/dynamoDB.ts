@@ -36,7 +36,7 @@ export const collectAndCreateTables = async (context) => {
 
             tablesToCreate.set(tableConfig.tableName, merge({}, {
                 TableName: tableConfig.tableName
-            }, tableConfig.config))
+            }, tableConfig.nativeConfig))
         }
 
         let metadata = getMetadata(constants.Class_EnvironmentKey, serviceDefinition.service)
