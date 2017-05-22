@@ -3,7 +3,7 @@ import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../anno
 
 export const getInvoker = (serviceType, params) => {
     const serviceInstance = new serviceType(...params)
-    const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
+    const parameterMapping = (getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceType, 'handle') || [])
         .filter(t => t && typeof t.parameterIndex === 'number');
         
     const invoker = async (req, res, next) => {
@@ -39,14 +39,14 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 
-        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceInstance.constructor, 'handle') || [];
+        let parameterMapping = getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [];
         parameterMapping.forEach((target) => {
             if (params && target && target.type === 'param') {
                 lambdaParams[target.from] = params[target.from]
             }
         })
 
-        let httpAttr = getMetadata(constants.Class_ApiGatewayKey, serviceInstance)[0]
+        let httpAttr = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceInstance)[0]
         if (!httpAttr) {
             return reject(new Error('missing http configuration'))
         }
@@ -65,7 +65,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
 
         try {
 
-            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceInstance)
+            const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceInstance)
             if (isLoggingEnabled) {
                 console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
             }

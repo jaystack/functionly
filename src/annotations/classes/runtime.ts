@@ -1,4 +1,4 @@
-import { Class_MemorySizeKey, Class_TimeoutKey, Class_RuntimeKey } from '../constants'
+import { CLASS_MEMORYSIZEKEY, CLASS_TIMEOUTKEY, CLASS_RUNTIMEKEY } from '../constants'
 import { defineMetadata } from '../metadata'
 
 export const runtime = (config: {
@@ -7,12 +7,12 @@ export const runtime = (config: {
     timeout?: number
 }) => (target: Function) => {
     if (typeof config.type === 'string') {
-        defineMetadata(Class_RuntimeKey, config.type, target);
+        defineMetadata(CLASS_RUNTIMEKEY, config.type, target);
     }
     if (typeof config.memorySize === 'number') {
-        defineMetadata(Class_MemorySizeKey, config.memorySize, target);
+        defineMetadata(CLASS_MEMORYSIZEKEY, config.memorySize, target);
     }
     if (typeof config.timeout === 'number') {
-        defineMetadata(Class_TimeoutKey, config.timeout, target);
+        defineMetadata(CLASS_TIMEOUTKEY, config.timeout, target);
     }
 }

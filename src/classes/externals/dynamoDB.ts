@@ -103,7 +103,7 @@ export class DynamoDB extends Service {
     }
 
     protected setDefaultValues(params, command) {
-        const tableConfig = getMetadata(constants.Class_DynamoTableConfigurationKey, this) || {}
+        const tableConfig = getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || {}
         const tableName = (tableConfig[this.constructor.name] && tableConfig[this.constructor.name].TableName)
         const initParams = {
             TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName

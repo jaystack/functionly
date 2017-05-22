@@ -1,4 +1,4 @@
-import { Class_ApiGatewayKey } from '../constants'
+import { CLASS_APIGATEWAYKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
 import { defaults } from 'lodash'
 
@@ -9,8 +9,8 @@ export const defaultEndpoint = {
 
 export const apiGateway = (endpoint: { path: string, method?: string, cors?: boolean }) => {
     return (target: Function) => {
-        let metadata = getMetadata(Class_ApiGatewayKey, target) || []
+        let metadata = getMetadata(CLASS_APIGATEWAYKEY, target) || []
         metadata.push(defaults({}, endpoint, defaultEndpoint))
-        defineMetadata(Class_ApiGatewayKey, [...metadata], target);
+        defineMetadata(CLASS_APIGATEWAYKEY, [...metadata], target);
     }
 }

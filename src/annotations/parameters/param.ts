@@ -1,4 +1,4 @@
-import { Parameter_ParamKey } from '../constants'
+import { PARAMETER_PARAMKEY } from '../constants'
 import { getOwnMetadata, defineMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
 
@@ -7,7 +7,7 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
     let decorator = function (target, targetKey, parameterIndex: number) {
         let parameterNames = getFunctionParameters(target, targetKey);
 
-        let existingParameters: any[] = getOwnMetadata(Parameter_ParamKey, target, targetKey) || [];
+        let existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
         let paramName = parameterNames[parameterIndex];
 
         existingParameters.push({
@@ -16,7 +16,7 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
             type: 'param'
         });
 
-        defineMetadata(Parameter_ParamKey, existingParameters, target, targetKey);
+        defineMetadata(PARAMETER_PARAMKEY, existingParameters, target, targetKey);
     }
 
     if (typeof target == "string" || typeof target == "undefined" || !target) {

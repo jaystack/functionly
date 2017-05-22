@@ -27,18 +27,18 @@ export const createLambdaFunction = (serviceDefinition, context) => {
                 S3Bucket: context.awsBucket,
                 S3Key: context.S3Zip
             },
-            Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
+            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, serviceDefinition.service),
             FunctionName: getFunctionName(serviceDefinition.service),
             Handler: serviceDefinition.handler,
-            MemorySize: getMetadata(constants.Class_MemorySizeKey, serviceDefinition.service),
+            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, serviceDefinition.service),
             Publish: true,
-            Role: getMetadata(constants.Class_RoleKey, serviceDefinition.service),
-            Runtime: getMetadata(constants.Class_RuntimeKey, serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.Class_TimeoutKey, serviceDefinition.service),
+            Role: getMetadata(constants.CLASS_ROLEKEY, serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, serviceDefinition.service),
             Environment: {
-                Variables: getMetadata(constants.Class_EnvironmentKey, serviceDefinition.service)
+                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceDefinition.service)
             },
-            Tags: getMetadata(constants.Class_TagKey, serviceDefinition.service),
+            Tags: getMetadata(constants.CLASS_TAGKEY, serviceDefinition.service),
             VpcConfig: {
             }
         };
@@ -110,15 +110,15 @@ export const updateLambdaFunctionConfiguration = (serviceDefinition, context) =>
     return new Promise((resolve, reject) => {
         let params = {
             FunctionName: getFunctionName(serviceDefinition.service),
-            Description: getMetadata(constants.Class_DescriptionKey, serviceDefinition.service),
+            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, serviceDefinition.service),
             Environment: {
-                Variables: getMetadata(constants.Class_EnvironmentKey, serviceDefinition.service)
+                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceDefinition.service)
             },
             Handler: serviceDefinition.handler,
-            MemorySize: getMetadata(constants.Class_MemorySizeKey, serviceDefinition.service),
-            Role: getMetadata(constants.Class_RoleKey, serviceDefinition.service),
-            Runtime: getMetadata(constants.Class_RuntimeKey, serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.Class_TimeoutKey, serviceDefinition.service),
+            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, serviceDefinition.service),
+            Role: getMetadata(constants.CLASS_ROLEKEY, serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, serviceDefinition.service),
             VpcConfig: {
             }
         };
@@ -132,7 +132,7 @@ export const updateLambdaFunctionConfiguration = (serviceDefinition, context) =>
 export const updateLambdaFunctionTags = async (serviceDefinition, context) => {
     initAWSSDK(context)
     const getLambdaFunctionResult = await getLambdaFunction(serviceDefinition, context)
-    const Tags = getMetadata(constants.Class_TagKey, serviceDefinition.service) || {}
+    const Tags = getMetadata(constants.CLASS_TAGKEY, serviceDefinition.service) || {}
 
     const listTagParams = {
         Resource: getLambdaFunctionResult.Configuration.FunctionArn

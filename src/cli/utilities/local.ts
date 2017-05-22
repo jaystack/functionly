@@ -6,7 +6,7 @@ import { config } from './config'
 
 const environmentConfigMiddleware = (serviceType) => {
     return (req, res, next) => {
-        const environmentVariables = getMetadata(constants.Class_EnvironmentKey, serviceType) || {}
+        const environmentVariables = getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceType) || {}
 
         let originals = {}
         Object.keys(environmentVariables).forEach((key) => {
@@ -54,10 +54,10 @@ export const local = async (context) => {
     app.use(bodyParser.json())
 
     for (let serviceDefinition of context.publishedFunctions) {
-        let httpMetadata = getMetadata(constants.Class_ApiGatewayKey, serviceDefinition.service)
+        let httpMetadata = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceDefinition.service)
 
         for (let event of httpMetadata) {
-            const isLoggingEnabled = getMetadata(constants.Class_LogKey, serviceDefinition.service)
+            const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceDefinition.service)
             console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
 
             if (event.cors) {

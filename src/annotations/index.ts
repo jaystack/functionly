@@ -9,9 +9,9 @@ export { dynamoTable, __dynamoDBDefaults } from './classes/dynamoTable'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
-import { Class_DescriptionKey, Class_RoleKey, Class_RuntimeKey } from './constants'
-export const description = simpleClassAnnotation<string>(Class_DescriptionKey)
-export const role = simpleClassAnnotation<string>(Class_RoleKey)
+import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_RUNTIMEKEY } from './constants'
+export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
+export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
 
 
 export { param } from './parameters/param'

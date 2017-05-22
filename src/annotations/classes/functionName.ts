@@ -1,12 +1,12 @@
-import { Class_NameKey } from '../constants'
+import { CLASS_NAMEKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
 import { simpleClassAnnotation } from './simpleAnnotation'
 
 
-export const functionName = simpleClassAnnotation<string>(Class_NameKey)
+export const functionName = simpleClassAnnotation<string>(CLASS_NAMEKEY)
 
 export const getFunctionName = (target) => {
-    const value = getMetadata(Class_NameKey, target)
+    const value = getMetadata(CLASS_NAMEKEY, target)
     if (value) {
         return value
     }

@@ -1,14 +1,14 @@
-import { Class_EnvironmentKey } from '../constants'
+import { CLASS_ENVIRONMENTKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
 
 export const environment = (key: string, value: string) => {
     return (target: Function) => {
-        let metadata = getMetadata(Class_EnvironmentKey, target) || {}
+        let metadata = getMetadata(CLASS_ENVIRONMENTKEY, target) || {}
 
         const { templatedKey, templatedValue } = applyTemplates(key, value, target)
 
         metadata[templatedKey] = templatedValue
-        defineMetadata(Class_EnvironmentKey, { ...metadata }, target);
+        defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
     }
 }
 

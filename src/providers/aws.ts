@@ -5,7 +5,7 @@ let lambda = new Lambda();
 
 export const getInvoker = (serviceType, params) => {
     const serviceInstance = new serviceType(...params)
-    const parameterMapping = (getOwnMetadata(constants.Parameter_ParamKey, serviceType, 'handle') || [])
+    const parameterMapping = (getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceType, 'handle') || [])
         .filter(t => t && typeof t.parameterIndex === 'number');
 
     const invoker = async (event, context, cb) => {
@@ -39,7 +39,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     return new Promise((resolve, reject) => {
         let lambdaParams = {}
 
-        let parameterMapping = getOwnMetadata(constants.Parameter_ParamKey, serviceInstance.constructor, 'handle') || [];
+        let parameterMapping = getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [];
         parameterMapping.forEach((target) => {
             if (params && target && target.type === 'param') {
                 lambdaParams[target.from] = params[target.from]
