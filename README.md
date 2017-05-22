@@ -1,5 +1,8 @@
 # functionly
-## install:
+## install from npm:
+- npm install functionly -g
+
+## install source:
 - npm install
 - npm run build
 - npm install -g
