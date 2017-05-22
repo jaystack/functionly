@@ -3,13 +3,13 @@ import { generate } from 'shortid'
 import { FunctionalService, FunctionalApi, annotations, DynamoDB } from '../index'
 const { role, apiGateway, environment, description, tag, runtime, param, inject, injectable, log } = annotations
 
-@role("arn:aws:iam::856324650258:role/corpjs-serverless")
+@role("arn:aws:iam::856324650258:role/corpjs-functionly")
 @runtime({ type: 'nodejs6.10', memorySize: 512, timeout: 3 })
 export class TodoService extends FunctionalService { }
 
 
 @injectable
-@environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_serverless')
+@environment('%ClassName%_TABLE_NAME', '%ClassName%_corpjs_functionly')
 export class TodoTable extends DynamoDB { }
 
 

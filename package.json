@@ -1,28 +1,26 @@
 {
-  "name": "corpjs-serverless",
+  "name": "functionly",
   "version": "0.0.1",
   "description": "",
   "main": "lib/src/index",
   "types": "lib/src/index.d.ts",
   "scripts": {
-    "start": "npm run build && corpjs-serverless local 3000 ./lib/src/example/todoDB.js",
+    "start": "npm run build && functionly local 3000 ./lib/src/example/todoDB.js",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
-    "test:fast": "mocha --recursive lib/test/**/*.tests.js",
-    "awsdeploy": "npm run build && corpjs-serverless deploy aws ./lib/src/example/todoDB.js --aws-region eu-central-1 --aws-bucket corpjs-serverless",
-    "localdeploy": "npm run build && corpjs-serverless deploy local ./lib/src/example/todoDB.js --aws-region eu-central-1"
+    "test:fast": "mocha --recursive lib/test/**/*.tests.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jaystack/corpjs-serverless.git"
+    "url": "git+https://github.com/jaystack/functionly.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jaystack/corpjs-serverless/issues"
+    "url": "https://github.com/jaystack/functionly/issues"
   },
-  "homepage": "https://github.com/jaystack/corpjs-serverless#readme",
+  "homepage": "https://github.com/jaystack/functionly#readme",
   "devDependencies": {
     "@types/async": "^2.0.33",
     "@types/chai": "^3.4.34",
@@ -51,6 +49,6 @@
     "winston": "^2.3.0"
   },
   "bin": {
-    "corpjs-serverless": "./lib/src/cli/cli.js"
+    "functionly": "./lib/src/cli/cli.js"
   }
 }
