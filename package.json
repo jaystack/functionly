@@ -1,11 +1,10 @@
 {
   "name": "functionly",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "lib/src/index",
   "types": "lib/src/index.d.ts",
   "scripts": {
-    "start": "npm run build && functionly local 3000 ./lib/src/example/todoDB.js",
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
@@ -30,7 +29,6 @@
     "@types/winston": "0.0.30",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
-    "shortid": "^2.2.8",
     "typescript": "^2.3.0"
   },
   "dependencies": {
