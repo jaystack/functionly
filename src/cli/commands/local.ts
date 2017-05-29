@@ -1,6 +1,5 @@
-import { serviceDiscovery } from '../utilities/serviceDiscovery'
 import { local } from '../utilities/local'
-import { resolvePath } from '../utilities/cli'
+import { createContext } from '../context'
 
 export const init = (commander) => {
     commander
@@ -9,14 +8,12 @@ export const init = (commander) => {
         .action(async (port, path, command) => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            let context: any = {
+            const context = await createContext(path, {
                 deployTarget: 'local',
-                localPort: port,
-                serviceRoot: resolvePath(path)
-            }
+                localPort: port
+            })
 
             try {
-                await serviceDiscovery(context)
                 await local(context)
 
                 console.log(`done`)

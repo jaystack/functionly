@@ -1,8 +1,8 @@
 import { getFunctionName } from '../../annotations'
 import { bundle } from '../utilities/webpack'
 import { zip } from '../utilities/compress'
-import { upload } from '../utilities/aws/s3Upload'
-import { collectAndCreateTables } from '../utilities/aws/dynamoDB'
+import { uploadZip } from '../utilities/aws/s3Upload'
+import { createTables } from '../utilities/aws/dynamoDB'
 import {
     getLambdaFunction,
     deleteLambdaFunction,
@@ -13,12 +13,14 @@ import {
     updateLambdaFunctionTags
 } from '../utilities/aws/lambda'
 
+export const FUNCTIONAL_ENVIRONMENT = 'aws'
 
 export const createEnvironment = async (context) => {
+    const date = new Date()
     await bundle(context)
     await zip(context)
-    await upload(context)
-    await collectAndCreateTables(context)
+    await uploadZip(context, `services-${date.toISOString()}.zip`, context.zipData())
+    await createTables(context)
 
     for (let serviceDefinition of context.publishedFunctions) {
         const serviceName = getFunctionName(serviceDefinition.service)

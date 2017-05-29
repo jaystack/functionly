@@ -8,7 +8,8 @@
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
-    "test:fast": "mocha --recursive lib/test/**/*.tests.js"
+    "test:fast": "mocha --recursive lib/test/**/*.tests.js",
+    "metadata": "node ./lib/src/cli/cli.js metadata aws --"
   },
   "repository": {
     "type": "git",
@@ -48,5 +49,11 @@
   },
   "bin": {
     "functionly": "./lib/src/cli/cli.js"
+  },
+  "CloudFormation": {
+    "StackName": "TestStack",
+    "OnFailure": "ROLLBACK",
+    "TimeoutInMinutes": 10,
+    "Capabilities": ["CAPABILITY_NAMED_IAM"]
   }
 }

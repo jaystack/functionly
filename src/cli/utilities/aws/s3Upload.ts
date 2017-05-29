@@ -15,25 +15,26 @@ const initAWSSDK = (context) => {
     return s3
 }
 
+export const uploadZip = async (context, name, data) => {
+    const uploadResult = await upload(context, name, data, 'application/zip')
+    context.S3Zip = uploadResult.Key
+    return uploadResult
+}
 
-export const upload = (context) => {
+
+export const upload = (context, name, data, contentType) => {
     initAWSSDK(context)
-    return new Promise((resolve, reject) => {
-
-        const date = new Date()
+    return new Promise<any>((resolve, reject) => {
         let params = merge({}, config.S3, {
             Bucket: context.awsBucket,
-            Body: new Buffer(context.zipData(), 'binary'),
-            Key: `services-${date.toISOString()}.zip`,
-            ContentType: 'application/zip'
+            Body: new Buffer(data, 'binary'),
+            Key: name,
+            ContentType: contentType
         })
 
         s3.putObject(params, (err, res) => {
-            if(err) return reject(err)
-
-            context.S3Zip = params.Key
-
-            return resolve()
+            if (err) return reject(err)
+            return resolve(params)
         })
     })
 }

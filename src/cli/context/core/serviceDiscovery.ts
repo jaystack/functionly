@@ -1,6 +1,5 @@
 import { lstat, readdirSync } from 'fs'
-import { FunctionalService } from '../../classes/functionalService'
-import { environment } from '../../annotations'
+import { FunctionalService } from '../../../classes/functionalService'
 
 import { join, basename, extname } from 'path'
 import { set } from 'lodash'
@@ -44,10 +43,6 @@ export const collectFromFile = (file, context) => {
                 invoker: exportItem,
                 handler: `${nameKey}.${key}`,
             }
-
-            const setEnvAttrib = environment('FUNCTIONAL_ENVIRONMENT', context.deployTarget)
-            setEnvAttrib(item.service)
-
 
             if (context.files.indexOf(file) < 0) {
                 context.files.push(file)

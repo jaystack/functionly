@@ -1,6 +1,5 @@
-import { serviceDiscovery } from '../utilities/serviceDiscovery'
 import { local } from '../utilities/local'
-import { resolvePath } from '../utilities/cli'
+import { createContext } from '../context'
 import { getMetadata, getMetadataKeys } from '../../annotations'
 
 export const init = (commander) => {
@@ -10,13 +9,11 @@ export const init = (commander) => {
         .action(async (target, path, command) => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
 
-            let context: any = {
-                deployTarget: target,
-                serviceRoot: resolvePath(path)
-            }
+            const context = await createContext(path, {
+                deployTarget: target
+            })
 
             try {
-                await serviceDiscovery(context)
 
                 console.log(JSON.stringify(context, null, 4))
 

@@ -1,6 +1,5 @@
-import { serviceDiscovery } from '../utilities/serviceDiscovery'
 import { deploy } from '../utilities/deploy'
-import { resolvePath } from '../utilities/cli'
+import { createContext } from '../context'
 
 export const init = (commander) => {
     commander
@@ -11,15 +10,13 @@ export const init = (commander) => {
         .action(async (target, path, command) => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
 
-            let context: any = {
+            const context = await createContext(path, {
                 deployTarget: target,
-                serviceRoot: resolvePath(path),
                 awsRegion: command.awsRegion,
                 awsBucket: command.awsBucket
-            }
+            })
 
             try {
-                await serviceDiscovery(context)
                 await deploy(context)
 
                 console.log(`done`)
