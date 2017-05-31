@@ -1,90 +1,85 @@
 import * as request from 'request'
+import { Provider } from './core/provider'
 import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
 
-export const getInvoker = (serviceType, params) => {
-    const serviceInstance = new serviceType(...params)
-    const parameterMapping = (getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceType, 'handle') || [])
-        .filter(t => t && typeof t.parameterIndex === 'number');
-        
-    const invoker = async (req, res, next) => {
-        try {
-            const params = []
-            parameterMapping.forEach((target) => {
-                params[target.parameterIndex] = parameterResolver(req, target)
-            })
 
-            const r = await serviceInstance.handle.apply(serviceInstance, params)
-            res.send(r)
-            return r
-        } catch (e) {
-            next(e)
+export class LocalProvider extends Provider {
+    public getInvoker(serviceType, serviceInstance, params) {
+        const parameters = this.getParameters(serviceType, 'handle')
+
+        const invoker = async (req, res, next) => {
+            try {
+                const params = []
+                for (const parameter of parameters){
+                    params[parameter.parameterIndex] = await this.localParameterResolver(req, parameter)
+                }
+
+                const r = await serviceInstance.handle.apply(serviceInstance, params)
+                res.send(r)
+                return r
+            } catch (e) {
+                next(e)
+            }
+        }
+        return invoker
+    }
+
+    protected async localParameterResolver(req, parameter) {
+        switch (parameter.type) {
+            case 'param':
+                if (req.body && req.body[parameter.from]) return req.body[parameter.from]
+                if (req.query && req.query[parameter.from]) return req.query[parameter.from]
+                if (req.params && req.params[parameter.from]) return req.params[parameter.from]
+            default:
+                return await super.parameterResolver(parameter)
         }
     }
-    return invoker
-}
 
-const parameterResolver = (req, target) => {
-    switch (target.type) {
-        case 'inject':
-            let serviceType = target.serviceType
-            return new serviceType(...target.params.map((p) => typeof p === 'function' ? p() : p))
-        default:
-            if (req.body && req.body[target.from]) return req.body[target.from]
-            if (req.query && req.query[target.from]) return req.query[target.from]
-            if (req.params && req.params[target.from]) return req.params[target.from]
-    }
-}
+    public async invoke(serviceInstance, params, invokeConfig?) {
+        return new Promise((resolve, reject) => {
 
-export const invoke = async (serviceInstance, params?, invokeConfig?) => {
-    return new Promise((resolve, reject) => {
-        let lambdaParams = {}
+            const httpAttr = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceInstance)[0]
+            if (!httpAttr) {
+                return reject(new Error('missing http configuration'))
+            }
 
-        let parameterMapping = getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [];
-        parameterMapping.forEach((target) => {
-            if (params && target && target.type === 'param') {
-                lambdaParams[target.from] = params[target.from]
+            const invokeParams: any = {
+                method: httpAttr.method || 'GET',
+                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
+            };
+
+            if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {
+                invokeParams.qs = params
+            } else {
+                invokeParams.body = params
+                invokeParams.json = true
+            }
+
+            try {
+
+                const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceInstance)
+                if (isLoggingEnabled) {
+                    console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
+                }
+
+                request(invokeParams, (error, response, body) => {
+
+                    if (error) return reject(error)
+
+                    let result = body
+                    try {
+                        result = JSON.parse(result)
+                    }
+                    catch (e) { }
+
+                    return resolve(result)
+
+                })
+            } catch (e) {
+                return reject(e);
             }
         })
-
-        let httpAttr = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceInstance)[0]
-        if (!httpAttr) {
-            return reject(new Error('missing http configuration'))
-        }
-
-        let invokeParams: any = {
-            method: httpAttr.method || 'GET',
-            url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
-        };
-
-        if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {
-            invokeParams.qs = lambdaParams
-        } else {
-            invokeParams.body = lambdaParams
-            invokeParams.json = true
-        }
-
-        try {
-
-            const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceInstance)
-            if (isLoggingEnabled) {
-                console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
-            }
-
-            request(invokeParams, (error, response, body) => {
-
-                if (error) return reject(error)
-
-                let result = body
-                try {
-                    result = JSON.parse(result)
-                }
-                catch (e) { }
-
-                return resolve(result)
-
-            })
-        } catch (e) {
-            return reject(e);
-        }
-    })
+    }
 }
+
+export const provider = new LocalProvider()

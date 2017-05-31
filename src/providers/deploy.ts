@@ -1,9 +1,6 @@
+import { Provider } from './core/provider'
 
-export const getInvoker = (serviceType, params) => {
-    let invoker = () => {}
-    return invoker
+export class DeployProvider extends Provider {
 }
 
-export const invoke = async (serviceInstance, params?, invokeConfig?) => {
-
-}
+export const provider = new DeployProvider()
