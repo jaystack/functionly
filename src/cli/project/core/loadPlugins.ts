@@ -6,14 +6,25 @@ export const PLUGIN_FOLDER = './node_modules/'
 export const PLUGIN_PREFIX = 'functionly-plugin-'
 export const PLUGIN_PATH_REGEXP = /^\./
 
+const pluginToLoad = []
+
 export const loadPlugins = (config) => {
     const pluginInitializers: any[] = []
 
     const cwd = process.cwd()
 
+    for (const plugin of pluginToLoad) {
+        createPluginInitializer({
+            pluginInitializers,
+            pluginInit: plugin,
+            pluginPath: null,
+            resolvedPluginPath: null
+        })
+    }
+
     if (Array.isArray(config.plugins)) {
         for (const pluginPath of config.plugins) {
-            
+
             let resolvedPluginPath = null
             if (PLUGIN_PATH_REGEXP.test(pluginPath)) {
                 resolvedPluginPath = resolvePath(pluginPath)
@@ -24,10 +35,11 @@ export const loadPlugins = (config) => {
             try {
                 const pluginInit = require(resolvedPluginPath)
 
-                pluginInitializers.push({
-                    init: pluginInit.default,
-                    path: pluginPath,
-                    resolvedPath: resolvedPluginPath
+                createPluginInitializer({
+                    pluginInitializers,
+                    pluginInit,
+                    pluginPath,
+                    resolvedPluginPath
                 })
 
             } catch (e) {
@@ -37,4 +49,18 @@ export const loadPlugins = (config) => {
     }
 
     return pluginInitializers;
+}
+
+export const createPluginInitializer = ({
+    pluginInitializers, pluginInit, pluginPath, resolvedPluginPath
+}) => {
+    pluginInitializers.push({
+        init: pluginInit.default,
+        path: pluginPath,
+        resolvedPath: resolvedPluginPath
+    })
+}
+
+export const internalPluginLoad = (plugin) => {
+    pluginToLoad.push(plugin)
 }

@@ -15,7 +15,7 @@ export class AWSProvider extends Provider {
                     params[parameter.parameterIndex] = await this.awsParameterResolver(event, context, parameter)
                 }
 
-                const r = await serviceInstance.handle.apply(serviceInstance, params)
+                const r = await serviceInstance.handle(...params)
                 cb(null, r)
                 return r
             } catch (e) {

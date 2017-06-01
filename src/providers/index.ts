@@ -26,7 +26,7 @@ export const getInvoker = (serviceType, params) => {
         if (typeof onHandleResult !== 'undefined') {
             return onHandleResult
         }
-        return await invoker.apply(this, params)
+        return await invoker(...params)
     }
 
     Object.defineProperty(invokeHandler, 'serviceType', {

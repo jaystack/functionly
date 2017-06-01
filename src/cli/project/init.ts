@@ -1,27 +1,35 @@
+export { internalPluginLoad } from './core/loadPlugins'
 import { readConfig } from './core/readConfig'
 import { loadPlugins } from './core/loadPlugins'
+import { projectConfig, updateConfig, setPluginDefinitions, getPluginDefinitions } from './config'
 
 import { logger } from '../utilities/logger'
 import { resolvePath } from '../utilities/cli'
+import { contextSteppes, createContext } from '../context'
+import * as annotations from '../../annotations'
 
-
-export const pluginDefinition = []
+export const pluginInitParam: any = {
+    logger,
+    resolvePath,
+    contextSteppes, createContext,
+    annotations,
+    projectConfig,
+    getPluginDefinitions
+}
 
 export const init = (commander) => {
 
-    const config = readConfig()
-    const plugins = loadPlugins(config)
+    const configJson = readConfig()
+    updateConfig(configJson)
+    const plugins = loadPlugins(projectConfig)
 
     // init plugins
     for (const pluginInfo of plugins) {
         try {
 
-            const pluginConfig = pluginInfo.init({
-                logger,
-                resolvePath
-            })
+            const pluginConfig = pluginInfo.init(pluginInitParam)
 
-            pluginDefinition.push({
+            setPluginDefinitions({
                 pluginInfo,
                 config: pluginConfig || {}
             })
@@ -33,7 +41,8 @@ export const init = (commander) => {
 
 
     // init commands
-    for (const plugin of pluginDefinition) {
+    const pluginDefinitions = getPluginDefinitions()
+    for (const plugin of pluginDefinitions) {
         try {
             if (plugin.config.commands) {
 

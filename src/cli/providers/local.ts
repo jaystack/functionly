@@ -4,5 +4,5 @@ import { getMetadata, constants } from '../../annotations'
 export const FUNCTIONAL_ENVIRONMENT = 'local'
 
 export const createEnvironment = async (context) => {
-    await createTables(context)
+    await context.runStep({ name: 'createTables', execute: createTables })
 }

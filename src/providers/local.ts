@@ -14,7 +14,7 @@ export class LocalProvider extends Provider {
                     params[parameter.parameterIndex] = await this.localParameterResolver(req, parameter)
                 }
 
-                const r = await serviceInstance.handle.apply(serviceInstance, params)
+                const r = await serviceInstance.handle(...params)
                 res.send(r)
                 return r
             } catch (e) {
