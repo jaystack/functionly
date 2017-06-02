@@ -1,6 +1,7 @@
 import { S3 } from 'aws-sdk'
 import { merge } from 'lodash'
 import { config } from '../config'
+import { ContextStep } from '../../context'
 
 let s3 = null;
 const initAWSSDK = (context) => {
@@ -15,21 +16,36 @@ const initAWSSDK = (context) => {
     return s3
 }
 
-export const uploadZip = async (context, name, data) => {
-    const uploadResult = await upload(context, name, data, 'application/zip')
-    context.S3Zip = uploadResult.Key
-    return uploadResult
+export const uploadZipStep = (name, data) => {
+    return async (context) => {
+        const step = uploaderStep(name, data, 'application/zip')
+        const uploadResult = await context.runStep(step)
+        context.S3Zip = uploadResult.Key
+        return uploadResult
+    }
 }
 
+export const uploaderStep = (name, data, contentType) => {
+    return async (context) => {
+        context.upload = {
+            name,
+            data,
+            contentType
+        }
+        const uploadResult = await context.runStep(uploadToAws)
+        delete context.upload
+        return uploadResult
+    }
+}
 
-export const upload = (context, name, data, contentType) => {
+export const uploadToAws = ContextStep.register('uploadToAws', async (context) => {
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
         let params = merge({}, config.S3, {
             Bucket: context.awsBucket,
-            Body: new Buffer(data, 'binary'),
-            Key: name,
-            ContentType: contentType
+            Body: new Buffer(context.upload.data, 'binary'),
+            Key: context.upload.name,
+            ContentType: context.upload.contentType
         })
 
         s3.putObject(params, (err, res) => {
@@ -37,4 +53,4 @@ export const upload = (context, name, data, contentType) => {
             return resolve(params)
         })
     })
-}
+})

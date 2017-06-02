@@ -1,7 +1,7 @@
 import { getFunctionName } from '../../../annotations'
 import { bundle } from '../../utilities/webpack'
 import { zip } from '../../utilities/compress'
-import { uploadZip } from '../../utilities/aws/s3Upload'
+import { uploadZipStep } from '../../utilities/aws/s3Upload'
 import { createStack, updateStack, getTemplate } from '../../utilities/aws/cloudFormation'
 
 import { cloudFormationInit } from './context/cloudFormationInit'
@@ -11,25 +11,24 @@ import { uploadTemplate } from './context/uploadTemplate'
 export const FUNCTIONAL_ENVIRONMENT = 'aws'
 
 export const createEnvironment = async (context) => {
-    await bundle(context)
-    await zip(context)
-    await uploadZip(context, `services-${context.date.toISOString()}.zip`, context.zipData())
+    await context.runStep(bundle)
+    await context.runStep(zip)
+    await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData()))
 
+    await context.runStep(cloudFormationInit)
+    await context.runStep(roleResources)
+    await context.runStep(tableResources)
+    await context.runStep(lambdaResources)
 
-    await cloudFormationInit(context)
-    await roleResources(context)
-    await tableResources(context)
-    await lambdaResources(context)
-
-    await uploadTemplate(context)
+    await context.runStep(uploadTemplate)
 
     try {
-        await getTemplate(context)
-        await updateStack(context)
+        await context.runStep(getTemplate)
+        await context.runStep(updateStack)
         console.log('updated')
     } catch (e) {
         if (/^Stack with id .* does not exist$/.test(e.message)) {
-            await createStack(context)
+            await context.runStep(createStack)
             console.log('created')
         } else {
             console.log(e)

@@ -1,8 +1,9 @@
 import * as nodeZip from 'node-zip'
 import { basename, join } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
+import { ContextStep } from '../context'
 
-export const zip = (context) => {
+export const zip = ContextStep.register('zip', (context) => {
     let compressor = new nodeZip()
 
     for (const file of context.files) {
@@ -11,4 +12,4 @@ export const zip = (context) => {
 
     let zipData = compressor.generate({ base64: false, compression: 'DEFLATE' });
     context.zipData = () => zipData
-}
+})

@@ -18,7 +18,7 @@ export class CreateEnvironmentStep extends ContextStep {
             await context.runStep(contextSteppes.setFunctionalEnvironment)
         }
 
-        await currentEnvironment.createEnvironment(context)
+        await context.runStep(currentEnvironment.createEnvironment)
     }
 }
 

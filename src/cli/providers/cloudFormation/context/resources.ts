@@ -2,6 +2,7 @@ import { merge } from 'lodash'
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY } = constants
+import { ContextStep } from '../../../context'
 
 export const nameReplaceRegexp = /[^a-zA-Z0-9]/g
 export const normalizeName = (name: string) => {
@@ -30,7 +31,7 @@ export const setResource = (context, name, resource) => {
     return name;
 }
 
-export const roleResources = async (context) => {
+export const roleResources = ContextStep.register('roleResources', async (context) => {
     const roleMap = new Map<string, any>()
 
 
@@ -129,9 +130,9 @@ export const roleResources = async (context) => {
 
     }
 
-}
+})
 
-export const tableResources = async (context) => {
+export const tableResources = ContextStep.register('tableResources', async (context) => {
 
     for (const tableConfig of context.tableConfigs) {
 
@@ -150,9 +151,9 @@ export const tableResources = async (context) => {
         setResource(context, resourceName, tableResource)
     }
 
-}
+})
 
-export const lambdaResources = async (context) => {
+export const lambdaResources = ContextStep.register('lambdaResources', async (context) => {
 
     for (const serviceDefinition of context.publishedFunctions) {
 
@@ -183,4 +184,4 @@ export const lambdaResources = async (context) => {
         setResource(context, resourceName, lambdaResource)
     }
 
-}
+})

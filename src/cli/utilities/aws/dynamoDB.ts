@@ -2,6 +2,7 @@ import { DynamoDB } from 'aws-sdk'
 import { merge } from 'lodash'
 import { config } from '../config'
 import { __dynamoDBDefaults } from '../../../annotations'
+import { ContextStep } from '../../context'
 
 let dynamoDB = null;
 const initAWSSDK = (context) => {
@@ -21,7 +22,7 @@ const initAWSSDK = (context) => {
 }
 
 
-export const createTables = async (context) => {
+export const createTables = ContextStep.register('createTables', async (context) => {
     initAWSSDK(context)
 
     for (let tableConfig of context.tableConfigs) {
@@ -34,7 +35,7 @@ export const createTables = async (context) => {
             }
         }
     }
-}
+})
 
 export const createTable = (tableConfig, context) => {
     initAWSSDK(context)

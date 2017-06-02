@@ -1,4 +1,4 @@
-export const contextSteppes: { [x: string]: ContextStep } = {}
+export const contextSteppes: { [x: string]: ContextStep | { name: string, execute: (c) => any } } = {}
 
 export class ContextStep {
     public name: string
@@ -13,5 +13,20 @@ export class ContextStep {
 
     public execute(context) {
 
+    }
+
+    public static register(name, execute) {
+        if (contextSteppes[name]) {
+            throw new Error(`step name '${this.name}' already defined`)
+        }
+
+        const step = {
+            name,
+            execute
+        }
+
+        contextSteppes[name] = step
+
+        return step
     }
 }

@@ -1,6 +1,7 @@
 import { CloudFormation } from 'aws-sdk'
 import { merge, pick } from 'lodash'
 import { config } from '../../utilities/config'
+import { ContextStep } from '../../context'
 
 
 export const UPDATE_STACK_PRPERTIES = ['StackName', 'Capabilities', 'ClientRequestToken', 'Parameters', 'ResourceTypes', 'RoleARN', 'StackPolicyBody',
@@ -23,7 +24,7 @@ const initAWSSDK = (context) => {
 
 
 
-export const createStack = (context) => {
+export const createStack = ContextStep.register('createStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig = pick(context.CloudFormationConfig, CREATE_STACK_PRPERTIES) 
@@ -36,9 +37,9 @@ export const createStack = (context) => {
             else resolve(data);
         });
     })
-}
+})
 
-export const updateStack = (context) => {
+export const updateStack = ContextStep.register('updateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig = pick(context.CloudFormationConfig, UPDATE_STACK_PRPERTIES)
@@ -52,9 +53,9 @@ export const updateStack = (context) => {
             else resolve(data);
         });
     })
-}
+})
 
-export const getTemplate = (context) => {
+export const getTemplate = ContextStep.register('getTemplate', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -66,4 +67,4 @@ export const getTemplate = (context) => {
             else resolve(data);
         });
     })
-}
+})
