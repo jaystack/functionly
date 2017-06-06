@@ -4,13 +4,14 @@ import { loadPlugins } from './core/loadPlugins'
 import { projectConfig, updateConfig, setPluginDefinitions, getPluginDefinitions } from './config'
 
 import { logger } from '../utilities/logger'
-import { resolvePath } from '../utilities/cli'
+import { resolvePath, requireValue } from '../utilities/cli'
 import { contextSteppes, createContext } from '../context'
 import * as annotations from '../../annotations'
 
 export const pluginInitParam: any = {
     logger,
     resolvePath,
+    requireValue,
     contextSteppes, createContext,
     annotations,
     projectConfig,

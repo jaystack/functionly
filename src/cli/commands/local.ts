@@ -2,7 +2,7 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as cors from 'cors'
 
-export default ({ createContext, annotations: { getMetadata, constants, getFunctionName } }) => {
+export default ({ createContext, annotations: { getMetadata, constants, getFunctionName }, projectConfig, requireValue }) => {
 
     const startLocal = async (context) => {
         let app = express()
@@ -81,17 +81,20 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
     return {
         commands({ commander }) {
             commander
-                .command('local <port> <path>')
+                .command('local [port] [path]')
                 .description('run functional service local')
                 .action(async (port, path, command) => {
                     process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                    const context = await createContext(path, {
-                        deployTarget: 'local',
-                        localPort: port
-                    })
-
                     try {
+                        const entryPoint = requireValue(path || projectConfig.main, 'entry point')
+                        const localPort = requireValue(port || projectConfig.localPort, 'localPort')
+
+                        const context = await createContext(entryPoint, {
+                            deployTarget: 'local',
+                            localPort
+                        })
+
                         await context.runStep({ name: 'startLocal', execute: startLocal })
 
                         console.log(`done`)

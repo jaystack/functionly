@@ -7,3 +7,9 @@ export let resolvePath = (path) => {
 
     return path;
 }
+
+export const requireValue = (value, msg) => {
+    if(typeof value !== 'undefined') return value
+
+    throw new Error(`missing value '${msg}'`)
+}

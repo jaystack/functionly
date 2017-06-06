@@ -1,18 +1,21 @@
-export default ({ createContext, annotations: { getMetadata, getMetadataKeys } }) => {
+export default ({ createContext, annotations: { getMetadata, getMetadataKeys }, projectConfig, requireValue }) => {
 
     return {
         commands({ commander }) {
             commander
-                .command('metadata <target> <path>')
+                .command('metadata [target] [path]')
                 .description('service metadata')
                 .action(async (target, path, command) => {
                     process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
 
-                    const context = await createContext(path, {
-                        deployTarget: target
-                    })
-
                     try {
+                        const entryPoint = requireValue(path || projectConfig.main, 'entry point')
+                        const deployTarget = requireValue(target || projectConfig.deployTarget, 'missing deploy target')
+
+
+                        const context = await createContext(entryPoint, {
+                            deployTarget
+                        })
 
                         console.log(JSON.stringify(context, null, 4))
 
