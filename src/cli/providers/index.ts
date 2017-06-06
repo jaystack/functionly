@@ -1,13 +1,28 @@
-import * as aws from './aws'
-import * as local from './local'
-import * as cf from './cloudFormation'
+import { aws } from './aws'
+import { local } from './local'
+import { cloudFormation as cf } from './cloudFormation'
 import { contextSteppes, ContextStep } from '../context'
+import { getPluginDefinitions } from '../project/config'
 
 let environments = { aws, local, cf }
 
 export class CreateEnvironmentStep extends ContextStep {
     public async execute(context) {
         let currentEnvironment = environments[context.deployTarget]
+
+        if (!currentEnvironment) {
+            const plugins = getPluginDefinitions()
+            for (const plugin of plugins) {
+                if (plugin.config.deployProviders &&
+                    plugin.config.deployProviders[context.deployTarget] &&
+                    plugin.config.deployProviders[context.deployTarget].createEnvironment
+                ) {
+                    currentEnvironment = plugin.config.deployProviders[context.deployTarget]
+                    break;
+                }
+            }
+        }
+
 
         if (!currentEnvironment) {
             throw new Error(`unhandled deploy target: '${context.deployTarget}'`)

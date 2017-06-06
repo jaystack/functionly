@@ -8,33 +8,33 @@ import { cloudFormationInit } from './context/cloudFormationInit'
 import { tableResources, lambdaResources, roleResources } from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
-export const FUNCTIONAL_ENVIRONMENT = 'aws'
+export const cloudFormation = {
+    FUNCTIONAL_ENVIRONMENT: 'aws',
+    createEnvironment: async (context) => {
+        await context.runStep(bundle)
+        await context.runStep(zip)
+        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData()))
 
-export const createEnvironment = async (context) => {
-    await context.runStep(bundle)
-    await context.runStep(zip)
-    await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData()))
+        await context.runStep(cloudFormationInit)
+        await context.runStep(roleResources)
+        await context.runStep(tableResources)
+        await context.runStep(lambdaResources)
 
-    await context.runStep(cloudFormationInit)
-    await context.runStep(roleResources)
-    await context.runStep(tableResources)
-    await context.runStep(lambdaResources)
+        await context.runStep(uploadTemplate)
 
-    await context.runStep(uploadTemplate)
-
-    try {
-        await context.runStep(getTemplate)
-        await context.runStep(updateStack)
-        console.log('updated')
-    } catch (e) {
-        if (/^Stack with id .* does not exist$/.test(e.message)) {
-            await context.runStep(createStack)
-            console.log('created')
-        } else {
-            console.log(e)
-            throw e
+        try {
+            await context.runStep(getTemplate)
+            await context.runStep(updateStack)
+            console.log('updated')
+        } catch (e) {
+            if (/^Stack with id .* does not exist$/.test(e.message)) {
+                await context.runStep(createStack)
+                console.log('created')
+            } else {
+                console.log(e)
+                throw e
+            }
         }
     }
 }
-
 
