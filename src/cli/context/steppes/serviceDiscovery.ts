@@ -44,6 +44,7 @@ export class ServiceDiscoveryStep extends ContextStep {
                     exportName: key,
                     invoker: exportItem,
                     handler: `${nameKey}.${key}`,
+                    file
                 }
 
                 if (context.files.indexOf(file) < 0) {

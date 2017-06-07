@@ -37,8 +37,11 @@ export class AWSProvider extends Provider {
     public async invoke(serviceInstance, params, invokeConfig?) {
         return new Promise((resolve, reject) => {
 
+            const funcName = getFunctionName(serviceInstance)
+            const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
+
             const invokeParams = {
-                FunctionName: getFunctionName(serviceInstance),
+                FunctionName: resolvedFuncName,
                 Payload: JSON.stringify(params)
             };
 

@@ -21,17 +21,23 @@ export const inject = (type: any, ...params): any => {
         defineMetadata(PARAMETER_PARAMKEY, [...existingParameters], target, targetKey);
 
         const injectTarget = type
-        const injectMetadata = getMetadata(CLASS_ENVIRONMENTKEY, injectTarget) || {}
         const metadata = getMetadata(CLASS_ENVIRONMENTKEY, target) || {}
-        if (injectMetadata) {
-            Object.keys(injectMetadata).forEach((key) => {
-                metadata[key] = injectMetadata[key]
-            })
+        if (injectTarget.createInvoker) {
+            const funcName = getFunctionName(injectTarget) || 'undefined'
+            metadata[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] = funcName
             defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
+        } else {
+            const injectMetadata = getMetadata(CLASS_ENVIRONMENTKEY, injectTarget) || {}
+            if (injectMetadata) {
+                Object.keys(injectMetadata).forEach((key) => {
+                    metadata[key] = injectMetadata[key]
+                })
+                defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
+            }
         }
 
         const injectTableConfig = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, injectTarget) || []
         const tableConfig = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, target) || []
-        defineMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, [ ...tableConfig, ...injectTableConfig ], target);
+        defineMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, [...tableConfig, ...injectTableConfig], target);
     }
 }

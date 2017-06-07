@@ -43,9 +43,10 @@ export class LocalProvider extends Provider {
                 return reject(new Error('missing http configuration'))
             }
 
+            const normalizedPath = /^\//.test(httpAttr.path) ? httpAttr.path : `/${httpAttr.path}`
             const invokeParams: any = {
                 method: httpAttr.method || 'GET',
-                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
+                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${normalizedPath}`,
             };
 
             if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {

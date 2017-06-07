@@ -12,15 +12,16 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
             let httpMetadata = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceDefinition.service)
 
             for (let event of httpMetadata) {
+                const normalizedPath = /^\//.test( event.path) ? event.path : `/${event.path}`
                 const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceDefinition.service)
-                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
+                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${normalizedPath}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
 
                 if (event.cors) {
-                    app.use(event.path, cors())
+                    app.use(normalizedPath, cors())
                 }
 
                 app[event.method](
-                    event.path,
+                    normalizedPath,
                     logMiddleware(isLoggingEnabled, serviceDefinition.service),
                     environmentConfigMiddleware(serviceDefinition.service),
                     serviceDefinition.invoker
