@@ -23,13 +23,8 @@ export default (api) => {
     } = api
 
     const serverlessConfig = async (context) => {
-        let projectName = 'unknown'
-        try {
-            projectName = require(resolvePath('./package.json')).name || projectName
-        } catch (e) { }
-
         context.serverless = {
-            service: projectName
+            service: projectConfig.name || 'unknown'
         }
     }
 

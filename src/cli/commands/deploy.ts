@@ -13,12 +13,13 @@ export default ({ createContext, contextSteppes: { createEnvironment }, projectC
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const deployTarget = requireValue(target || projectConfig.deployTarget, 'missing deploy target')
                         const awsRegion = requireValue(command.awsRegion || projectConfig.awsRegion, 'awsRegion')
-                        const awsBucket = requireValue(command.awsBucket || projectConfig.awsBucket, 'awsBucket')
+                        const awsBucket = command.awsBucket || projectConfig.awsBucket
 
                         const context = await createContext(entryPoint, {
                             deployTarget,
                             awsRegion,
-                            awsBucket
+                            awsBucket,
+                            version: projectConfig.version
                         })
 
                         await context.runStep(createEnvironment)

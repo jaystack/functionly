@@ -154,12 +154,16 @@ export const tableResources = ContextStep.register('tableResources', async (cont
 })
 
 export const lambdaResources = ContextStep.register('lambdaResources', async (context) => {
+    const awsBucket = context.__userAWSBucket ? context.awsBucket : {
+        "Ref": "FunctionlyDeploymentBucket"
+    }
+
 
     for (const serviceDefinition of context.publishedFunctions) {
 
         const properties: any = {
             Code: {
-                S3Bucket: context.awsBucket,
+                S3Bucket: awsBucket,
                 S3Key: context.S3Zip
             },
             Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
@@ -181,7 +185,41 @@ export const lambdaResources = ContextStep.register('lambdaResources', async (co
         }
 
         const resourceName = `lambda_${properties.FunctionName}`
-        setResource(context, resourceName, lambdaResource)
+        const name = setResource(context, resourceName, lambdaResource)
+
+
+        const versionResource = {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": name
+                },
+                "CodeSha256": context.zipCodeSha256
+            }
+        }
+        setResource(context, `${name}${context.zipCodeSha256}`, versionResource)
+
+    }
+
+})
+
+export const s3BucketResources = ContextStep.register('s3BucketResources', async (context) => {
+    if (context.awsBucket) {
+        context.__userAWSBucket = true
+    }
+
+    const s3BucketResources = {
+        "Type": "AWS::S3::Bucket"
+    }
+
+    const resourceName = `FunctionlyDeploymentBucket`
+    const name = setResource(context, resourceName, s3BucketResources)
+
+    context.CloudFormationTemplate.Outputs[`${name}Name`] = {
+        "Value": {
+            "Ref": "FunctionlyDeploymentBucket"
+        }
     }
 
 })

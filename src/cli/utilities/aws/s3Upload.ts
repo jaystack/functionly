@@ -41,10 +41,11 @@ export const uploaderStep = (name, data, contentType) => {
 export const uploadToAws = ContextStep.register('uploadToAws', async (context) => {
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
+        const version = context.version ? `${context.version}/` : ''
         let params = merge({}, config.S3, {
             Bucket: context.awsBucket,
             Body: new Buffer(context.upload.data, 'binary'),
-            Key: context.upload.name,
+            Key: `functionly/${version}${context.upload.name}`,
             ContentType: context.upload.contentType
         })
 
