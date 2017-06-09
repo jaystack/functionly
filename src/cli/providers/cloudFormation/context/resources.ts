@@ -38,9 +38,13 @@ export const roleResources = ContextStep.register('roleResources', async (contex
     for (const serviceDefinition of context.publishedFunctions) {
 
 
-        const role = getMetadata(CLASS_ROLEKEY, serviceDefinition.service)
+        let role = getMetadata(CLASS_ROLEKEY, serviceDefinition.service)
         if (typeof role === 'string' && /^arn:/.test(role)) {
             continue
+        }
+
+        if (!role) {
+            role = context.CloudFormationConfig.StackName
         }
 
         if (!roleMap.has(role)) {
@@ -123,6 +127,10 @@ export const roleResources = ContextStep.register('roleResources', async (contex
                 },
                 resourceName
             })
+
+            context.CloudFormationConfig.Capabilities = context.CloudFormationConfig.Capabilities || [
+                "CAPABILITY_NAMED_IAM"
+            ]
         }
 
         const iam_role = roleMap.get(role)

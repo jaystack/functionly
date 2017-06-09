@@ -6,7 +6,9 @@ import { merge } from 'lodash'
 
 export const cloudFormationInit = ContextStep.register('cloudFormationInit', async (context) => {
     context.CloudFormationConfig = merge({}, {
-        StackName: projectConfig.name
+        StackName: projectConfig.name,
+        OnFailure: "ROLLBACK",
+        TimeoutInMinutes: 10
     }, projectConfig.cloudFormation)
 
     context.CloudFormationTemplate = {
