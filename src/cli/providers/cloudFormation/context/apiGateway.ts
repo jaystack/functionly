@@ -1,18 +1,18 @@
 import { getMetadata, constants } from '../../../../annotations'
 const { CLASS_APIGATEWAYKEY } = constants
-import { ContextStep, executor } from '../../../context'
+import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 
 export const API_GATEWAY_REST_API = 'ApiGatewayRestApi'
 
-export const apiGateway = ContextStep.register('ApiGateway', async (context) => {
+export const apiGateway = ExecuteStep.register('ApiGateway', async (context) => {
     const deploymentResources = []
     await executor({ ...context, deploymentResources }, gatewayRestApi)
     await executor({ ...context, deploymentResources }, gatewayResources)
     await executor({ ...context, deploymentResources }, gatewayDeployment)
 })
 
-export const gatewayRestApi = ContextStep.register('ApiGateway-RestApi', async (context) => {
+export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (context) => {
     const RestApi = {
         "Type": "AWS::ApiGateway::RestApi",
         "Properties": {
@@ -39,7 +39,7 @@ export const gatewayRestApi = ContextStep.register('ApiGateway-RestApi', async (
 
 })
 
-export const gatewayResources = ContextStep.register('ApiGateway-Resources', async (context) => {
+export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', async (context) => {
     const endpointsCors = new Map<string, string[]>()
     const endpoints = new Map<string, any>()
     for (const serviceDefinition of context.publishedFunctions) {
@@ -172,7 +172,7 @@ export const apiGatewayPathPart = async (context) => {
     return endpointResourceName
 }
 
-export const gatewayDeployment = ContextStep.register('ApiGateway-Deployment', async (context) => {
+export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', async (context) => {
 
     const deploymentResources = context.deploymentResources
         .filter(r => r.type === 'AWS::ApiGateway::Method')

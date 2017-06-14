@@ -1,9 +1,9 @@
 import { getMetadata, constants, __dynamoDBDefaults } from '../../../annotations'
-import { ContextStep } from '../core/contextStep'
+import { ExecuteStep } from '../core/executeStep'
 
-export class TableDiscoveryStep extends ContextStep {
+export class TableDiscoveryStep extends ExecuteStep {
     protected tableNameEnvRegexp = /_TABLE_NAME$/
-    public async execute(context) {
+    public async method(context) {
         const tablesToCreate = new Map()
 
         for (let serviceDefinition of context.publishedFunctions) {
@@ -34,4 +34,4 @@ export class TableDiscoveryStep extends ContextStep {
 }
 
 
-export const tableDiscovery = new TableDiscoveryStep('tableDiscovery')
+export const tableDiscovery = new TableDiscoveryStep('TableDiscovery')

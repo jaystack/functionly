@@ -1,12 +1,12 @@
 import { lstat, readdirSync } from 'fs'
 import { FunctionalService } from '../../../classes/functionalService'
-import { ContextStep } from '../core/contextStep'
+import { ExecuteStep } from '../core/executeStep'
 
 import { join, basename, extname } from 'path'
 import { set } from 'lodash'
 
-export class ServiceDiscoveryStep extends ContextStep {
-    public async execute(context) {
+export class ServiceDiscoveryStep extends ExecuteStep {
+    public async method(context) {
 
         context.files = context.files || []
         context.publishedFunctions = context.publishedFunctions || []
@@ -73,4 +73,4 @@ export class ServiceDiscoveryStep extends ContextStep {
 
 }
 
-export const serviceDiscovery = new ServiceDiscoveryStep('serviceDiscovery')
+export const serviceDiscovery = new ServiceDiscoveryStep('ServiceDiscovery')

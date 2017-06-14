@@ -1,7 +1,7 @@
 import { CloudFormation } from 'aws-sdk'
 import { merge, pick } from 'lodash'
 import { config } from '../../utilities/config'
-import { ContextStep } from '../../context'
+import { ExecuteStep } from '../../context'
 
 
 export const UPDATE_STACK_PRPERTIES = ['StackName', 'Capabilities', 'ClientRequestToken', 'Parameters', 'ResourceTypes', 'RoleARN', 'StackPolicyBody',
@@ -24,7 +24,7 @@ const initAWSSDK = (context) => {
 
 
 
-export const createStack = ContextStep.register('CF-CreateStack', (context) => {
+export const createStack = ExecuteStep.register('CF-CreateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, CREATE_STACK_PRPERTIES)
@@ -46,7 +46,7 @@ export const createStack = ContextStep.register('CF-CreateStack', (context) => {
     })
 })
 
-export const updateStack = ContextStep.register('CF-UpdateStack', (context) => {
+export const updateStack = ExecuteStep.register('CF-UpdateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, UPDATE_STACK_PRPERTIES)
@@ -69,7 +69,7 @@ export const updateStack = ContextStep.register('CF-UpdateStack', (context) => {
     })
 })
 
-export const getTemplate = ContextStep.register('CF-GetTemplate', (context) => {
+export const getTemplate = ExecuteStep.register('CF-GetTemplate', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -84,7 +84,7 @@ export const getTemplate = ContextStep.register('CF-GetTemplate', (context) => {
 })
 
 
-export const getStackBucketName = ContextStep.register('CF-GetStackBucketName', (context) => {
+export const getStackBucketName = ExecuteStep.register('CF-GetStackBucketName', (context) => {
     if (context.awsBucket) return context.awsBucket
 
     initAWSSDK(context)
@@ -102,7 +102,7 @@ export const getStackBucketName = ContextStep.register('CF-GetStackBucketName', 
     })
 })
 
-export const describeStacks = ContextStep.register('CF-DescribeStacks', (context) => {
+export const describeStacks = ExecuteStep.register('CF-DescribeStacks', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -125,7 +125,7 @@ export const stackStateWaiter = (status, context, tries = 20, timeout = 5000) =>
             if (iteration >= tries) return reject(new Error(`stackStateWaiter timeout '${status}'`))
             iteration++
             setTimeout(async () => {
-                const stack = await describeStacks.execute(context)
+                const stack = await describeStacks.method(context)
                 console.log(' >', stack.StackStatus)
                 if (waitregexp.test(stack.StackStatus)) {
                     return waiter()

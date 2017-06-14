@@ -2,7 +2,7 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as cors from 'cors'
 
-export default ({ createContext, annotations: { getMetadata, constants, getFunctionName }, projectConfig, requireValue }) => {
+export default ({ createContext, annotations: { getMetadata, constants, getFunctionName }, projectConfig, requireValue, executor }) => {
 
     const startLocal = async (context) => {
         let app = express()
@@ -95,7 +95,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                             localPort
                         })
 
-                        await context.runStep({ name: 'startLocal', execute: startLocal })
+                        await executor(context, { name: 'startLocal', method: startLocal })
 
                         console.log(`done`)
                     } catch (e) {

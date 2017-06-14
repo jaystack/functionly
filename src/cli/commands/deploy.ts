@@ -1,4 +1,4 @@
-export default ({ createContext, contextSteppes: { createEnvironment }, projectConfig, requireValue }) => {
+export default ({ createContext, executor, ExecuteStep, projectConfig, requireValue }) => {
     return {
         commands({ commander }) {
             commander
@@ -22,7 +22,7 @@ export default ({ createContext, contextSteppes: { createEnvironment }, projectC
                             version: projectConfig.version
                         })
 
-                        await context.runStep(createEnvironment)
+                        await executor(context, ExecuteStep.get('CreateEnvironment'))
 
                         console.log(`done`)
                     } catch (e) {

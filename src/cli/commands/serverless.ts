@@ -19,7 +19,7 @@ export default (api) => {
         },
         projectConfig,
         requireValue, resolvePath,
-        contextSteppes
+        ExecuteStep, executor
     } = api
 
     const serverlessConfig = async (context) => {
@@ -35,7 +35,7 @@ export default (api) => {
             stage: 'dev',
             environment: {}
         }
-        await context.runStep({ name: 'iamRoleConfig', execute: iamRoleConfig })
+        await executor({ context, name: 'iamRoleConfig', method: iamRoleConfig })
     }
 
     const iamRoleConfig = async (context) => {
@@ -76,9 +76,11 @@ export default (api) => {
         context.serverless.functions = {}
 
         for (const serviceDefinition of context.publishedFunctions) {
-            context.serviceDefinition = serviceDefinition
-            await context.runStep({ name: 'functionExport', execute: functionExport })
-            delete context.serviceDefinition
+            await executor({
+                context: { ...context, serviceDefinition },
+                name: 'functionExport',
+                method: functionExport
+            })
         }
     }
 
@@ -96,8 +98,8 @@ export default (api) => {
             runtime: getMetadata(CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10"
         }
 
-        await context.runStep({ name: 'funtionEnvironments', execute: funtionEnvironments })
-        await context.runStep({ name: 'funtionEvents', execute: funtionEvents })
+        await executor({ context, name: 'funtionEnvironments', method: funtionEnvironments })
+        await executor({ context, name: 'funtionEvents', method: funtionEvents })
     }
 
     const functional_service_regexp = /^FUNCTIONAL_SERVICE_/
@@ -145,9 +147,11 @@ export default (api) => {
         }
 
         for (const tableDefinition of context.tableConfigs) {
-            context.tableConfig = tableDefinition
-            await context.runStep({ name: 'tableConfig', execute: tableConfig })
-            delete context.tableConfig
+            await executor({
+                context: { ...context, tableConfig },
+                name: 'tableConfig',
+                method: tableConfig
+            })
         }
 
     }
@@ -173,11 +177,11 @@ export default (api) => {
     }
 
     const build = async (context) => {
-        await context.runStep({ name: 'serverlessConfig', execute: serverlessConfig })
-        await context.runStep({ name: 'providerConfig', execute: providerConfig })
-        await context.runStep({ name: 'functionsConfig', execute: functionsConfig })
-        await context.runStep({ name: 'resourcesConfig', execute: resourcesConfig })
-        await context.runStep({ name: 'saveConfig', execute: saveConfig })
+        await executor({ context, name: 'serverlessConfig', method: serverlessConfig })
+        await executor({ context, name: 'providerConfig', method: providerConfig })
+        await executor({ context, name: 'functionsConfig', method: functionsConfig })
+        await executor({ context, name: 'resourcesConfig', method: resourcesConfig })
+        await executor({ context, name: 'saveConfig', method: saveConfig })
     }
 
 
@@ -202,7 +206,7 @@ export default (api) => {
                             FUNCTIONAL_ENVIRONMENT
                         })
 
-                        await context.runStep(contextSteppes.setFunctionalEnvironment)
+                        await executor(context, ExecuteStep.get('SetFunctionalEnvironment'))
 
                         await build(context)
 

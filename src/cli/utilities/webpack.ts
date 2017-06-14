@@ -2,13 +2,13 @@ import { merge } from 'lodash'
 import * as webpack from 'webpack'
 import { config } from './config'
 import { basename, extname, join } from 'path'
-import { ContextStep } from '../context'
+import { ExecuteStep, executor } from '../context'
 
 
-export const bundle = ContextStep.register('bundle', (context) => {
+export const bundle = ExecuteStep.register('WebpackBundle', (context) => {
 
     return new Promise(async (resolve, reject) => {
-        const webpackConfig = await context.runStep(bundleConfig)
+        const webpackConfig = await executor(context, bundleConfig)
 
         webpack(webpackConfig, function (err, stats) {
             if (err) return reject()
@@ -37,7 +37,7 @@ export const bundle = ContextStep.register('bundle', (context) => {
     })
 })
 
-export const bundleConfig = ContextStep.register('bundleConfig', (context) => {
+export const bundleConfig = ExecuteStep.register('WebpackBundleConfig', (context) => {
     let entry = {}
     context.files.forEach((file) => {
         let name = basename(file)

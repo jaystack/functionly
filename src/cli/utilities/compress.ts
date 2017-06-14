@@ -2,9 +2,9 @@ import * as nodeZip from 'node-zip'
 import { basename, join } from 'path'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
-import { ContextStep } from '../context'
+import { ExecuteStep } from '../context'
 
-export const zip = ContextStep.register('zip', (context) => {
+export const zip = ExecuteStep.register('Compress-zip', (context) => {
     let compressor = new nodeZip()
 
     for (const file of context.files) {

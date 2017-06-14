@@ -2,7 +2,7 @@ import { DynamoDB } from 'aws-sdk'
 import { merge } from 'lodash'
 import { config } from '../config'
 import { __dynamoDBDefaults } from '../../../annotations'
-import { ContextStep } from '../../context'
+import { ExecuteStep, executor } from '../../context'
 
 let dynamoDB = null;
 const initAWSSDK = (context) => {
@@ -22,12 +22,16 @@ const initAWSSDK = (context) => {
 }
 
 
-export const createTables = ContextStep.register('createTables', async (context) => {
+export const createTables = ExecuteStep.register('CreateTables', async (context) => {
     initAWSSDK(context)
 
     for (let tableConfig of context.tableConfigs) {
         try {
-            let data = await createTable(tableConfig, context)
+            let data = await executor({
+                context: { ...context, tableConfig },
+                name: `CreateTable-${tableConfig.tableName}`,
+                method: createTable
+            })
             console.log(`${data.TableDescription.TableName} DynamoDB table created.`)
         } catch (e) {
             if (e.code !== 'ResourceInUseException') {
@@ -37,8 +41,9 @@ export const createTables = ContextStep.register('createTables', async (context)
     }
 })
 
-export const createTable = (tableConfig, context) => {
+export const createTable = (context) => {
     initAWSSDK(context)
+    const { tableConfig } = context
     return new Promise<any>((resolve, reject) => {
 
         let params = merge({}, {

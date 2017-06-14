@@ -1,4 +1,4 @@
-export { contextSteppes, ContextStep } from './core/contextStep'
+export { ExecuteStep } from './core/executeStep'
 
 import { serviceDiscovery } from './steppes/serviceDiscovery'
 import { tableDiscovery } from './steppes/tableDiscovery'
@@ -38,14 +38,6 @@ export const createContext = async (path, defaultValues) => {
 }
 
 let depth = 0
-// export class Context {
-//     [p: string]: any
-
-//     public async runStep(step: Function | any) {
-//         return await runStep(this, step)
-//     }
-// }
-
 export const executor = async (context, step?: Function | any) => {
     if (!step) {
         step = context;
@@ -55,10 +47,7 @@ export const executor = async (context, step?: Function | any) => {
     let result = undefined
     if (typeof step === 'function') {
         result = await step(context)
-    } else if (step && step.name && typeof (step.execute === 'function' || step.method === 'function')) {
-
-        const method = step.method || step.execute
-
+    } else if (step && step.name && typeof step.method === 'function') {
         const tab = depth++
         const separator = (s = '  ') => {
             let result = ''
@@ -70,26 +59,26 @@ export const executor = async (context, step?: Function | any) => {
 
         try {
 
-            if (projectConfig.debug) logger.debug(`Context step run -----------${separator('--')}> ${step.name}`)
-            if (projectConfig.debug) logger.debug(`Context step before start   ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   run -----------${separator('--')}> ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   before start   ${separator()}  ${step.name}`)
             await cliCallContextHooks(step.name, context, CONTEXT_HOOK_MODIFIER_BEFORE)
-            if (projectConfig.debug) logger.debug(`Context step before end     ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   before end     ${separator()}  ${step.name}`)
 
-            if (projectConfig.debug) logger.debug(`Context step start          ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   start          ${separator()}  ${step.name}`)
             if (hasCliCallContextHooks(step.name, context)) {
                 result = await cliCallContextHooks(step.name, context)
             } else {
-                result = await method.call(step, context)
+                result = await step.method(context)
             }
-            if (projectConfig.debug) logger.debug(`Context step end            ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   end            ${separator()}  ${step.name}`)
 
-            if (projectConfig.debug) logger.debug(`Context step after start    ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   after start    ${separator()}  ${step.name}`)
             await cliCallContextHooks(step.name, context, CONTEXT_HOOK_MODIFIER_AFTER)
-            if (projectConfig.debug) logger.debug(`Context step after end      ${separator()}  ${step.name}`)
-            if (projectConfig.debug) logger.debug(`Context step complete ------${separator('--')}> ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   after end      ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   complete ------${separator('--')}> ${step.name}`)
         }
         catch (e) {
-            if (projectConfig.debug) logger.debug(`Context step exited --------${separator('--')}> ${step.name}`)
+            if (projectConfig.debug) logger.debug(`executor  |   exited --------${separator('--')}> ${step.name}`)
             depth--
             throw e
         }

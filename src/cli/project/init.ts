@@ -5,13 +5,13 @@ import { projectConfig, updateConfig, setPluginDefinitions, getPluginDefinitions
 
 import { logger } from '../utilities/logger'
 import { resolvePath, requireValue } from '../utilities/cli'
-import { contextSteppes, createContext, ContextStep } from '../context'
+import { createContext, ExecuteStep, executor } from '../context'
 import * as annotations from '../../annotations'
 
 export const pluginInitParam: any = {
     logger,
     resolvePath, requireValue,
-    contextSteppes, createContext, ContextStep,
+    createContext, ExecuteStep, executor,
     annotations,
     projectConfig,
     getPluginDefinitions

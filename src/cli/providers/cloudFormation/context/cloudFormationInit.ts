@@ -1,10 +1,10 @@
 import { resolvePath } from '../../../utilities/cli'
 import { projectConfig } from '../../../project/config'
-import { ContextStep } from '../../../context'
+import { ExecuteStep } from '../../../context'
 
 import { merge } from 'lodash'
 
-export const cloudFormationInit = ContextStep.register('CloudFormationInit', async (context) => {
+export const cloudFormationInit = ExecuteStep.register('CloudFormationInit', async (context) => {
     context.CloudFormationConfig = merge({}, {
         StackName: projectConfig.name,
         OnFailure: "ROLLBACK",

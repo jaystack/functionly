@@ -12,17 +12,17 @@ import {
     updateLambdaFunctionConfiguration,
     updateLambdaFunctionTags
 } from '../utilities/aws/lambda'
-import { ContextStep } from '../context'
+import { ExecuteStep, executor } from '../context'
 import { projectConfig } from '../project/config'
 
 export const aws = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
-    createEnvironment: ContextStep.register('createEnvironment_aws', async (context) => {
-        await context.runStep(bundle)
-        await context.runStep(zip)
+    createEnvironment: ExecuteStep.register('CreateEnvironment_aws', async (context) => {
+        await executor(context, bundle)
+        await executor(context, zip)
         const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
-        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
-        await context.runStep(createTables)
+        await executor(context, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
+        await executor(context, createTables)
 
         for (let serviceDefinition of context.publishedFunctions) {
             const serviceName = getFunctionName(serviceDefinition.service)
@@ -30,13 +30,13 @@ export const aws = {
                 console.log(`${serviceName} deploying...`)
                 context.serviceDefinition = serviceDefinition
                 try {
-                    await context.runStep(getLambdaFunction)
-                    await context.runStep(updateLambdaFunctionCode)
-                    await context.runStep(updateLambdaFunctionConfiguration)
-                    await context.runStep(updateLambdaFunctionTags)
+                    await executor(context, getLambdaFunction)
+                    await executor(context, updateLambdaFunctionCode)
+                    await executor(context, updateLambdaFunctionConfiguration)
+                    await executor(context, updateLambdaFunctionTags)
                 } catch (e) {
                     if (e.code === "ResourceNotFoundException") {
-                        await context.runStep(createLambdaFunction)
+                        await executor(context, createLambdaFunction)
                     } else {
                         throw e
                     }

@@ -1,7 +1,7 @@
 import { environment } from '../../../annotations'
-import { ContextStep } from '../core/contextStep'
-export class SetFunctionalEnvironmentStep extends ContextStep {
-    public async execute(context) {
+import { ExecuteStep } from '../core/executeStep'
+export class SetFunctionalEnvironmentStep extends ExecuteStep {
+    public async method(context) {
         for (let serviceDefinition of context.publishedFunctions) {
             const setEnvAttrib = environment('FUNCTIONAL_ENVIRONMENT', context.FUNCTIONAL_ENVIRONMENT)
             setEnvAttrib(serviceDefinition.service)
@@ -9,4 +9,4 @@ export class SetFunctionalEnvironmentStep extends ContextStep {
     }
 }
 
-export const setFunctionalEnvironment = new SetFunctionalEnvironmentStep('setFunctionalEnvironment')
+export const setFunctionalEnvironment = new SetFunctionalEnvironmentStep('SetFunctionalEnvironment')

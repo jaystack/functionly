@@ -1,10 +1,10 @@
 import { createTables } from '../utilities/aws/dynamoDB'
 import { getMetadata, constants } from '../../annotations'
-import { ContextStep } from '../context'
+import { ExecuteStep, executor } from '../context'
 
 export const local = {
     FUNCTIONAL_ENVIRONMENT: 'local',
-    createEnvironment: ContextStep.register('createEnvironment_local', async (context) => {
-        await context.runStep(createTables)
+    createEnvironment: ExecuteStep.register('CreateEnvironment_local', async (context) => {
+        await executor(context, createTables)
     })
 }

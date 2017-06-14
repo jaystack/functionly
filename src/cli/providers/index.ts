@@ -1,13 +1,13 @@
 import { aws } from './aws'
 import { local } from './local'
 import { cloudFormation as cf } from './cloudFormation'
-import { contextSteppes, ContextStep } from '../context'
+import { ExecuteStep, executor } from '../context'
 import { getPluginDefinitions } from '../project/config'
 
 let environments = { aws, local, cf }
 
-export class CreateEnvironmentStep extends ContextStep {
-    public async execute(context) {
+export class CreateEnvironmentStep extends ExecuteStep {
+    public async method(context) {
         let currentEnvironment = environments[context.deployTarget]
 
         if (!currentEnvironment) {
@@ -30,11 +30,11 @@ export class CreateEnvironmentStep extends ContextStep {
 
         if (currentEnvironment.FUNCTIONAL_ENVIRONMENT) {
             context.FUNCTIONAL_ENVIRONMENT = currentEnvironment.FUNCTIONAL_ENVIRONMENT
-            await context.runStep(contextSteppes.setFunctionalEnvironment)
+            await executor(context, ExecuteStep.get('SetFunctionalEnvironment'))
         }
 
-        await context.runStep(currentEnvironment.createEnvironment)
+        await executor(context, currentEnvironment.createEnvironment)
     }
 }
 
-export const createEnvironment = new CreateEnvironmentStep('createEnvironment')
+export const createEnvironment = new CreateEnvironmentStep('CreateEnvironment')

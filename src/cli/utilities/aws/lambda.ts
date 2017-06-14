@@ -2,7 +2,7 @@ import { Lambda } from 'aws-sdk'
 import { merge, difference } from 'lodash'
 import { config } from '../../utilities/config'
 import { getMetadata, constants, getFunctionName } from '../../../annotations'
-import { ContextStep } from '../../context'
+import { ExecuteStep, executor } from '../../context'
 
 
 let lambda = null;
@@ -20,7 +20,7 @@ const initAWSSDK = (context) => {
 
 
 
-export const createLambdaFunction = ContextStep.register('createLambdaFunction', (context) => {
+export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -51,7 +51,7 @@ export const createLambdaFunction = ContextStep.register('createLambdaFunction',
     })
 })
 
-export const getLambdaFunction = ContextStep.register('getLambdaFunction', (context) => {
+export const getLambdaFunction = ExecuteStep.register('GetLambdaFunction', (context) => {
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
         let params = {
@@ -64,7 +64,7 @@ export const getLambdaFunction = ContextStep.register('getLambdaFunction', (cont
     })
 })
 
-export const deleteLambdaFunction = ContextStep.register('deleteLambdaFunction', (context) => {
+export const deleteLambdaFunction = ExecuteStep.register('DeleteLambdaFunction', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -77,7 +77,7 @@ export const deleteLambdaFunction = ContextStep.register('deleteLambdaFunction',
     })
 })
 
-export const publishLambdaFunction = ContextStep.register('publishLambdaFunction', (context) => {
+export const publishLambdaFunction = ExecuteStep.register('PublishLambdaFunction', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -90,7 +90,7 @@ export const publishLambdaFunction = ContextStep.register('publishLambdaFunction
     })
 })
 
-export const updateLambdaFunctionCode = ContextStep.register('updateLambdaFunctionCode', (context) => {
+export const updateLambdaFunctionCode = ExecuteStep.register('UpdateLambdaFunctionCode', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -106,7 +106,7 @@ export const updateLambdaFunctionCode = ContextStep.register('updateLambdaFuncti
     })
 })
 
-export const updateLambdaFunctionConfiguration = ContextStep.register('updateLambdaFunctionConfiguration', (context) => {
+export const updateLambdaFunctionConfiguration = ExecuteStep.register('UpdateLambdaFunctionConfiguration', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -130,9 +130,9 @@ export const updateLambdaFunctionConfiguration = ContextStep.register('updateLam
     })
 })
 
-export const updateLambdaFunctionTags = ContextStep.register('updateLambdaFunctionTags', async (context) => {
+export const updateLambdaFunctionTags = ExecuteStep.register('UpdateLambdaFunctionTags', async (context) => {
     initAWSSDK(context)
-    const getLambdaFunctionResult = await context.runStep(getLambdaFunction)
+    const getLambdaFunctionResult = await executor(context, getLambdaFunction)
     const Tags = getMetadata(constants.CLASS_TAGKEY, context.serviceDefinition.service) || {}
 
     const listTagParams = {

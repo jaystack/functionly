@@ -2,17 +2,13 @@ import { merge } from 'lodash'
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
-import { ContextStep, executor } from '../../../context'
+import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 export { apiGateway } from './apiGateway'
 
-export const roleResources = ContextStep.register('IAM-Role', async (context) => {
+export const roleResources = ExecuteStep.register('IAM-Role', async (context) => {
     const roleMap = new Map<string, any>()
-
-
     for (const serviceDefinition of context.publishedFunctions) {
-
-
         let role = getMetadata(CLASS_ROLEKEY, serviceDefinition.service)
         if (typeof role === 'string' && /^arn:/.test(role)) {
             continue
@@ -23,7 +19,6 @@ export const roleResources = ContextStep.register('IAM-Role', async (context) =>
         }
 
         if (!roleMap.has(role)) {
-
             const properties = {
                 "RoleName": role,
                 "AssumeRolePolicyDocument": {
@@ -85,14 +80,14 @@ export const roleResources = ContextStep.register('IAM-Role', async (context) =>
                 }]
             }
 
-            const tableResource = {
+            const iamRole = {
                 "Type": "AWS::IAM::Role",
                 "Properties": properties
             }
 
 
-            const roleResourceName = `iam_${properties.RoleName}`
-            const resourceName = setResource(context, roleResourceName, tableResource)
+            const roleResourceName = `IAM${properties.RoleName}`
+            const resourceName = setResource(context, roleResourceName, iamRole)
             roleMap.set(role, {
                 ref: {
                     "Fn::GetAtt": [
@@ -112,84 +107,106 @@ export const roleResources = ContextStep.register('IAM-Role', async (context) =>
         serviceDefinition[CLASS_ROLEKEY] = iam_role.ref
 
     }
-
 })
 
-export const tableResources = ContextStep.register('DynamoDB-Tables', async (context) => {
-
+export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (context) => {
     for (const tableConfig of context.tableConfigs) {
+        await executor({
+            context: { ...context, tableConfig },
+            name: `DynamoDB-Table-${tableConfig.tableName}`,
+            method: tableResource
+        })
+    }
+})
 
-        const properties = merge({}, {
-            TableName: tableConfig.tableName
-        }, tableConfig.nativeConfig, __dynamoDBDefaults);
+export const tableResource = async (context) => {
+    const { tableConfig } = context
+
+    const properties = merge({}, {
+        TableName: tableConfig.tableName
+    }, tableConfig.nativeConfig, __dynamoDBDefaults);
 
 
-        const tableResource = {
-            "Type": "AWS::DynamoDB::Table",
-            "Properties": properties
-        }
-
-
-        const resourceName = `dynamo_${properties.TableName}`
-        const name = setResource(context, resourceName, tableResource)
-
-        tableConfig.resourceName = name
+    const dynamoDb = {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": properties
     }
 
-})
 
-export const lambdaResources = ContextStep.register('Lambda-Functions', async (context) => {
+    const resourceName = `Dynamo${properties.TableName}`
+    const name = setResource(context, resourceName, dynamoDb)
+
+    tableConfig.resourceName = name
+
+}
+
+export const lambdaResources = ExecuteStep.register('Lambda-Functions', async (context) => {
     const awsBucket = context.__userAWSBucket ? context.awsBucket : {
         "Ref": "FunctionlyDeploymentBucket"
     }
 
-
     for (const serviceDefinition of context.publishedFunctions) {
-
-        const properties: any = {
-            Code: {
-                S3Bucket: awsBucket,
-                S3Key: context.S3Zip
-            },
-            Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
-            FunctionName: getFunctionName(serviceDefinition.service),
-            Handler: serviceDefinition.handler,
-            MemorySize: serviceDefinition[CLASS_MEMORYSIZEKEY] || getMetadata(CLASS_MEMORYSIZEKEY, serviceDefinition.service),
-            Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
-            Runtime: serviceDefinition[CLASS_RUNTIMEKEY] || getMetadata(CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
-            Timeout: serviceDefinition[CLASS_TIMEOUTKEY] || getMetadata(CLASS_TIMEOUTKEY, serviceDefinition.service),
-            Environment: {
-                Variables: serviceDefinition[CLASS_ENVIRONMENTKEY] || getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
-            },
-            Tags: serviceDefinition[CLASS_TAGKEY] || getMetadata(CLASS_TAGKEY, serviceDefinition.service)
-        };
-
-        const lambdaResource = {
-            "Type": "AWS::Lambda::Function",
-            "Properties": properties
-        }
-
-        const resourceName = `lambda_${properties.FunctionName}`
-        const name = setResource(context, resourceName, lambdaResource)
-        serviceDefinition.resourceName = name
-
-        const versionResource = {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-                "FunctionName": {
-                    "Ref": name
-                },
-                "CodeSha256": context.zipCodeSha256
-            }
-        }
-        setResource(context, `${name}${context.zipCodeSha256}`, versionResource)
-
+        await executor({
+            context: { ...context, serviceDefinition, awsBucket },
+            name: `Lambda-Function-${serviceDefinition.service.name}`,
+            method: lambdaResource
+        })
+        await executor({
+            context: { ...context, serviceDefinition },
+            name: `Lambda-Version-${serviceDefinition.service.name}`,
+            method: lambdaVersionResource
+        })
     }
-
 })
 
-export const s3BucketResources = ContextStep.register('S3-Bucket', async (context) => {
+export const lambdaResource = async (context) => {
+    const { serviceDefinition, awsBucket } = context
+
+    const properties: any = {
+        Code: {
+            S3Bucket: awsBucket,
+            S3Key: context.S3Zip
+        },
+        Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
+        FunctionName: getFunctionName(serviceDefinition.service),
+        Handler: serviceDefinition.handler,
+        MemorySize: serviceDefinition[CLASS_MEMORYSIZEKEY] || getMetadata(CLASS_MEMORYSIZEKEY, serviceDefinition.service),
+        Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
+        Runtime: serviceDefinition[CLASS_RUNTIMEKEY] || getMetadata(CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+        Timeout: serviceDefinition[CLASS_TIMEOUTKEY] || getMetadata(CLASS_TIMEOUTKEY, serviceDefinition.service),
+        Environment: {
+            Variables: serviceDefinition[CLASS_ENVIRONMENTKEY] || getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
+        },
+        Tags: serviceDefinition[CLASS_TAGKEY] || getMetadata(CLASS_TAGKEY, serviceDefinition.service)
+    };
+
+    const lambdaResource = {
+        "Type": "AWS::Lambda::Function",
+        "Properties": properties
+    }
+
+    const resourceName = `Lambda${properties.FunctionName}`
+    const name = setResource(context, resourceName, lambdaResource)
+    serviceDefinition.resourceName = name
+}
+
+export const lambdaVersionResource = async (context) => {
+    const { serviceDefinition } = context
+
+    const versionResource = {
+        "Type": "AWS::Lambda::Version",
+        "DeletionPolicy": "Retain",
+        "Properties": {
+            "FunctionName": {
+                "Ref": serviceDefinition.resourceName
+            },
+            "CodeSha256": context.zipCodeSha256
+        }
+    }
+    setResource(context, `${serviceDefinition.resourceName}${context.zipCodeSha256}`, versionResource)
+}
+
+export const s3BucketResources = ExecuteStep.register('S3-Bucket', async (context) => {
     if (context.awsBucket) {
         context.__userAWSBucket = true
     }
