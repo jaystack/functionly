@@ -15,6 +15,7 @@ module.exports = {
         },
         target: 'node'
     },
+    tempDirectory: path.join(process.cwd(), 'dist'),
     S3: {
         ACL: 'public-read'
     }

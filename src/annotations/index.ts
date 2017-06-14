@@ -14,7 +14,7 @@ export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
 export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
 
 
-export { param } from './parameters/param'
+export { param, event } from './parameters/param'
 export { inject } from './parameters/inject'
 
 import * as _constants from './constants'

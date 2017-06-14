@@ -10,8 +10,8 @@ export class LocalProvider extends Provider {
         const invoker = async (req, res, next) => {
             try {
                 const params = []
-                for (const parameter of parameters){
-                    params[parameter.parameterIndex] = await this.localParameterResolver(req, parameter)
+                for (const parameter of parameters) {
+                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { req, res, next })
                 }
 
                 const r = await serviceInstance.handle(...params)
@@ -24,14 +24,15 @@ export class LocalProvider extends Provider {
         return invoker
     }
 
-    protected async localParameterResolver(req, parameter) {
+    protected async parameterResolver(parameter, event) {
+        const req = event.req
         switch (parameter.type) {
             case 'param':
                 if (req.body && req.body[parameter.from]) return req.body[parameter.from]
                 if (req.query && req.query[parameter.from]) return req.query[parameter.from]
                 if (req.params && req.params[parameter.from]) return req.params[parameter.from]
             default:
-                return await super.parameterResolver(parameter)
+                return await super.parameterResolver(parameter, event)
         }
     }
 
@@ -43,10 +44,9 @@ export class LocalProvider extends Provider {
                 return reject(new Error('missing http configuration'))
             }
 
-            const normalizedPath = /^\//.test(httpAttr.path) ? httpAttr.path : `/${httpAttr.path}`
             const invokeParams: any = {
                 method: httpAttr.method || 'GET',
-                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${normalizedPath}`,
+                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
             };
 
             if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {

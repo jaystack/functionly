@@ -13,13 +13,15 @@ import {
     updateLambdaFunctionTags
 } from '../utilities/aws/lambda'
 import { ContextStep } from '../context'
+import { projectConfig } from '../project/config'
 
 export const aws = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
     createEnvironment: ContextStep.register('createEnvironment_aws', async (context) => {
         await context.runStep(bundle)
         await context.runStep(zip)
-        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData()))
+        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
         await context.runStep(createTables)
 
         for (let serviceDefinition of context.publishedFunctions) {

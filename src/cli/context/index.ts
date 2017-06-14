@@ -23,71 +23,81 @@ export const getDefaultSteppes = (): any[] => {
 }
 
 export const createContext = async (path, defaultValues) => {
-    const context = defaults(new Context(), {
+    const context = defaults({}, {
         serviceRoot: resolvePath(path),
-        date: new Date()
+        date: new Date(),
+        runStep: async function (step) { return await executor(this, step) }
     }, defaultValues)
 
     const defaultSteppes = getDefaultSteppes()
     for (const step of defaultSteppes) {
-        await context.runStep(step)
+        await executor(context, step)
     }
 
     return context
 }
 
 let depth = 0
-export class Context {
-    [p: string]: any
+// export class Context {
+//     [p: string]: any
 
-    public async runStep(step: Function | any) {
+//     public async runStep(step: Function | any) {
+//         return await runStep(this, step)
+//     }
+// }
 
-
-        let result = undefined
-        if (typeof step === 'function') {
-            result = await step(this)
-        } else if (step && step.name && typeof step.execute === 'function') {
-
-            const tab = depth++
-            const separator = (s = '  ') => {
-                let result = ''
-                for (var i = 0; i < tab; i++) {
-                    result += s
-                }
-                return result
-            }
-
-            try {
-
-                if (projectConfig.debug) logger.debug(`Context step run -----------${separator('--')}> ${step.name}`)
-                if (projectConfig.debug) logger.debug(`Context step before start   ${separator()}  ${step.name}`)
-                await cliCallContextHooks(step.name, this, CONTEXT_HOOK_MODIFIER_BEFORE)
-                if (projectConfig.debug) logger.debug(`Context step before end     ${separator()}  ${step.name}`)
-
-                if (projectConfig.debug) logger.debug(`Context step start          ${separator()}  ${step.name}`)
-                if (hasCliCallContextHooks(step.name, this)) {
-                    result = await cliCallContextHooks(step.name, this)
-                } else {
-                    result = await step.execute(this)
-                }
-                if (projectConfig.debug) logger.debug(`Context step end            ${separator()}  ${step.name}`)
-
-                if (projectConfig.debug) logger.debug(`Context step after start    ${separator()}  ${step.name}`)
-                await cliCallContextHooks(step.name, this, CONTEXT_HOOK_MODIFIER_AFTER)
-                if (projectConfig.debug) logger.debug(`Context step after end      ${separator()}  ${step.name}`)
-                if (projectConfig.debug) logger.debug(`Context step complete ------${separator('--')}> ${step.name}`)
-            }
-            catch (e) {
-                if (projectConfig.debug) logger.debug(`Context step exited --------${separator('--')}> ${step.name}`)
-                depth--
-                throw e
-            }
-            depth--
-        } else {
-            throw new Error(`context.runStep has invalid parameter '${step}'`)
-        }
-        return result
+export const executor = async (context, step?: Function | any) => {
+    if (!step) {
+        step = context;
+        context = context.context
     }
+
+    let result = undefined
+    if (typeof step === 'function') {
+        result = await step(context)
+    } else if (step && step.name && typeof (step.execute === 'function' || step.method === 'function')) {
+
+        const method = step.method || step.execute
+
+        const tab = depth++
+        const separator = (s = '  ') => {
+            let result = ''
+            for (var i = 0; i < tab; i++) {
+                result += s
+            }
+            return result
+        }
+
+        try {
+
+            if (projectConfig.debug) logger.debug(`Context step run -----------${separator('--')}> ${step.name}`)
+            if (projectConfig.debug) logger.debug(`Context step before start   ${separator()}  ${step.name}`)
+            await cliCallContextHooks(step.name, context, CONTEXT_HOOK_MODIFIER_BEFORE)
+            if (projectConfig.debug) logger.debug(`Context step before end     ${separator()}  ${step.name}`)
+
+            if (projectConfig.debug) logger.debug(`Context step start          ${separator()}  ${step.name}`)
+            if (hasCliCallContextHooks(step.name, context)) {
+                result = await cliCallContextHooks(step.name, context)
+            } else {
+                result = await method.call(step, context)
+            }
+            if (projectConfig.debug) logger.debug(`Context step end            ${separator()}  ${step.name}`)
+
+            if (projectConfig.debug) logger.debug(`Context step after start    ${separator()}  ${step.name}`)
+            await cliCallContextHooks(step.name, context, CONTEXT_HOOK_MODIFIER_AFTER)
+            if (projectConfig.debug) logger.debug(`Context step after end      ${separator()}  ${step.name}`)
+            if (projectConfig.debug) logger.debug(`Context step complete ------${separator('--')}> ${step.name}`)
+        }
+        catch (e) {
+            if (projectConfig.debug) logger.debug(`Context step exited --------${separator('--')}> ${step.name}`)
+            depth--
+            throw e
+        }
+        depth--
+    } else {
+        throw new Error(`runStep has invalid parameter '${step}'`)
+    }
+    return result
 }
 
 

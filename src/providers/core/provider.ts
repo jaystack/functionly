@@ -12,7 +12,7 @@ export abstract class Provider {
     }
 
 
-    protected async parameterResolver(parameter): Promise<any> {
+    protected async parameterResolver(parameter, event): Promise<any> {
         switch (parameter.type) {
             case 'inject':
                 const serviceType = parameter.serviceType
@@ -25,6 +25,8 @@ export abstract class Provider {
                 const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
                 await callExtension(instance, 'onInject', { parameter })
                 return instance
+            case 'event': 
+                return event;
             default:
                 return undefined
         }

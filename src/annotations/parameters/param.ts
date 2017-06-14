@@ -26,3 +26,16 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
         return decorator(target, targetKey, parameterIndex);
     }
 }
+
+export const event = (target, targetKey, parameterIndex: number) => {
+    let parameterNames = getFunctionParameters(target, targetKey);
+
+    let existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+    let paramName = parameterNames[parameterIndex];
+    existingParameters.push({
+        from: paramName,
+        parameterIndex,
+        type: 'event'
+    });
+    defineMetadata(PARAMETER_PARAMKEY, existingParameters, target, targetKey);
+}

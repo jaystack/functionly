@@ -4,9 +4,10 @@ import { logger } from '../../utilities/logger'
 import { zip } from '../../utilities/compress'
 import { uploadZipStep } from '../../utilities/aws/s3Upload'
 import { createStack, updateStack, getTemplate, getStackBucketName, describeStacks } from '../../utilities/aws/cloudFormation'
+import { projectConfig } from '../../project/config'
 
 import { cloudFormationInit } from './context/cloudFormationInit'
-import { tableResources, lambdaResources, roleResources, s3BucketResources } from './context/resources'
+import { tableResources, lambdaResources, roleResources, s3BucketResources, apiGateway } from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
 export const cloudFormation = {
@@ -36,11 +37,13 @@ export const cloudFormation = {
         }
 
         logger.info(`Functionly: Uploading binary...`)
-        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData()))
+        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await context.runStep(uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
 
         await context.runStep(roleResources)
         await context.runStep(tableResources)
         await context.runStep(lambdaResources)
+        await context.runStep(apiGateway)
 
         logger.info(`Functionly: Uploading template...`)
         await context.runStep(uploadTemplate)

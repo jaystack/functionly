@@ -24,7 +24,7 @@ const initAWSSDK = (context) => {
 
 
 
-export const createStack = ContextStep.register('createStack', (context) => {
+export const createStack = ContextStep.register('CF-CreateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, CREATE_STACK_PRPERTIES)
@@ -46,7 +46,7 @@ export const createStack = ContextStep.register('createStack', (context) => {
     })
 })
 
-export const updateStack = ContextStep.register('updateStack', (context) => {
+export const updateStack = ContextStep.register('CF-UpdateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, UPDATE_STACK_PRPERTIES)
@@ -69,7 +69,7 @@ export const updateStack = ContextStep.register('updateStack', (context) => {
     })
 })
 
-export const getTemplate = ContextStep.register('getTemplate', (context) => {
+export const getTemplate = ContextStep.register('CF-GetTemplate', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -84,7 +84,7 @@ export const getTemplate = ContextStep.register('getTemplate', (context) => {
 })
 
 
-export const getStackBucketName = ContextStep.register('getStackBucketName', (context) => {
+export const getStackBucketName = ContextStep.register('CF-GetStackBucketName', (context) => {
     if (context.awsBucket) return context.awsBucket
 
     initAWSSDK(context)
@@ -102,7 +102,7 @@ export const getStackBucketName = ContextStep.register('getStackBucketName', (co
     })
 })
 
-export const describeStacks = ContextStep.register('describeStacks', (context) => {
+export const describeStacks = ContextStep.register('CF-DescribeStacks', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {

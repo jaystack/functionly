@@ -119,15 +119,14 @@ export default (api) => {
 
     const funtionEvents = ({ serviceDefinition, serverless }) => {
         const functionName = getFunctionName(serviceDefinition.service)
-        let httpMetadata = getMetadata(CLASS_APIGATEWAYKEY, serviceDefinition.service)
-        const environments = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
+        let httpMetadata = getMetadata(CLASS_APIGATEWAYKEY, serviceDefinition.service) || []
         for (const { method, path, cors } of httpMetadata) {
-            const normalizedPath = /^\//.test(path) ? path.substring(1, path.length) : path
+            const resourcePath = /^\//.test(path) ? path.substring(1, path.length) : path
             const defs = serverless.functions[functionName].events = serverless.functions[functionName].events || []
             const def: any = {
                 http: {
                     method,
-                    path: normalizedPath
+                    path: resourcePath
                 }
             }
 

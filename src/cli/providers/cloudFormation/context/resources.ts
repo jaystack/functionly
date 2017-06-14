@@ -1,37 +1,12 @@
 import { merge } from 'lodash'
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
-    CLASS_ENVIRONMENTKEY, CLASS_TAGKEY } = constants
-import { ContextStep } from '../../../context'
+    CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
+import { ContextStep, executor } from '../../../context'
+import { setResource } from '../utils'
+export { apiGateway } from './apiGateway'
 
-export const nameReplaceRegexp = /[^a-zA-Z0-9]/g
-export const normalizeName = (name: string) => {
-    const result = name.replace(nameReplaceRegexp, '')
-    if (!result) {
-        throw new Error(`'invalid name '${name}'`)
-    }
-    return result
-}
-
-export const setResource = (context, name, resource) => {
-    if (!name) {
-        throw new Error(`invalid resource name '${name}'`)
-    }
-    name = normalizeName(name)
-    if (context.CloudFormationTemplate.Resources[name]) {
-        throw new Error(`resource name '${name}' already exists`)
-    }
-
-    context.usedAwsResources = context.usedAwsResources || [];
-    if (context.usedAwsResources.indexOf(resource.Type) < 0) {
-        context.usedAwsResources.push(resource.type)
-    }
-
-    context.CloudFormationTemplate.Resources[name] = resource
-    return name;
-}
-
-export const roleResources = ContextStep.register('roleResources', async (context) => {
+export const roleResources = ContextStep.register('IAM-Role', async (context) => {
     const roleMap = new Map<string, any>()
 
 
@@ -140,7 +115,7 @@ export const roleResources = ContextStep.register('roleResources', async (contex
 
 })
 
-export const tableResources = ContextStep.register('tableResources', async (context) => {
+export const tableResources = ContextStep.register('DynamoDB-Tables', async (context) => {
 
     for (const tableConfig of context.tableConfigs) {
 
@@ -156,12 +131,14 @@ export const tableResources = ContextStep.register('tableResources', async (cont
 
 
         const resourceName = `dynamo_${properties.TableName}`
-        setResource(context, resourceName, tableResource)
+        const name = setResource(context, resourceName, tableResource)
+
+        tableConfig.resourceName = name
     }
 
 })
 
-export const lambdaResources = ContextStep.register('lambdaResources', async (context) => {
+export const lambdaResources = ContextStep.register('Lambda-Functions', async (context) => {
     const awsBucket = context.__userAWSBucket ? context.awsBucket : {
         "Ref": "FunctionlyDeploymentBucket"
     }
@@ -194,7 +171,7 @@ export const lambdaResources = ContextStep.register('lambdaResources', async (co
 
         const resourceName = `lambda_${properties.FunctionName}`
         const name = setResource(context, resourceName, lambdaResource)
-
+        serviceDefinition.resourceName = name
 
         const versionResource = {
             "Type": "AWS::Lambda::Version",
@@ -212,7 +189,7 @@ export const lambdaResources = ContextStep.register('lambdaResources', async (co
 
 })
 
-export const s3BucketResources = ContextStep.register('s3BucketResources', async (context) => {
+export const s3BucketResources = ContextStep.register('S3-Bucket', async (context) => {
     if (context.awsBucket) {
         context.__userAWSBucket = true
     }

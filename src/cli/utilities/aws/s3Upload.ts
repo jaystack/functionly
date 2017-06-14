@@ -3,6 +3,9 @@ import { merge } from 'lodash'
 import { config } from '../config'
 import { ContextStep } from '../../context'
 
+import { writeFileSync } from 'fs'
+import { join, normalize } from 'path'
+
 let s3 = null;
 const initAWSSDK = (context) => {
     if (!s3) {
@@ -16,21 +19,22 @@ const initAWSSDK = (context) => {
     return s3
 }
 
-export const uploadZipStep = (name, data) => {
+export const uploadZipStep = (name, data, localName?) => {
     return async (context) => {
-        const step = uploaderStep(name, data, 'application/zip')
+        const step = uploaderStep(name, data, 'application/zip', localName)
         const uploadResult = await context.runStep(step)
         context.S3Zip = uploadResult.Key
         return uploadResult
     }
 }
 
-export const uploaderStep = (name, data, contentType) => {
+export const uploaderStep = (name, data, contentType, localName?) => {
     return async (context) => {
         context.upload = {
             name,
             data,
-            contentType
+            contentType,
+            localName
         }
         const uploadResult = await context.runStep(uploadToAws)
         delete context.upload
@@ -42,15 +46,21 @@ export const uploadToAws = ContextStep.register('uploadToAws', async (context) =
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
         const version = context.version ? `${context.version}/` : ''
+        const binary = new Buffer(context.upload.data, 'binary')
         let params = merge({}, config.S3, {
             Bucket: context.awsBucket,
-            Body: new Buffer(context.upload.data, 'binary'),
+            Body: binary,
             Key: `functionly/${version}${context.upload.name}`,
             ContentType: context.upload.contentType
         })
 
         s3.putObject(params, (err, res) => {
             if (err) return reject(err)
+
+            if (config.tempDirectory && context.upload.localName) {
+                writeFileSync(join(config.tempDirectory, context.upload.localName), binary)
+            }
+
             return resolve(params)
         })
     })

@@ -17,7 +17,7 @@ export class ContextStep {
 
     public static register(name, execute) {
         if (contextSteppes[name]) {
-            throw new Error(`step name '${this.name}' already defined`)
+            throw new Error(`step name '${name}' already defined`)
         }
 
         const step = {
