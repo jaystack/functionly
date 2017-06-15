@@ -1,5 +1,3 @@
-import { merge } from 'lodash'
-
 import { CLASS_DYNAMOTABLECONFIGURATIONKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
 import { applyTemplates, environment } from './environment'
@@ -33,14 +31,15 @@ export const dynamoTable = (tableConfig: {
     let tableDefinitions = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, target) || [];
 
     tableConfig.environmentKey = tableConfig.environmentKey || '%ClassName%_TABLE_NAME'
-    tableConfig.nativeConfig = merge({}, __dynamoDBDefaults, tableConfig.nativeConfig)
+    tableConfig.nativeConfig = { ...__dynamoDBDefaults, ...tableConfig.nativeConfig }
 
     const { templatedKey, templatedValue } = applyTemplates(tableConfig.environmentKey, tableConfig.tableName, target)
-    tableDefinitions.push(merge({}, tableConfig, {
+    tableDefinitions.push({
+        ...tableConfig,
         environmentKey: templatedKey,
         tableName: templatedValue,
         definedBy: target.name
-    }))
+    })
 
     defineMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, [...tableDefinitions], target)
 

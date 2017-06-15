@@ -1,6 +1,5 @@
 import { writeFileSync } from 'fs'
 import { extname } from 'path'
-import { merge } from 'lodash'
 import { stringify } from 'yamljs'
 
 export const FUNCTIONAL_ENVIRONMENT = 'aws'
@@ -63,7 +62,7 @@ export default (api) => {
             }
 
             for (const tableConfig of context.tableConfigs) {
-                const properties = merge({}, { TableName: tableConfig.tableName }, tableConfig.nativeConfig)
+                const properties = { TableName: tableConfig.tableName, ...tableConfig.nativeConfig }
                 dynamoStatement.Resource.push("arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/" + properties.TableName)
             }
 
@@ -156,9 +155,11 @@ export default (api) => {
     }
 
     const tableConfig = async ({ tableConfig, serverless }) => {
-        const properties = merge({}, {
-            TableName: tableConfig.tableName
-        }, tableConfig.nativeConfig, __dynamoDBDefaults);
+        const properties = {
+            ...__dynamoDBDefaults,
+            TableName: tableConfig.tableName,
+            ...tableConfig.nativeConfig
+        }
 
 
         const tableResource = {

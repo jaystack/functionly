@@ -1,4 +1,3 @@
-import { merge } from 'lodash'
 import * as webpack from 'webpack'
 import { config } from './config'
 import { basename, extname, join } from 'path'
@@ -46,14 +45,15 @@ export const bundleConfig = ExecuteStep.register('WebpackBundleConfig', (context
         entry[nameKey] = file
     })
 
-    const webpackConfig = merge({}, config.webpack, {
+    const webpackConfig = {
+        ...config.webpack,
         entry: entry,
         externals: [
             {
                 'aws-sdk': 'commonjs aws-sdk'
             }
         ]
-    })
+    }
 
     return webpackConfig
 })

@@ -1,4 +1,3 @@
-import { get } from 'lodash'
 import { constants, getOwnMetadata } from '../annotations'
 import { callExtension } from '../classes'
 

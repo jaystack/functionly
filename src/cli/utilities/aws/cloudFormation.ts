@@ -1,5 +1,5 @@
 import { CloudFormation } from 'aws-sdk'
-import { merge, pick } from 'lodash'
+import { pick } from 'lodash'
 import { config } from '../../utilities/config'
 import { ExecuteStep } from '../../context'
 
@@ -12,7 +12,7 @@ export const CREATE_STACK_PRPERTIES = ['StackName', 'Capabilities', 'ClientReque
 let cloudFormation = null;
 const initAWSSDK = (context) => {
     if (!cloudFormation) {
-        let awsConfig = merge({}, config.aws.CloudFormation)
+        let awsConfig = { ...config.aws.CloudFormation }
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -24,13 +24,14 @@ const initAWSSDK = (context) => {
 
 
 
-export const createStack = ExecuteStep.register('CF-CreateStack', (context) => {
+export const createStack = ExecuteStep.register('CloudFormation-CreateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, CREATE_STACK_PRPERTIES)
-        const params = merge({}, cfConfig, {
+        const params = {
+            ...cfConfig,
             TemplateBody: JSON.stringify(context.CloudFormationTemplate, null, 2)
-        })
+        }
 
         cloudFormation.createStack(params, async (err, data) => {
             if (err) return reject(err)
@@ -46,14 +47,15 @@ export const createStack = ExecuteStep.register('CF-CreateStack', (context) => {
     })
 })
 
-export const updateStack = ExecuteStep.register('CF-UpdateStack', (context) => {
+export const updateStack = ExecuteStep.register('CloudFormation-UpdateStack', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         const cfConfig: any = pick(context.CloudFormationConfig, UPDATE_STACK_PRPERTIES)
-        const params = merge({}, cfConfig, {
+        const params = {
+            ...cfConfig,
             TemplateURL: `https://s3.eu-central-1.amazonaws.com/${context.awsBucket}/${context.S3CloudFormationTemplate}`,
             UsePreviousTemplate: false
-        })
+        }
 
         cloudFormation.updateStack(params, async (err, data) => {
             if (err) return reject(err)
@@ -69,7 +71,7 @@ export const updateStack = ExecuteStep.register('CF-UpdateStack', (context) => {
     })
 })
 
-export const getTemplate = ExecuteStep.register('CF-GetTemplate', (context) => {
+export const getTemplate = ExecuteStep.register('CloudFormation-GetTemplate', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -84,7 +86,7 @@ export const getTemplate = ExecuteStep.register('CF-GetTemplate', (context) => {
 })
 
 
-export const getStackBucketName = ExecuteStep.register('CF-GetStackBucketName', (context) => {
+export const getStackBucketName = ExecuteStep.register('CloudFormation-GetStackBucketName', (context) => {
     if (context.awsBucket) return context.awsBucket
 
     initAWSSDK(context)
@@ -102,7 +104,7 @@ export const getStackBucketName = ExecuteStep.register('CF-GetStackBucketName', 
     })
 })
 
-export const describeStacks = ExecuteStep.register('CF-DescribeStacks', (context) => {
+export const describeStacks = ExecuteStep.register('CloudFormation-DescribeStacks', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {

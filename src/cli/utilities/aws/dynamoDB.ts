@@ -1,5 +1,4 @@
 import { DynamoDB } from 'aws-sdk'
-import { merge } from 'lodash'
 import { config } from '../config'
 import { __dynamoDBDefaults } from '../../../annotations'
 import { ExecuteStep, executor } from '../../context'
@@ -7,7 +6,7 @@ import { ExecuteStep, executor } from '../../context'
 let dynamoDB = null;
 const initAWSSDK = (context) => {
     if (!dynamoDB) {
-        let awsConfig = merge({}, config.aws.DynamoDB)
+        let awsConfig = { ...config.aws.DynamoDB }
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -46,9 +45,11 @@ export const createTable = (context) => {
     const { tableConfig } = context
     return new Promise<any>((resolve, reject) => {
 
-        let params = merge({}, {
-            TableName: tableConfig.tableName
-        }, tableConfig.nativeConfig, __dynamoDBDefaults);
+        let params = {
+            ...__dynamoDBDefaults,
+            TableName: tableConfig.tableName,
+            ...tableConfig.nativeConfig
+        };
 
         dynamoDB.createTable(params, function (err, data) {
             if (err) reject(err)

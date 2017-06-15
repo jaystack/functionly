@@ -1,5 +1,4 @@
 import * as AWS from 'aws-sdk'
-import { merge } from 'lodash'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
 import { Service } from '../service'
@@ -109,6 +108,6 @@ export class DynamoDB extends Service {
             TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName
         }
 
-        return merge({}, initParams, params)
+        return { ...initParams, ...params }
     }
 }

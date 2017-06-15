@@ -1,4 +1,4 @@
-import { merge, intersection } from 'lodash'
+import { intersection } from 'lodash'
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
@@ -209,9 +209,11 @@ export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (con
 export const tableResource = async (context) => {
     const { tableConfig } = context
 
-    const properties = merge({}, {
-        TableName: tableConfig.tableName
-    }, tableConfig.nativeConfig, __dynamoDBDefaults);
+    const properties = {
+        ...__dynamoDBDefaults,
+        TableName: tableConfig.tableName,
+        ...tableConfig.nativeConfig
+    };
 
     tableConfig.tableName = properties.TableName
 

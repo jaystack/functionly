@@ -6,7 +6,6 @@ import './steppes/setFunctionalEnvironment'
 
 import { resolvePath } from '../utilities/cli'
 import { logger } from '../utilities/logger'
-import { defaults } from 'lodash'
 
 import { projectConfig } from '../project/config'
 import {
@@ -23,11 +22,12 @@ export const getDefaultSteppes = (): any[] => {
 }
 
 export const createContext = async (path, defaultValues) => {
-    const context = defaults({}, {
+    const context = {
+        ...defaultValues,
         serviceRoot: resolvePath(path),
         date: new Date(),
         runStep: async function (step) { return await executor(this, step) }
-    }, defaultValues)
+    }
 
     const defaultSteppes = getDefaultSteppes()
     for (const step of defaultSteppes) {

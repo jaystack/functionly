@@ -1,5 +1,4 @@
 import { S3 } from 'aws-sdk'
-import { merge } from 'lodash'
 import { config } from '../config'
 import { ExecuteStep, executor } from '../../context'
 
@@ -9,7 +8,7 @@ import { join, normalize } from 'path'
 let s3 = null;
 const initAWSSDK = (context) => {
     if (!s3) {
-        let awsConfig = merge({}, config.aws.S3)
+        let awsConfig = { ...config.aws.S3 }
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -47,12 +46,13 @@ export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => 
     return new Promise<any>((resolve, reject) => {
         const version = context.version ? `${context.version}/` : ''
         const binary = new Buffer(context.upload.data, 'binary')
-        let params = merge({}, config.S3, {
+        let params = {
+            ...config.S3,
             Bucket: context.awsBucket,
             Body: binary,
             Key: `functionly/${version}${context.upload.name}`,
             ContentType: context.upload.contentType
-        })
+        }
 
         if (context.skipUpload) {
             if (config.tempDirectory && context.upload.localName) {

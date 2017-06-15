@@ -1,5 +1,5 @@
 import { Lambda } from 'aws-sdk'
-import { merge, difference } from 'lodash'
+import { difference } from 'lodash'
 import { config } from '../../utilities/config'
 import { getMetadata, constants, getFunctionName } from '../../../annotations'
 import { ExecuteStep, executor } from '../../context'
@@ -8,7 +8,7 @@ import { ExecuteStep, executor } from '../../context'
 let lambda = null;
 const initAWSSDK = (context) => {
     if (!lambda) {
-        let awsConfig = merge({}, config.aws.Lambda)
+        let awsConfig = { ...config.aws.Lambda }
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }

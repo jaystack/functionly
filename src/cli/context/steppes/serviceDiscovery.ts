@@ -3,7 +3,6 @@ import { FunctionalService } from '../../../classes/functionalService'
 import { ExecuteStep } from '../core/executeStep'
 
 import { join, basename, extname } from 'path'
-import { set } from 'lodash'
 
 export class ServiceDiscoveryStep extends ExecuteStep {
     public async method(context) {
