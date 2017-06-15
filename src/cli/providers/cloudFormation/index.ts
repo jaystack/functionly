@@ -41,8 +41,8 @@ export const cloudFormation = {
         const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
         await executor(context, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
 
-        await executor(context, roleResources)
         await executor(context, tableResources)
+        await executor(context, roleResources)
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
 
@@ -50,6 +50,27 @@ export const cloudFormation = {
         await executor(context, uploadTemplate)
         logger.info(`Functionly: Updating stack...`)
         await executor(context, updateStack)
+        logger.info(`Functionly: Complete`)
+    },
+    package: async (context) => {
+        logger.info(`Functionly: Packgaging...`)
+        await executor(context, bundle)
+        await executor(context, zip)
+
+        await executor(context, cloudFormationInit)
+        await executor(context, s3BucketResources)
+
+        logger.info(`Functionly: Save binary...`)
+        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await executor({ ...context, skipUpload: true }, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
+
+        await executor(context, tableResources)
+        await executor(context, roleResources)
+        await executor(context, lambdaResources)
+        await executor(context, apiGateway)
+
+        logger.info(`Functionly: Save template...`)
+        await executor({ ...context, skipUpload: true }, uploadTemplate)
         logger.info(`Functionly: Complete`)
     }
 }

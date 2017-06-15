@@ -1,4 +1,4 @@
-import { merge } from 'lodash'
+import { merge, intersection } from 'lodash'
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
@@ -7,107 +7,194 @@ import { setResource } from '../utils'
 export { apiGateway } from './apiGateway'
 
 export const roleResources = ExecuteStep.register('IAM-Role', async (context) => {
-    const roleMap = new Map<string, any>()
+    const roleMap = new Map<string, any[]>()
     for (const serviceDefinition of context.publishedFunctions) {
         let role = getMetadata(CLASS_ROLEKEY, serviceDefinition.service)
         if (typeof role === 'string' && /^arn:/.test(role)) {
             continue
         }
-
         if (!role) {
             role = context.CloudFormationConfig.StackName
         }
-
         if (!roleMap.has(role)) {
-            const properties = {
-                "RoleName": role,
-                "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [{
-                        "Effect": "Allow",
-                        "Principal": {
-                            "Service": ["lambda.amazonaws.com"]
-                        },
-                        "Action": ["sts:AssumeRole"]
-                    }]
-                },
-                "Path": "/",
-                "Policies": [{
-                    "PolicyName": {
-                        "Fn::Join": [
-                            "-",
-                            [
-                                "functionly",
-                                role,
-                                "lambda"
-                            ]
-                        ]
-                    },
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "logs:CreateLogGroup",
-                                    "logs:CreateLogStream",
-                                    "logs:PutLogEvents"
-                                ],
-                                "Resource": ["*"]
-                            }, {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "lambda:InvokeAsync",
-                                    "lambda:InvokeFunction"
-                                ],
-                                "Resource": ["*"]
-                            }, {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "dynamodb:Query",
-                                    "dynamodb:Scan",
-                                    "dynamodb:GetItem",
-                                    "dynamodb:PutItem",
-                                    "dynamodb:UpdateItem"
-                                ],
-                                "Resource": [
-                                    {
-                                        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*"
-                                    }
-                                ]
-                            }]
-                    }
-                }]
-            }
-
-            const iamRole = {
-                "Type": "AWS::IAM::Role",
-                "Properties": properties
-            }
-
-
-            const roleResourceName = `IAM${properties.RoleName}`
-            const resourceName = setResource(context, roleResourceName, iamRole)
-            roleMap.set(role, {
-                ref: {
-                    "Fn::GetAtt": [
-                        resourceName,
-                        "Arn"
-                    ]
-                },
-                resourceName
-            })
-
-            context.CloudFormationConfig.Capabilities = context.CloudFormationConfig.Capabilities || [
-                "CAPABILITY_NAMED_IAM"
-            ]
+            roleMap.set(role, [serviceDefinition])
         }
 
-        const iam_role = roleMap.get(role)
-        serviceDefinition[CLASS_ROLEKEY] = iam_role.ref
+        const roleDef = roleMap.get(role)
+        roleDef.push(serviceDefinition)
+    }
 
+    for (const [roleName, serviceDefinitions] of roleMap) {
+        await executor({
+            context: { ...context, roleName, serviceDefinitions },
+            name: `IAM-Role-${roleName}`,
+            method: roleResource
+        })
     }
 })
+
+export const roleResource = async (context) => {
+
+    const { roleName, serviceDefinitions } = context
+
+    const roleProperties = {
+        "RoleName": roleName,
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": ["lambda.amazonaws.com"]
+                },
+                "Action": ["sts:AssumeRole"]
+            }]
+        },
+        "Path": "/",
+        "Policies": []
+    }
+
+    await executor({
+        context: { ...context, roleName, serviceDefinitions, roleProperties },
+        name: `IAM-Lambda-Policy-${roleName}`,
+        method: lambdaPolicy
+    })
+
+    await executor({
+        context: { ...context, roleName, serviceDefinitions, roleProperties },
+        name: `IAM-Log-Policy-${roleName}`,
+        method: logPolicy
+    })
+
+    await executor({
+        context: { ...context, roleName, serviceDefinitions, roleProperties },
+        name: `IAM-Dynamo-Policy-${roleName}`,
+        method: dynamoPolicy
+    })
+
+    if (roleProperties.Policies.length) {
+        const iamRole = {
+            "Type": "AWS::IAM::Role",
+            "Properties": roleProperties
+        }
+
+
+        const roleResourceName = `IAM${roleProperties.RoleName}`
+        const resourceName = setResource(context, roleResourceName, iamRole)
+
+        context.CloudFormationConfig.Capabilities = context.CloudFormationConfig.Capabilities || [
+            "CAPABILITY_NAMED_IAM"
+        ]
+
+        for (const serviceDefinition of serviceDefinitions) {
+            serviceDefinition[CLASS_ROLEKEY] = {
+                "Fn::GetAtt": [
+                    resourceName,
+                    "Arn"
+                ]
+            }
+        }
+    }
+}
+
+export const lambdaPolicy = async (context) => {
+    const { roleName, roleProperties } = context
+    const policy = {
+        "PolicyName": {
+            "Fn::Join": [
+                "-",
+                [
+                    "functionly",
+                    roleName,
+                    "lambda"
+                ]
+            ]
+        },
+        "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": [
+                    "lambda:InvokeAsync",
+                    "lambda:InvokeFunction"
+                ],
+                "Resource": ["*"]
+            }]
+        }
+    }
+    roleProperties.Policies.push(policy)
+}
+
+export const logPolicy = async (context) => {
+    const { roleName, roleProperties } = context
+    const policy = {
+        "PolicyName": {
+            "Fn::Join": [
+                "-",
+                [
+                    "functionly",
+                    roleName,
+                    "logs"
+                ]
+            ]
+        },
+        "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Resource": ["*"]
+            }]
+        }
+    }
+    roleProperties.Policies.push(policy)
+}
+
+export const dynamoPolicy = async (context) => {
+    const { roleName, serviceDefinitions, roleProperties } = context
+    const tables = []
+    const services = serviceDefinitions.map(s => s.service)
+    const usedTableConfigs = context.tableConfigs.filter(t => intersection(t.usedBy, services).length)
+
+    const policy = {
+        "PolicyName": {
+            "Fn::Join": [
+                "-",
+                [
+                    "functionly",
+                    roleName,
+                    "dynamo"
+                ]
+            ]
+        },
+        "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem"
+                ],
+                "Resource": usedTableConfigs.map(t => {
+                    return {
+                        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.tableName
+                    }
+                })
+            }]
+        }
+    }
+
+    if (usedTableConfigs.length) {
+        roleProperties.Policies.push(policy)
+    }
+}
+
 
 export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (context) => {
     for (const tableConfig of context.tableConfigs) {
@@ -126,12 +213,12 @@ export const tableResource = async (context) => {
         TableName: tableConfig.tableName
     }, tableConfig.nativeConfig, __dynamoDBDefaults);
 
+    tableConfig.tableName = properties.TableName
 
     const dynamoDb = {
         "Type": "AWS::DynamoDB::Table",
         "Properties": properties
     }
-
 
     const resourceName = `Dynamo${properties.TableName}`
     const name = setResource(context, resourceName, dynamoDb)

@@ -54,6 +54,13 @@ export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => 
             ContentType: context.upload.contentType
         })
 
+        if (context.skipUpload) {
+            if (config.tempDirectory && context.upload.localName) {
+                writeFileSync(join(config.tempDirectory, context.upload.localName), binary)
+            }
+            return resolve(params)
+        }
+
         s3.putObject(params, (err, res) => {
             if (err) return reject(err)
 

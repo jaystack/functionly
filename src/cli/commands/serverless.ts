@@ -63,7 +63,6 @@ export default (api) => {
             }
 
             for (const tableConfig of context.tableConfigs) {
-                console.log(tableConfig)
                 const properties = merge({}, { TableName: tableConfig.tableName }, tableConfig.nativeConfig)
                 dynamoStatement.Resource.push("arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/" + properties.TableName)
             }

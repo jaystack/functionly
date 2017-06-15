@@ -33,7 +33,15 @@ export class CreateEnvironmentStep extends ExecuteStep {
             await executor(context, ExecuteStep.get('SetFunctionalEnvironment'))
         }
 
-        await executor(context, currentEnvironment.createEnvironment)
+        if (context.packageOnly) {
+            if (currentEnvironment.package) {
+                await executor(context, currentEnvironment.package)
+            } else {
+                throw new Error('package creation not implemented')
+            }
+        } else {
+            await executor(context, currentEnvironment.createEnvironment)
+        }
     }
 }
 
