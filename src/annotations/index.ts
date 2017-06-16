@@ -1,11 +1,13 @@
+export { templates, applyTemplates } from './templates'
 export { injectable } from './classes/injectable'
 export { apiGateway } from './classes/apiGateway'
-export { environment, environmentTemplates } from './classes/environment'
+export { environment } from './classes/environment'
 export { tag } from './classes/tag'
 export { log } from './classes/log'
 export { runtime } from './classes/runtime'
 export { functionName, getFunctionName } from './classes/functionName'
 export { dynamoTable, __dynamoDBDefaults } from './classes/dynamoTable'
+export { sns } from './classes/sns'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 

@@ -8,7 +8,7 @@ import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
 import { cloudFormationInit } from './context/cloudFormationInit'
-import { tableResources, lambdaResources, roleResources, s3BucketResources, apiGateway } from './context/resources'
+import { tableResources, lambdaResources, roleResources, s3BucketResources, apiGateway, sns } from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
 export const cloudFormation = {
@@ -45,6 +45,7 @@ export const cloudFormation = {
         await executor(context, roleResources)
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
+        await executor(context, sns)
 
         logger.info(`Functionly: Uploading template...`)
         await executor(context, uploadTemplate)
@@ -68,6 +69,7 @@ export const cloudFormation = {
         await executor(context, roleResources)
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
+        await executor(context, sns)
 
         logger.info(`Functionly: Save template...`)
         await executor({ ...context, skipUpload: true }, uploadTemplate)

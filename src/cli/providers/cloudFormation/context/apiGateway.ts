@@ -148,7 +148,11 @@ export const apiGatewayMethod = async (context) => {
     const resourceName = `ApiGateway${pathFragment}${method}`
     const name = setResource(context, resourceName, methodConfig)
 
-    setGatewayPermissions({ serviceDefinition, context })
+    await executor({
+        context,
+        name: `ApiGateway-Method-Permission-${pathFragment}`,
+        method: setGatewayPermissions
+    })
 }
 
 export const apiGatewayPathPart = async (context) => {
@@ -265,7 +269,8 @@ export const setOptionsMethodResource = (context) => {
     setResource(context, resourceName, methodConfig)
 }
 
-export const setGatewayPermissions = ({ serviceDefinition, context }) => {
+export const setGatewayPermissions = (context) => {
+    const { serviceDefinition } = context
     const properties = {
         "FunctionName": {
             "Fn::GetAtt": [

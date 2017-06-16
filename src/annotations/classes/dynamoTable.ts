@@ -1,6 +1,7 @@
 import { CLASS_DYNAMOTABLECONFIGURATIONKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
-import { applyTemplates, environment } from './environment'
+import { applyTemplates } from '../templates'
+import { environment } from './environment'
 
 export const __dynamoDBDefaults = {
     AttributeDefinitions: [

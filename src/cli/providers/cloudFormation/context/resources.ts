@@ -5,6 +5,7 @@ const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEK
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 export { apiGateway } from './apiGateway'
+export { sns } from './sns'
 
 export const roleResources = ExecuteStep.register('IAM-Role', async (context) => {
     const roleMap = new Map<string, any[]>()

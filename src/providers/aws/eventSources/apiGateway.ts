@@ -18,6 +18,7 @@ export class ApiGateway extends EventSource {
                 if (query && query[parameter.from]) return query[parameter.from]
                 if (params && params[parameter.from]) return params[parameter.from]
                 if (headers && headers[parameter.from]) return headers[parameter.from]
+                break
             default:
                 return await super.parameterResolver(parameter, event)
         }
