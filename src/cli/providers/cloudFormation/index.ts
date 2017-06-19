@@ -8,7 +8,10 @@ import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
 import { cloudFormationInit } from './context/cloudFormationInit'
-import { tableResources, lambdaResources, roleResources, s3BucketResources, apiGateway, sns } from './context/resources'
+import {
+    tableResources, lambdaResources, roleResources, s3BucketResources, s3BucketParameter,
+    apiGateway, sns, initStacks
+} from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
 export const cloudFormation = {
@@ -38,8 +41,11 @@ export const cloudFormation = {
         }
 
         logger.info(`Functionly: Uploading binary...`)
-        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
-        await executor(context, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
+        const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await executor(context, uploadZipStep(fileName, context.zipData()))
+
+        await executor(context, initStacks)
+        await executor(context, s3BucketParameter)
 
         await executor(context, tableResources)
         await executor(context, roleResources)
@@ -62,8 +68,11 @@ export const cloudFormation = {
         await executor(context, s3BucketResources)
 
         logger.info(`Functionly: Save binary...`)
-        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
-        await executor({ ...context, skipUpload: true }, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
+        const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await executor({ ...context, skipUpload: true }, uploadZipStep(fileName, context.zipData()))
+
+        await executor(context, initStacks)
+        await executor(context, s3BucketParameter)
 
         await executor(context, tableResources)
         await executor(context, roleResources)

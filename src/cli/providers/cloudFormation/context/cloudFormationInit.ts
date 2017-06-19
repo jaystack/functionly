@@ -15,4 +15,5 @@ export const cloudFormationInit = ExecuteStep.register('CloudFormationInit', asy
         "Resources": {},
         "Outputs": {}
     }
+    context.CloudFormationStacks = {}
 })

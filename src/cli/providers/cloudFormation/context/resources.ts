@@ -4,8 +4,24 @@ const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEK
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
+import { createStack, setStackParameter, getStackName } from './stack'
+
 export { apiGateway } from './apiGateway'
 export { sns } from './sns'
+
+export const DYNAMODB_TABLE_STACK = 'DynamoDBTableStack'
+
+
+export const initStacks = ExecuteStep.register('CloudFormation-Stack-init', async (context) => {
+    for (const serviceDefinition of context.publishedFunctions) {
+        const stackName = getStackName(serviceDefinition)
+        await executor({
+            context: { ...context, stackName },
+            name: `CloudFormation-Stack-init-${stackName}`,
+            method: createStack
+        })
+    }
+})
 
 export const roleResources = ExecuteStep.register('IAM-Role', async (context) => {
     const roleMap = new Map<string, any[]>()
@@ -82,16 +98,19 @@ export const roleResource = async (context) => {
         const roleResourceName = `IAM${roleProperties.RoleName}`
         const resourceName = setResource(context, roleResourceName, iamRole)
 
+        await setStackParameter({
+            ...context,
+            resourceName,
+            attr: 'Arn'
+        })
+
         context.CloudFormationConfig.Capabilities = context.CloudFormationConfig.Capabilities || [
             "CAPABILITY_NAMED_IAM"
         ]
 
         for (const serviceDefinition of serviceDefinitions) {
             serviceDefinition[CLASS_ROLEKEY] = {
-                "Fn::GetAtt": [
-                    resourceName,
-                    "Arn"
-                ]
+                "Ref": `${resourceName}Arn`
             }
         }
     }
@@ -198,6 +217,12 @@ export const dynamoPolicy = async (context) => {
 
 
 export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (context) => {
+    await executor({
+        context: { ...context, stackName: DYNAMODB_TABLE_STACK },
+        name: `CloudFormation-Stack-init-${DYNAMODB_TABLE_STACK}`,
+        method: createStack
+    })
+
     for (const tableConfig of context.tableConfigs) {
         await executor({
             context: { ...context, tableConfig },
@@ -223,10 +248,16 @@ export const tableResource = async (context) => {
         "Properties": properties
     }
 
-    const resourceName = `Dynamo${properties.TableName}`
-    const name = setResource(context, resourceName, dynamoDb)
+    const tableResourceName = `Dynamo${properties.TableName}`
+    const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK)
 
-    tableConfig.resourceName = name
+    await setStackParameter({
+        ...context,
+        resourceName,
+        sourceStackName: DYNAMODB_TABLE_STACK
+    })
+
+    tableConfig.resourceName = resourceName
 
 }
 
@@ -276,7 +307,7 @@ export const lambdaResource = async (context) => {
     }
 
     const resourceName = `Lambda${properties.FunctionName}`
-    const name = setResource(context, resourceName, lambdaResource)
+    const name = setResource(context, resourceName, lambdaResource, getStackName(serviceDefinition))
     serviceDefinition.resourceName = name
 }
 
@@ -293,7 +324,7 @@ export const lambdaVersionResource = async (context) => {
             "CodeSha256": context.zipCodeSha256
         }
     }
-    setResource(context, `${serviceDefinition.resourceName}${context.zipCodeSha256}`, versionResource)
+    setResource(context, `${serviceDefinition.resourceName}${context.zipCodeSha256}`, versionResource, getStackName(serviceDefinition))
 }
 
 export const s3BucketResources = ExecuteStep.register('S3-Bucket', async (context) => {
@@ -305,13 +336,21 @@ export const s3BucketResources = ExecuteStep.register('S3-Bucket', async (contex
         "Type": "AWS::S3::Bucket"
     }
 
-    const resourceName = `FunctionlyDeploymentBucket`
-    const name = setResource(context, resourceName, s3BucketResources)
+    const bucketResourceName = `FunctionlyDeploymentBucket`
+    const resourceName = setResource(context, bucketResourceName, s3BucketResources)
 
-    context.CloudFormationTemplate.Outputs[`${name}Name`] = {
+    context.CloudFormationTemplate.Outputs[`${resourceName}Name`] = {
         "Value": {
-            "Ref": "FunctionlyDeploymentBucket"
+            "Ref": bucketResourceName
         }
     }
 
+})
+
+export const s3BucketParameter = ExecuteStep.register('S3-Bucket-Parameter', async (context) => {
+    const resourceName = `FunctionlyDeploymentBucket`
+    await setStackParameter({
+        ...context,
+        resourceName
+    })
 })

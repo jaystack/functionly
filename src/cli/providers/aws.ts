@@ -20,8 +20,8 @@ export const aws = {
     createEnvironment: ExecuteStep.register('CreateEnvironment_aws', async (context) => {
         await executor(context, bundle)
         await executor(context, zip)
-        const localName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
-        await executor(context, uploadZipStep(`services-${context.date.toISOString()}.zip`, context.zipData(), localName))
+        const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
+        await executor(context, uploadZipStep(fileName, context.zipData()))
         await executor(context, createTables)
 
         for (let serviceDefinition of context.publishedFunctions) {

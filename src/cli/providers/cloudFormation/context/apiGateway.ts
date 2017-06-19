@@ -2,6 +2,7 @@ import { getMetadata, constants } from '../../../../annotations'
 const { CLASS_APIGATEWAYKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
+import { setStackParameter, getStackName } from './stack'
 
 export const API_GATEWAY_REST_API = 'ApiGatewayRestApi'
 
@@ -20,7 +21,18 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
         }
     }
 
-    const apiName = setResource(context, API_GATEWAY_REST_API, RestApi)
+    const resourceName = setResource(context, API_GATEWAY_REST_API, RestApi)
+
+    await setStackParameter({
+        ...context,
+        resourceName
+    })
+
+    await setStackParameter({
+        ...context,
+        resourceName,
+        attr: 'RootResourceId'
+    })
 
     context.CloudFormationTemplate.Outputs[`ServiceEndpoint`] = {
         "Value": {
@@ -29,7 +41,7 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
                 [
                     "https://",
                     {
-                        "Ref": apiName
+                        "Ref": resourceName
                     },
                     ".execute-api.eu-central-1.amazonaws.com/dev"
                 ]
@@ -40,7 +52,7 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
 })
 
 export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', async (context) => {
-    const endpointsCors = new Map<string, string[]>()
+    const endpointsCors = new Map<string, any>()
     const endpoints = new Map<string, any>()
     for (const serviceDefinition of context.publishedFunctions) {
         await executor({
@@ -50,9 +62,9 @@ export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', asy
         })
     }
 
-    for (const [endpointResourceName, methods] of endpointsCors) {
+    for (const [endpointResourceName, { serviceDefinition, methods }] of endpointsCors) {
         await executor({
-            context: { ...context, endpointResourceName, methods },
+            context: { ...context, endpointResourceName, serviceDefinition, methods },
             name: `ApiGateway-Method-Options-${endpointResourceName}`,
             method: setOptionsMethodResource
         })
@@ -60,7 +72,7 @@ export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', asy
 })
 
 export const apiGatewayMethods = async (context) => {
-    const { serviceDefinition, endpoints, endpointsCors } = context
+    const { serviceDefinition } = context
 
     let httpMetadata = getMetadata(CLASS_APIGATEWAYKEY, serviceDefinition.service) || []
     for (let metadata of httpMetadata) {
@@ -78,7 +90,7 @@ export const apiGatewayMethod = async (context) => {
 
     const pathParts = path.split('/')
     let pathFragment = ''
-    let endpointResourceName;
+    let endpoint;
     for (const pathPart of pathParts) {
         if (!pathPart) continue
 
@@ -86,9 +98,9 @@ export const apiGatewayMethod = async (context) => {
         pathFragment += `/${pathPart}`
 
         if (endpoints.has(pathFragment)) {
-            endpointResourceName = endpoints.get(pathFragment)
+            endpoint = endpoints.get(pathFragment)
         } else {
-            endpointResourceName = await executor({
+            endpoint = await executor({
                 context: { ...context, pathFragment, rootPathFragment, endpoints, pathPart },
                 name: `ApiGateway-ResourcePath-${pathFragment}`,
                 method: apiGatewayPathPart
@@ -96,20 +108,37 @@ export const apiGatewayMethod = async (context) => {
         }
     }
 
+    if (!endpoint) {
+        //  handle / (root path)
+        throw new Error('TODO missing endpoint')
+    }
+
+    if (endpoint.serviceDefinition !== serviceDefinition) {
+        await setStackParameter({
+            ...context,
+            resourceName: endpoint.endpointResourceName,
+            sourceStackName: getStackName(endpoint.serviceDefinition),
+            targetStackName: getStackName(serviceDefinition)
+        })
+    }
+
     if (cors) {
-        let values = ['OPTIONS']
-        if (endpointsCors.has(endpointResourceName)) {
-            values = endpointsCors.get(endpointResourceName)
+        let value = {
+            serviceDefinition,
+            methods: ['OPTIONS']
         }
-        values.push(method)
-        endpointsCors.set(endpointResourceName, values)
+        if (endpointsCors.has(endpoint.endpointResourceName)) {
+            value = endpointsCors.get(endpoint.endpointResourceName)
+        }
+        value.methods.push(method)
+        endpointsCors.set(endpoint.endpointResourceName, value)
     }
 
     const properties = {
         "HttpMethod": method,
         "RequestParameters": {},
         "ResourceId": {
-            "Ref": endpointResourceName
+            "Ref": endpoint.endpointResourceName
         },
         "RestApiId": {
             "Ref": API_GATEWAY_REST_API
@@ -146,7 +175,7 @@ export const apiGatewayMethod = async (context) => {
         "Properties": properties
     }
     const resourceName = `ApiGateway${pathFragment}${method}`
-    const name = setResource(context, resourceName, methodConfig)
+    const name = setResource(context, resourceName, methodConfig, getStackName(serviceDefinition))
 
     await executor({
         context,
@@ -156,31 +185,57 @@ export const apiGatewayMethod = async (context) => {
 }
 
 export const apiGatewayPathPart = async (context) => {
-    const { pathFragment, rootPathFragment, endpoints, pathPart } = context
+    const { pathFragment, rootPathFragment, endpoints, pathPart, serviceDefinition } = context
+
+    let parentId
+    if (rootPathFragment && endpoints.has(rootPathFragment)) {
+        const endpoint = endpoints.get(rootPathFragment)
+        if (endpoint.serviceDefinition !== serviceDefinition) {
+            await setStackParameter({
+                ...context,
+                resourceName: endpoint.endpointResourceName,
+                sourceStackName: getStackName(endpoint.serviceDefinition),
+                targetStackName: getStackName(serviceDefinition)
+            })
+        }
+
+        parentId = {
+            "Ref": endpoint.endpointResourceName
+        }
+    } else {
+        parentId = {
+            "Ref": `${API_GATEWAY_REST_API}RootResourceId`
+        }
+    }
 
     const properties = {
-        "ParentId": getAGResourceParentId(rootPathFragment, endpoints),
+        "ParentId": parentId,
         "PathPart": pathPart,
         "RestApiId": {
             "Ref": API_GATEWAY_REST_API
         }
     }
 
+
     const resourceConfig = {
         "Type": "AWS::ApiGateway::Resource",
         "Properties": properties
     }
     const resourceName = `ApiGateway${pathFragment}`
-    const endpointResourceName = setResource(context, resourceName, resourceConfig)
-    endpoints.set(pathFragment, endpointResourceName)
-    return endpointResourceName
+    const endpointResourceName = setResource(context, resourceName, resourceConfig, getStackName(serviceDefinition))
+    endpoints.set(pathFragment, { endpointResourceName, serviceDefinition })
+    return { endpointResourceName, serviceDefinition }
 }
 
 export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', async (context) => {
 
-    const deploymentResources = context.deploymentResources
-        .filter(r => r.type === 'AWS::ApiGateway::Method')
-        .map(r => r.name)
+    const lambdaDependsOn = context.deploymentResources
+        .filter(r => !r.stackName && r.type === 'AWS::ApiGateway::Method')
+        .map(r => r.resourceName)
+
+    const stackDependsOn = context.deploymentResources
+        .filter(r => r.stackName && r.type === 'AWS::ApiGateway::Method')
+        .map(r => r.stackName)
 
     const ApiGatewayDeployment = {
         "Type": "AWS::ApiGateway::Deployment",
@@ -191,32 +246,21 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
             "StageName": "dev"
         },
         "DependsOn": [
-            ...deploymentResources
+            ...[...lambdaDependsOn, ...stackDependsOn].filter((v, i, self) => self.indexOf(v) === i)
         ]
     }
 
-    const resourceName = `ApiGateway${context.date.valueOf()}`
-    const apiName = setResource(context, resourceName, ApiGatewayDeployment)
+    const deploymentResourceName = `ApiGateway${context.date.valueOf()}`
+    const resourceName = setResource(context, deploymentResourceName, ApiGatewayDeployment)
 
+    // await setStackParameter({
+    //     ...context,
+    //     resourceName
+    // })
 })
 
-export const getAGResourceParentId = (rootPathFragment, endpoints) => {
-    if (rootPathFragment && endpoints.has(rootPathFragment)) {
-        return {
-            "Ref": endpoints.get(rootPathFragment)
-        }
-    } else {
-        return {
-            "Fn::GetAtt": [
-                API_GATEWAY_REST_API,
-                "RootResourceId"
-            ]
-        }
-    }
-}
-
-export const setOptionsMethodResource = (context) => {
-    const { endpointResourceName, methods } = context
+export const setOptionsMethodResource = async (context) => {
+    const { endpointResourceName, serviceDefinition, methods } = context
     const properties = {
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
@@ -266,7 +310,7 @@ export const setOptionsMethodResource = (context) => {
         "Properties": properties
     }
     const resourceName = `${endpointResourceName}Options`
-    setResource(context, resourceName, methodConfig)
+    setResource(context, resourceName, methodConfig, getStackName(serviceDefinition))
 }
 
 export const setGatewayPermissions = (context) => {
@@ -307,5 +351,5 @@ export const setGatewayPermissions = (context) => {
         "Properties": properties
     }
     const resourceName = `ApiGateway${serviceDefinition.resourceName}Permission`
-    setResource(context, resourceName, methodConfig, true)
+    setResource(context, resourceName, methodConfig, getStackName(serviceDefinition), true)
 }

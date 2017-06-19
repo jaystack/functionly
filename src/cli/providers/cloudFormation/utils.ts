@@ -7,13 +7,33 @@ export const normalizeName = (name: string) => {
     return result
 }
 
-export const setResource = (context, name, resource, allowOverride = false) => {
+export const getResourceName = (name) => {
     if (!name) {
         throw new Error(`invalid resource name '${name}'`)
     }
-    name = normalizeName(name)
-    if (allowOverride === false && context.CloudFormationTemplate.Resources[name]) {
-        throw new Error(`resource name '${name}' already exists`)
+    return normalizeName(name)
+}
+
+export const setResource = (context: any, name: string, resource: any, stackName: string = null, allowOverride = false) => {
+    const resourceName = getResourceName(name)
+
+    let resources
+    let outputs
+    if (stackName) {
+        if (context.CloudFormationStacks[stackName]) {
+            resources = context.CloudFormationStacks[stackName].Resources
+            outputs = context.CloudFormationStacks[stackName].Outputs
+        }
+    } else {
+        resources = context.CloudFormationTemplate.Resources
+    }
+
+    if (!resources) {
+        throw new Error(`Stack with name '${stackName}' not defined`)
+    }
+
+    if (allowOverride === false && resources[resourceName]) {
+        throw new Error(`resource name '${resourceName}' already exists`)
     }
 
     context.usedAwsResources = context.usedAwsResources || [];
@@ -21,14 +41,22 @@ export const setResource = (context, name, resource, allowOverride = false) => {
         context.usedAwsResources.push(resource.type)
     }
 
-    context.CloudFormationTemplate.Resources[name] = resource
+    resources[resourceName] = resource
+    if (outputs) {
+        outputs[resourceName] = {
+            "Value": {
+                "Ref": resourceName
+            }
+        }
+    }
 
     if (Array.isArray(context.deploymentResources)) {
         context.deploymentResources.push({
-            name,
-            type: resource.Type
+            resourceName,
+            type: resource.Type,
+            stackName
         })
     }
 
-    return name;
+    return resourceName;
 }

@@ -2,6 +2,7 @@ import { getMetadata, constants } from '../../../../annotations'
 const { CLASS_SNSCONFIGURATIONKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
+import { getStackName } from './stack'
 
 export const sns = ExecuteStep.register('SNS', async (context) => {
     await executor(context, snsTopics)
@@ -52,7 +53,7 @@ export const snsTopicSubscription = async (context) => {
     }
 
     const resourceName = `SNS${serviceDefinition.resourceName}${snsConfig.topicName}${context.date.valueOf()}`
-    const topicName = setResource(context, resourceName, snsTopic)
+    const topicName = setResource(context, resourceName, snsTopic, getStackName(serviceDefinition))
 
     await executor({
         context: { ...context, topicName },
@@ -80,5 +81,5 @@ export const snsPermissions = (context) => {
         "Properties": properties
     }
     const resourceName = `${topicName}Permission`
-    setResource(context, resourceName, snsPermission, true)
+    setResource(context, resourceName, snsPermission, getStackName(serviceDefinition), true)
 }

@@ -3,9 +3,24 @@ import { ExecuteStep, executor } from '../../../context'
 import { projectConfig } from '../../../project/config'
 
 export const uploadTemplate = ExecuteStep.register('UploadTemplate', async (context) => {
+    for (const stackName in context.CloudFormationStacks) {
+        const stack = context.CloudFormationStacks[stackName]
+        if(!Object.keys(stack.Resources).length){
+            delete context.CloudFormationStacks[stackName]
+            delete context.CloudFormationTemplate.Resources[stackName]
+        }
+    }
+
     const templateData = JSON.stringify(context.CloudFormationTemplate, null, 2);
-    const localName = projectConfig.name ? `${projectConfig.name}.template` : 'cloudformation.template'
-    const uploadresult = await executor(context, uploaderStep(`services-${context.date.toISOString()}.template`, templateData, 'application/octet-stream', localName))
+    const fileName = projectConfig.name ? `${projectConfig.name}.template` : 'cloudformation.template'
+    const uploadresult = await executor(context, uploaderStep(fileName, templateData, 'application/octet-stream'))
     context.S3CloudFormationTemplate = uploadresult.Key
+
+    for (const stackName in context.CloudFormationStacks) {
+        const templateData = JSON.stringify(context.CloudFormationStacks[stackName], null, 2);
+        const templateFileName = `${stackName}.template`
+        const uploadresult = await executor(context, uploaderStep(templateFileName, templateData, 'application/octet-stream'))
+    }
+
     return uploadresult
 })
