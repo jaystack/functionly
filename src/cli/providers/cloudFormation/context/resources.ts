@@ -145,7 +145,13 @@ export const lambdaPolicy = async (context) => {
 }
 
 export const logPolicy = async (context) => {
-    const { roleName, roleProperties } = context
+    const { roleName, roleProperties, serviceDefinitions } = context
+
+    const logGroupResourceNames = serviceDefinitions.map(s => s.logGroupResourceName)
+    const logGroupNames = context.deploymentResources
+        .filter(r => r.type === 'AWS::Logs::LogGroup' && logGroupResourceNames.indexOf(r.resourceName) >= 0)
+        .map(r => r.resource.Properties.LogGroupName)
+
     const policy = {
         "PolicyName": {
             "Fn::Join": [
@@ -162,11 +168,23 @@ export const logPolicy = async (context) => {
             "Statement": [{
                 "Effect": "Allow",
                 "Action": [
-                    "logs:CreateLogGroup",
                     "logs:CreateLogStream",
+                ],
+                "Resource": logGroupNames.map(n => {
+                    return {
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:" + n + ":*"
+                    }
+                })
+            }, {
+                "Effect": "Allow",
+                "Action": [
                     "logs:PutLogEvents"
                 ],
-                "Resource": ["*"]
+                "Resource": logGroupNames.map(n => {
+                    return {
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:" + n + ":*:*"
+                    }
+                })
             }]
         }
     }
@@ -303,7 +321,10 @@ export const lambdaResource = async (context) => {
 
     const lambdaResource = {
         "Type": "AWS::Lambda::Function",
-        "Properties": properties
+        "Properties": properties,
+        "DependsOn": [
+            serviceDefinition.logGroupResourceName
+        ]
     }
 
     const resourceName = `Lambda${properties.FunctionName}`
@@ -325,6 +346,35 @@ export const lambdaVersionResource = async (context) => {
         }
     }
     setResource(context, `${serviceDefinition.resourceName}${context.zipCodeSha256}`, versionResource, getStackName(serviceDefinition))
+}
+
+export const lambdaLogResources = ExecuteStep.register('Lambda-LogGroups', async (context) => {
+    for (const serviceDefinition of context.publishedFunctions) {
+        await executor({
+            context: { ...context, serviceDefinition },
+            name: `Lambda-Function-${serviceDefinition.service.name}`,
+            method: lambdaLogResource
+        })
+    }
+})
+
+export const lambdaLogResource = async (context) => {
+    const { serviceDefinition } = context
+
+    const functionName = getFunctionName(serviceDefinition.service)
+
+    const properties: any = {
+        "LogGroupName": `/aws/lambda/${functionName}`
+    };
+
+    const lambdaResource = {
+        "Type": "AWS::Logs::LogGroup",
+        "Properties": properties
+    }
+
+    const resourceName = `${functionName}LogGroup`
+    const name = setResource(context, resourceName, lambdaResource, getStackName(serviceDefinition))
+    serviceDefinition.logGroupResourceName = name
 }
 
 export const s3BucketResources = ExecuteStep.register('S3-Bucket', async (context) => {

@@ -10,7 +10,7 @@ import { executor } from '../../context'
 import { cloudFormationInit } from './context/cloudFormationInit'
 import {
     tableResources, lambdaResources, roleResources, s3BucketResources, s3BucketParameter,
-    apiGateway, sns, initStacks
+    apiGateway, sns, initStacks, lambdaLogResources
 } from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
@@ -48,6 +48,7 @@ export const cloudFormation = {
         await executor(context, s3BucketParameter)
 
         await executor(context, tableResources)
+        await executor(context, lambdaLogResources)
         await executor(context, roleResources)
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
@@ -75,6 +76,7 @@ export const cloudFormation = {
         await executor(context, s3BucketParameter)
 
         await executor(context, tableResources)
+        await executor(context, lambdaLogResources)
         await executor(context, roleResources)
         await executor(context, lambdaResources)
         await executor(context, apiGateway)

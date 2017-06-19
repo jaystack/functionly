@@ -54,7 +54,8 @@ export const setResource = (context: any, name: string, resource: any, stackName
         context.deploymentResources.push({
             resourceName,
             type: resource.Type,
-            stackName
+            stackName,
+            resource
         })
     }
 

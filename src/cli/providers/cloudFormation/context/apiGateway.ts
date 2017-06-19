@@ -7,10 +7,9 @@ import { setStackParameter, getStackName } from './stack'
 export const API_GATEWAY_REST_API = 'ApiGatewayRestApi'
 
 export const apiGateway = ExecuteStep.register('ApiGateway', async (context) => {
-    const deploymentResources = []
-    await executor({ ...context, deploymentResources }, gatewayRestApi)
-    await executor({ ...context, deploymentResources }, gatewayResources)
-    await executor({ ...context, deploymentResources }, gatewayDeployment)
+    await executor(context, gatewayRestApi)
+    await executor(context, gatewayResources)
+    await executor(context, gatewayDeployment)
 })
 
 export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (context) => {
