@@ -135,7 +135,8 @@ export const lambdaPolicy = async (context) => {
                 "Effect": "Allow",
                 "Action": [
                     "lambda:InvokeAsync",
-                    "lambda:InvokeFunction"
+                    "lambda:InvokeFunction",
+                    "sns:Publish"
                 ],
                 "Resource": ["*"]
             }]

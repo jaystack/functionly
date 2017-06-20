@@ -6,6 +6,7 @@ module.exports = {
         Lambda: { apiVersion: '2015-03-31', signatureVersion: 'v4' },
         DynamoDB: { apiVersion: '2012-08-10', signatureVersion: 'v4' },
         CloudFormation: { apiVersion: '2010-05-15', signatureVersion: 'v4' },
+        SNS: { apiVersion: '2010-03-31', signatureVersion: 'v4' },
     },
     webpack: {
         output: {

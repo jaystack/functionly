@@ -9,7 +9,7 @@ export const sns = (snsConfig: {
 }) => (target: Function) => {
     let snsDefinitions = getMetadata(CLASS_SNSCONFIGURATIONKEY, target) || [];
 
-    snsConfig.environmentKey = snsConfig.environmentKey || '%ClassName%_QUEUE_NAME'
+    snsConfig.environmentKey = snsConfig.environmentKey || '%ClassName%_SNS_TOPICNAME'
 
     const { templatedKey, templatedValue } = applyTemplates(snsConfig.environmentKey, snsConfig.topicName, target)
     snsDefinitions.push({

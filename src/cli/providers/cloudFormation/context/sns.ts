@@ -1,69 +1,115 @@
-import { getMetadata, constants } from '../../../../annotations'
-const { CLASS_SNSCONFIGURATIONKEY } = constants
+import { getMetadata, constants, defineMetadata } from '../../../../annotations'
+const { CLASS_SNSCONFIGURATIONKEY, CLASS_ENVIRONMENTKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
-import { setResource } from '../utils'
-import { getStackName } from './stack'
+import { setResource, collectConfig } from '../utils'
+import { createStack, setStackParameter, getStackName } from './stack'
+
+export const SNS_TABLE_STACK = 'SNSStack'
 
 export const sns = ExecuteStep.register('SNS', async (context) => {
+    await executor({
+        context: { ...context, stackName: SNS_TABLE_STACK },
+        name: `CloudFormation-Stack-init-${SNS_TABLE_STACK}`,
+        method: createStack
+    })
+
     await executor(context, snsTopics)
 })
 
 export const snsTopics = ExecuteStep.register('SNS-Topics', async (context) => {
-    for (const serviceDefinition of context.publishedFunctions) {
+    const configs = collectConfig(context, CLASS_SNSCONFIGURATIONKEY, (c) => c.topicName)
+
+    for (const snsConfig of configs) {
         await executor({
-            context: { ...context, serviceDefinition },
-            name: `SNS-Topic-${serviceDefinition.service.name}`,
+            context: { ...context, snsConfig },
+            name: `SNS-Topic-${snsConfig.topicName}`,
             method: snsTopic
+        })
+
+        await executor({
+            context: { ...context, snsConfig },
+            name: `SNS-Topic-Subscription-${snsConfig.topicName}`,
+            method: snsTopicSubscriptions
         })
     }
 })
 
 export const snsTopic = async (context) => {
-    const { serviceDefinition } = context
-    let snsConfigs = getMetadata(CLASS_SNSCONFIGURATIONKEY, serviceDefinition.service) || []
+    const { snsConfig } = context
 
-    for (const snsConfig of snsConfigs) {
-        await executor({
-            context: { ...context, snsConfig },
-            name: `SNS-Topic-Subscription-${serviceDefinition.service.name}-${snsConfig.topicName}`,
-            method: snsTopicSubscription
-        })
-    }
-}
+    snsConfig.advTopicName = `${snsConfig.topicName}${context.date.valueOf()}`
 
-export const snsTopicSubscription = async (context) => {
-    const { serviceDefinition, snsConfig } = context
+    await executor({
+        context,
+        name: `SNS-Topic-${snsConfig.topicName}-DynamicName`,
+        method: updateSNSEnvironmentVariables
+    })
 
     const snsProperties = {
-        "TopicName": snsConfig.topicName,
-        "Subscription": [
-            {
-                "Endpoint": {
-                    "Fn::GetAtt": [serviceDefinition.resourceName, "Arn"]
-                },
-                "Protocol": "lambda"
-            }
-        ]
+        "TopicName": snsConfig.advTopicName
     }
 
     const snsTopic = {
         "Type": "AWS::SNS::Topic",
-        "Properties": snsProperties,
-        "DependsOn": [serviceDefinition.resourceName]
+        "Properties": snsProperties
     }
 
-    const resourceName = `SNS${serviceDefinition.resourceName}${snsConfig.topicName}${context.date.valueOf()}`
-    const topicName = setResource(context, resourceName, snsTopic, getStackName(serviceDefinition))
+    const resourceName = `SNS${snsConfig.advTopicName}`
+    const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK)
+    snsConfig.resourceName = topicResourceName
+}
 
-    await executor({
-        context: { ...context, topicName },
-        name: `SNS-Topic-Permission-${serviceDefinition.service.name}-${snsConfig.topicName}`,
-        method: snsPermissions
+export const snsTopicSubscriptions = async (context) => {
+    const { snsConfig } = context
+
+    for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
+        if (serviceConfig.injected) continue
+
+        await executor({
+            context: { ...context, serviceDefinition },
+            name: `SNS-Topic-Subscription-${snsConfig.topicName}-${serviceDefinition.service.name}`,
+            method: snsTopicSubscription
+        })
+
+        await executor({
+            context: { ...context, serviceDefinition },
+            name: `SNS-Topic-Permission-${snsConfig.topicName}-${serviceDefinition.service.name}`,
+            method: snsPermissions
+        })
+    }
+}
+
+export const snsTopicSubscription = (context) => {
+    const { serviceDefinition, snsConfig } = context
+
+    setStackParameter({
+        ...context,
+        sourceStackName: SNS_TABLE_STACK,
+        resourceName: snsConfig.resourceName,
+        targetStackName: getStackName(serviceDefinition)
     })
+
+    const snsProperties = {
+        "Endpoint": {
+            "Fn::GetAtt": [serviceDefinition.resourceName, "Arn"]
+        },
+        "Protocol": "lambda",
+        "TopicArn": {
+            "Ref": snsConfig.resourceName
+        }
+    }
+
+    const snsTopic = {
+        "Type": "AWS::SNS::Subscription",
+        "Properties": snsProperties
+    }
+
+    const resourceName = `SNS${serviceDefinition.resourceName}${snsConfig.resourceName}`
+    const topicResourceName = setResource(context, resourceName, snsTopic, getStackName(serviceDefinition))
 }
 
 export const snsPermissions = (context) => {
-    const { serviceDefinition, topicName } = context
+    const { serviceDefinition, snsConfig } = context
     const properties = {
         "FunctionName": {
             "Fn::GetAtt": [
@@ -73,13 +119,24 @@ export const snsPermissions = (context) => {
         },
         "Action": "lambda:InvokeFunction",
         "Principal": "sns.amazonaws.com",
-        "SourceArn": { "Ref": topicName }
+        "SourceArn": { "Ref": snsConfig.resourceName }
     }
 
     const snsPermission = {
         "Type": "AWS::Lambda::Permission",
         "Properties": properties
     }
-    const resourceName = `${topicName}Permission`
+    const resourceName = `${snsConfig.resourceName}Permission`
     setResource(context, resourceName, snsPermission, getStackName(serviceDefinition), true)
+}
+
+const updateSNSEnvironmentVariables = (context) => {
+    const { snsConfig } = context
+
+    for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
+        const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
+        environmentVariables[serviceConfig.environmentKey] = snsConfig.advTopicName
+        defineMetadata(CLASS_ENVIRONMENTKEY, { ...environmentVariables }, serviceDefinition.service)
+    }
+
 }

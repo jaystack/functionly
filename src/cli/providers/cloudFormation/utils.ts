@@ -1,3 +1,5 @@
+import { getMetadata } from '../../../annotations'
+
 export const nameReplaceRegexp = /[^a-zA-Z0-9]/g
 export const normalizeName = (name: string) => {
     const result = name.replace(nameReplaceRegexp, '')
@@ -60,4 +62,24 @@ export const setResource = (context: any, name: string, resource: any, stackName
     }
 
     return resourceName;
+}
+
+export const collectConfig = (context, metadataKey, getHash: (c) => string) => {
+    const configs = []
+    for (const serviceDefinition of context.publishedFunctions) {
+        let partialConfigs = (getMetadata(metadataKey, serviceDefinition.service) || [])
+
+        for (const serviceConfig of partialConfigs) {
+            const hash = getHash(serviceConfig)
+            const config = configs.find(c => c.hash === hash)
+            if (config) {
+                config.services.push({ serviceDefinition, serviceConfig })
+                continue
+            }
+
+            configs.push({ ...serviceConfig, hash, services: [{ serviceDefinition, serviceConfig }] })
+        }
+    }
+
+    return configs
 }

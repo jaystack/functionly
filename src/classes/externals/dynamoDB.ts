@@ -12,6 +12,13 @@ const initAWSSDK = () => {
             awsConfig.apiVersion = '2012-08-10'
             awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
             awsConfig.endpoint = process.env.DYNAMODB_LOCAL_ENDPOINT || 'http://localhost:8000'
+
+            console.log('Local DynamoDB configuration')
+            console.log(JSON.stringify({
+                apiVersion: awsConfig.apiVersion,
+                'region (process.env.AWS_REGION)': awsConfig.region,
+                'endpoint (process.env.SNS_LOCAL_ENDPOINT)': awsConfig.endpoint,
+            }, null, 2))
         }
 
         dynamoDB = new AWS.DynamoDB(awsConfig);
@@ -102,8 +109,8 @@ export class DynamoDB extends Service {
     }
 
     protected setDefaultValues(params, command) {
-        const tableConfig = getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || {}
-        const tableName = (tableConfig[this.constructor.name] && tableConfig[this.constructor.name].TableName)
+        const tableConfig = (getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
+        const tableName = ({ TableName: tableConfig && tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
         const initParams = {
             TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName
         }
