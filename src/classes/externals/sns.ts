@@ -51,10 +51,8 @@ export class SimpleNotificationService extends Service {
     }
 
     protected setDefaultValues(params, command) {
-        const snsConfig = (getMetadata(CLASS_SNSCONFIGURATIONKEY, this) || [])[0]
-        const topicName = snsConfig && snsConfig.topicName
         const initParams = {
-            TopicArn: 'arn:aws:sns:null:null:' + process.env[`${this.constructor.name}_SNS_TOPICNAME`] || topicName
+            TopicArn: process.env[`${this.constructor.name}_SNS_TOPICNAME_ARN`]
         }
 
         return { ...initParams, ...params }

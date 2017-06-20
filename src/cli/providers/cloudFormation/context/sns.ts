@@ -39,12 +39,6 @@ export const snsTopic = async (context) => {
 
     snsConfig.advTopicName = `${snsConfig.topicName}${context.date.valueOf()}`
 
-    await executor({
-        context,
-        name: `SNS-Topic-${snsConfig.topicName}-DynamicName`,
-        method: updateSNSEnvironmentVariables
-    })
-
     const snsProperties = {
         "TopicName": snsConfig.advTopicName
     }
@@ -57,6 +51,12 @@ export const snsTopic = async (context) => {
     const resourceName = `SNS${snsConfig.advTopicName}`
     const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK)
     snsConfig.resourceName = topicResourceName
+
+    await executor({
+        context,
+        name: `SNS-Topic-${snsConfig.topicName}-DynamicName`,
+        method: updateSNSEnvironmentVariables
+    })
 }
 
 export const snsTopicSubscriptions = async (context) => {
@@ -136,6 +136,18 @@ const updateSNSEnvironmentVariables = (context) => {
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
         environmentVariables[serviceConfig.environmentKey] = snsConfig.advTopicName
+
+        setStackParameter({
+            ...context,
+            sourceStackName: SNS_TABLE_STACK,
+            resourceName: snsConfig.resourceName,
+            targetStackName: getStackName(serviceDefinition)
+        })
+
+        environmentVariables[`${serviceConfig.environmentKey}_ARN`] = {
+            "Ref": snsConfig.resourceName
+        }
+
         defineMetadata(CLASS_ENVIRONMENTKEY, { ...environmentVariables }, serviceDefinition.service)
     }
 
