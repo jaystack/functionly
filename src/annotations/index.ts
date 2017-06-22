@@ -8,6 +8,7 @@ export { runtime } from './classes/runtime'
 export { functionName, getFunctionName } from './classes/functionName'
 export { dynamoTable, __dynamoDBDefaults } from './classes/dynamoTable'
 export { sns } from './classes/sns'
+export { s3Storage } from './classes/s3Storage'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 

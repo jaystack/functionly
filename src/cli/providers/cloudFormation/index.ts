@@ -3,14 +3,14 @@ import { bundle } from '../../utilities/webpack'
 import { logger } from '../../utilities/logger'
 import { zip } from '../../utilities/compress'
 import { uploadZipStep } from '../../utilities/aws/s3Upload'
-import { createStack, updateStack, getTemplate, getStackBucketName, describeStacks } from '../../utilities/aws/cloudFormation'
+import { createStack, updateStack, getTemplate, describeStackResouce, describeStacks } from '../../utilities/aws/cloudFormation'
 import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
 import { cloudFormationInit } from './context/cloudFormationInit'
 import {
-    tableResources, lambdaResources, roleResources, s3BucketResources, s3BucketParameter,
-    apiGateway, sns, initStacks, lambdaLogResources
+    tableResources, lambdaResources, roleResources, s3DeploymentBucket, s3DeploymentBucketParameter,
+    apiGateway, sns, s3, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
 } from './context/resources'
 import { uploadTemplate } from './context/uploadTemplate'
 
@@ -22,7 +22,7 @@ export const cloudFormation = {
         await executor(context, zip)
 
         await executor(context, cloudFormationInit)
-        await executor(context, s3BucketResources)
+        await executor(context, s3DeploymentBucket)
 
         try {
             await executor(context, getTemplate)
@@ -37,7 +37,8 @@ export const cloudFormation = {
             }
         }
         if (!context.awsBucket) {
-            await executor(context, getStackBucketName)
+            const bucketData = await executor({ ...context, LogicalResourceId: S3_DEPLOYMENT_BUCKET_RESOURCE_NAME }, describeStackResouce)
+            context.awsBucket = bucketData.StackResourceDetail.PhysicalResourceId
         }
 
         logger.info(`Functionly: Uploading binary...`)
@@ -45,7 +46,7 @@ export const cloudFormation = {
         await executor(context, uploadZipStep(fileName, context.zipData()))
 
         await executor(context, initStacks)
-        await executor(context, s3BucketParameter)
+        await executor(context, s3DeploymentBucketParameter)
 
         await executor(context, tableResources)
         await executor(context, lambdaLogResources)
@@ -53,6 +54,7 @@ export const cloudFormation = {
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
         await executor(context, sns)
+        await executor(context, s3)
 
         logger.info(`Functionly: Uploading template...`)
         await executor(context, uploadTemplate)
@@ -66,14 +68,14 @@ export const cloudFormation = {
         await executor(context, zip)
 
         await executor(context, cloudFormationInit)
-        await executor(context, s3BucketResources)
+        await executor(context, s3DeploymentBucket)
 
         logger.info(`Functionly: Save binary...`)
         const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
         await executor({ ...context, skipUpload: true }, uploadZipStep(fileName, context.zipData()))
 
         await executor(context, initStacks)
-        await executor(context, s3BucketParameter)
+        await executor(context, s3DeploymentBucketParameter)
 
         await executor(context, tableResources)
         await executor(context, lambdaLogResources)
@@ -81,6 +83,7 @@ export const cloudFormation = {
         await executor(context, lambdaResources)
         await executor(context, apiGateway)
         await executor(context, sns)
+        await executor(context, s3)
 
         logger.info(`Functionly: Save template...`)
         await executor({ ...context, skipUpload: true }, uploadTemplate)

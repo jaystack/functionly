@@ -1,6 +1,7 @@
 import { ExecuteStep, executor } from '../../../context'
 import { setResource, getResourceName } from '../utils'
 import { getFunctionName } from '../../../../annotations'
+import { getBucketReference } from './s3Storage'
 
 export const createStack = async (context) => {
     const { stackName } = context
@@ -13,9 +14,7 @@ export const createStack = async (context) => {
     }
 
     const folderPah = context.version ? `${context.version}/${context.date.toISOString()}` : `${context.date.toISOString()}`
-    const awsBucket = context.__userAWSBucket ? context.awsBucket : {
-        "Ref": "FunctionlyDeploymentBucket"
-    }
+    const awsBucket = await getBucketReference(context)
 
     const properties = {
         "Parameters": {},
@@ -58,6 +57,23 @@ export const setStackParameter = (context) => {
                 `Outputs.${resourceName}`
             ]
         }
+        if (attr) {
+            attrName = attr
+            parameterReference = {
+                "Fn::GetAtt": [
+                    sourceStackName,
+                    `Outputs.${resourceName}${attr}`
+                ]
+            }
+            context.CloudFormationStacks[sourceStackName].Outputs[`${resourceName}${attr}`] = {
+                "Value": {
+                    "Fn::GetAtt": [
+                        resourceName,
+                        attr
+                    ]
+                }
+            }
+        }
     } else if (attr) {
         attrName = attr
         parameterReference = {
@@ -77,12 +93,10 @@ export const setStackParameter = (context) => {
             }
             stackDefinition.Properties.Parameters[`${resourceName}${attrName}`] = parameterReference
 
-            if (sourceStackName) {
-                if (stackDefinition.DependsOn.indexOf(sourceStackName) < 0) {
-                    stackDefinition.DependsOn.push(sourceStackName)
-                }
-            } else if (resourceName) {
-                stackDefinition.DependsOn.push(resourceName)
+
+            const dependsOnResourceName = sourceStackName ? sourceStackName : resourceName
+            if (stackDefinition.DependsOn.indexOf(dependsOnResourceName) < 0) {
+                stackDefinition.DependsOn.push(dependsOnResourceName)
             }
         }
     }

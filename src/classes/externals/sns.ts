@@ -1,6 +1,5 @@
 import { SNS } from 'aws-sdk'
 export { SNS } from 'aws-sdk'
-// import { } from 'aws-sdk/clients/sns'
 
 import { Service } from '../service'
 import { constants, getMetadata } from '../../annotations'

@@ -1,9 +1,9 @@
 import { EventSource } from './eventSource'
 
-export class SNS extends EventSource {
+export class S3 extends EventSource {
     public available(eventContext: any): boolean {
         const { event } = eventContext
-        return event && Array.isArray(event.Records) && event.Records.length && event.Records[0].EventSource === "aws:sns" ? true : false
+        return event && Array.isArray(event.Records) && event.Records.length && event.Records[0].EventSource === "aws:s3" ? true : false
     }
 
     public async parameterResolver(parameter, event) {

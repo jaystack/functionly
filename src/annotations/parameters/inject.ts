@@ -1,4 +1,4 @@
-import { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_INJECTABLEKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY } from '../constants'
+import { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_INJECTABLEKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY } from '../constants'
 import { getOwnMetadata, defineMetadata, getMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
 import { getFunctionName } from '../classes/functionName'
@@ -36,7 +36,7 @@ export const inject = (type: any, ...params): any => {
             }
         }
 
-        [CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY].forEach(key => {
+        [CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY].forEach(key => {
             const injectKeyConfig = (getMetadata(key, injectTarget) || [])
                 .map(c => { return { ...c, injected: true } })
             const keyConfig = getMetadata(key, target) || []

@@ -251,11 +251,6 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
 
     const deploymentResourceName = `ApiGateway${context.date.valueOf()}`
     const resourceName = setResource(context, deploymentResourceName, ApiGatewayDeployment)
-
-    // await setStackParameter({
-    //     ...context,
-    //     resourceName
-    // })
 })
 
 export const setOptionsMethodResource = async (context) => {

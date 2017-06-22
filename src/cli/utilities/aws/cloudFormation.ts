@@ -85,21 +85,17 @@ export const getTemplate = ExecuteStep.register('CloudFormation-GetTemplate', (c
     })
 })
 
-
-export const getStackBucketName = ExecuteStep.register('CloudFormation-GetStackBucketName', (context) => {
-    if (context.awsBucket) return context.awsBucket
-
+export const describeStackResouce = ExecuteStep.register('CloudFormation-DescribeStackResouce', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
             StackName: context.CloudFormationConfig.StackName,
-            LogicalResourceId: 'FunctionlyDeploymentBucket'
+            LogicalResourceId: context.LogicalResourceId
         }
 
         cloudFormation.describeStackResource(params, function (err, data) {
             if (err) return reject(err)
-            context.awsBucket = data.StackResourceDetail.PhysicalResourceId
-            return resolve(data.StackResourceDetail.PhysicalResourceId);
+            return resolve(data);
         });
     })
 })

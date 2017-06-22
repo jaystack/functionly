@@ -5,7 +5,9 @@ const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEK
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
+import { getBucketReference } from './s3Storage'
 
+export { s3DeploymentBucket, s3DeploymentBucketParameter, s3, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3Storage'
 export { apiGateway } from './apiGateway'
 export { sns } from './sns'
 
@@ -112,6 +114,7 @@ export const roleResource = async (context) => {
             serviceDefinition[CLASS_ROLEKEY] = {
                 "Ref": `${resourceName}Arn`
             }
+            serviceDefinition.roleResource = iamRole
         }
     }
 }
@@ -281,9 +284,7 @@ export const tableResource = async (context) => {
 }
 
 export const lambdaResources = ExecuteStep.register('Lambda-Functions', async (context) => {
-    const awsBucket = context.__userAWSBucket ? context.awsBucket : {
-        "Ref": "FunctionlyDeploymentBucket"
-    }
+    const awsBucket = await getBucketReference(context)
 
     for (const serviceDefinition of context.publishedFunctions) {
         await executor({
@@ -377,31 +378,3 @@ export const lambdaLogResource = async (context) => {
     const name = setResource(context, resourceName, lambdaResource, getStackName(serviceDefinition))
     serviceDefinition.logGroupResourceName = name
 }
-
-export const s3BucketResources = ExecuteStep.register('S3-Bucket', async (context) => {
-    if (context.awsBucket) {
-        context.__userAWSBucket = true
-    }
-
-    const s3BucketResources = {
-        "Type": "AWS::S3::Bucket"
-    }
-
-    const bucketResourceName = `FunctionlyDeploymentBucket`
-    const resourceName = setResource(context, bucketResourceName, s3BucketResources)
-
-    context.CloudFormationTemplate.Outputs[`${resourceName}Name`] = {
-        "Value": {
-            "Ref": bucketResourceName
-        }
-    }
-
-})
-
-export const s3BucketParameter = ExecuteStep.register('S3-Bucket-Parameter', async (context) => {
-    const resourceName = `FunctionlyDeploymentBucket`
-    await setStackParameter({
-        ...context,
-        resourceName
-    })
-})
