@@ -1,4 +1,5 @@
 import { EventSource } from './eventSource'
+import { get } from '../../../helpers/property'
 
 export class ApiGateway extends EventSource {
     public available(eventContext: any): boolean {
@@ -14,11 +15,12 @@ export class ApiGateway extends EventSource {
         
         switch (parameter.type) {
             case 'param':
-                if (body && body[parameter.from]) return body[parameter.from]
-                if (query && query[parameter.from]) return query[parameter.from]
-                if (params && params[parameter.from]) return params[parameter.from]
-                if (headers && headers[parameter.from]) return headers[parameter.from]
-                break
+                let value
+                if (typeof (value = get(body, parameter.from)) !== 'undefined') return value
+                if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
+                if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
+                if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
+                return value;
             default:
                 return await super.parameterResolver(parameter, event)
         }

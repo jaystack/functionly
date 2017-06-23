@@ -1,9 +1,10 @@
 import { EventSource } from './eventSource'
+import { get } from '../../../helpers/property'
 
 export class S3 extends EventSource {
     public available(eventContext: any): boolean {
         const { event } = eventContext
-        return event && Array.isArray(event.Records) && event.Records.length && event.Records[0].EventSource === "aws:s3" ? true : false
+        return event && Array.isArray(event.Records) && event.Records.length && event.Records[0].eventSource === "aws:s3" ? true : false
     }
 
     public async parameterResolver(parameter, event) {
@@ -11,8 +12,7 @@ export class S3 extends EventSource {
 
         switch (parameter.type) {
             case 'param':
-                if (data && data[parameter.from]) return data[parameter.from]
-                break
+                return get(data, parameter.from)
             default:
                 return await super.parameterResolver(parameter, event)
         }

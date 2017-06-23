@@ -1,4 +1,5 @@
 import { EventSource } from './eventSource'
+import { get } from '../../../helpers/property'
 
 export class SNS extends EventSource {
     public available(eventContext: any): boolean {
@@ -11,8 +12,7 @@ export class SNS extends EventSource {
 
         switch (parameter.type) {
             case 'param':
-                if (data && data[parameter.from]) return data[parameter.from]
-                break
+                return get(data, parameter.from)
             default:
                 return await super.parameterResolver(parameter, event)
         }
