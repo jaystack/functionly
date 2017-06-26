@@ -12,15 +12,24 @@ export class ApiGateway extends EventSource {
         const query = event.event.queryStringParameters
         const params = event.event.pathParameters
         const headers = event.event.headers
-        
+
         switch (parameter.type) {
             case 'param':
-                let value
-                if (typeof (value = get(body, parameter.from)) !== 'undefined') return value
-                if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
-                if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
-                if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
-                return value;
+                const source = parameter.source;
+                if (typeof source !== 'undefined') {
+                    const holder = !source ? event.event : get(event.event, source)
+                    if (holder) {
+                        return get(holder, parameter.from)
+                    }
+                } else {
+                    let value
+                    if (typeof (value = get(body, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
+                    return value;
+                }
+                return undefined
             default:
                 return await super.parameterResolver(parameter, event)
         }
