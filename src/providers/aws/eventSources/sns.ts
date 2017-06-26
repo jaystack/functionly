@@ -8,11 +8,11 @@ export class SNS extends EventSource {
     }
 
     public async parameterResolver(parameter, event) {
-        const data = event.event.Records[0]
+        const holder = this.getHolder(event.event.Records[0], event.event, parameter)
 
         switch (parameter.type) {
             case 'param':
-                return get(data, parameter.from)
+                return get(holder, parameter.from)
             default:
                 return await super.parameterResolver(parameter, event)
         }

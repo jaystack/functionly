@@ -694,6 +694,40 @@ describe('annotations', () => {
                 expect(matadata2).to.have.property('parameterIndex', 0)
                 expect(matadata2).to.have.property('type', 'param')
             })
+            it("inject with config", () => {
+                class ParamClass {
+                    method( @param({ name: 'fullName', p1: 1, p2: 'p2' }) name) { }
+                }
+
+                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const matadata = value[0]
+
+                expect(matadata).to.have.property('from', 'fullName')
+                expect(matadata).to.have.property('parameterIndex', 0)
+                expect(matadata).to.have.property('type', 'param')
+                expect(matadata).to.have.property('p1', 1)
+                expect(matadata).to.have.property('p2', 'p2')
+            })
+            it("inject with config without name", () => {
+                class ParamClass {
+                    method( @param({ p1: 1, p2: 'p2' }) shortName) { }
+                }
+
+                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const matadata = value[0]
+
+                expect(matadata).to.have.property('from', 'shortName')
+                expect(matadata).to.have.property('parameterIndex', 0)
+                expect(matadata).to.have.property('type', 'param')
+                expect(matadata).to.have.property('p1', 1)
+                expect(matadata).to.have.property('p2', 'p2')
+            })
         })
     })
 })

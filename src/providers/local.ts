@@ -1,7 +1,7 @@
 import * as request from 'request'
 import { Provider } from './core/provider'
 import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
-
+import { get } from '../helpers/property'
 
 export class LocalProvider extends Provider {
     public getInvoker(serviceType, serviceInstance, params) {
@@ -26,11 +26,22 @@ export class LocalProvider extends Provider {
 
     protected async parameterResolver(parameter, event) {
         const req = event.req
+        const source = parameter.source;
         switch (parameter.type) {
             case 'param':
-                if (req.body && req.body[parameter.from]) return req.body[parameter.from]
-                if (req.query && req.query[parameter.from]) return req.query[parameter.from]
-                if (req.params && req.params[parameter.from]) return req.params[parameter.from]
+                if (typeof source !== 'undefined') {
+                    const holder = !source ? req : get(req, source)
+                    if (holder) {
+                        return get(holder, parameter.from)
+                    }
+                } else {
+                    let value = undefined
+                    if (typeof (value = get(req.body, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(req.query, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(req.params, parameter.from)) !== 'undefined') return value
+                    return value
+                }
+                return undefined
             default:
                 return await super.parameterResolver(parameter, event)
         }
