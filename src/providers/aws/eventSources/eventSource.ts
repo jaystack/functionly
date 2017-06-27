@@ -18,7 +18,7 @@ export abstract class EventSource {
         const source = parameter.source;
         if (typeof source !== 'undefined') {
             const holder = !source ? data : get(data, source)
-            return holder && get(holder, parameter.from)
+            return holder
         } else {
             return suggestedHolder
         }
