@@ -124,12 +124,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('path', '/v1/test')
-                expect(matadata).to.have.property('method', 'get')
-                expect(matadata).to.have.property('cors', false)
-                expect(matadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.property('method', 'get')
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authorization', 'AWS_IAM')
             })
             it("method", () => {
                 @apiGateway({ path: '/v1/test', method: 'post' })
@@ -139,12 +139,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('path', '/v1/test')
-                expect(matadata).to.have.property('method', 'post')
-                expect(matadata).to.have.property('cors', false)
-                expect(matadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.property('method', 'post')
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authorization', 'AWS_IAM')
             })
             it("cors", () => {
                 @apiGateway({ path: '/v1/test', cors: true })
@@ -154,12 +154,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('path', '/v1/test')
-                expect(matadata).to.have.property('method', 'get')
-                expect(matadata).to.have.property('cors', true)
-                expect(matadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.property('method', 'get')
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.property('authorization', 'AWS_IAM')
             })
             it("authorization", () => {
                 @apiGateway({ path: '/v1/test', authorization: 'NONE' })
@@ -169,12 +169,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('path', '/v1/test')
-                expect(matadata).to.have.property('method', 'get')
-                expect(matadata).to.have.property('cors', false)
-                expect(matadata).to.have.property('authorization', 'NONE')
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.property('method', 'get')
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authorization', 'NONE')
             })
         })
         describe("dynamoTable", () => {
@@ -186,12 +186,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('tableName', 'mytablename')
-                expect(matadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(matadata).to.have.property('definedBy', DynamoTableTestClass.name)
-                expect(matadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("environmentKey", () => {
                 @dynamoTable({ tableName: 'mytablename', environmentKey: 'myenvkey' })
@@ -201,12 +201,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('tableName', 'mytablename')
-                expect(matadata).to.have.property('environmentKey', 'myenvkey')
-                expect(matadata).to.have.property('definedBy', DynamoTableTestClass.name)
-                expect(matadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'myenvkey')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("nativeConfig", () => {
                 @dynamoTable({
@@ -223,12 +223,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('tableName', 'mytablename')
-                expect(matadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(matadata).to.have.property('definedBy', DynamoTableTestClass.name)
-                expect(matadata).to.have.deep.property('nativeConfig').that.deep.equal({
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal({
                     ...__dynamoDBDefaults,
                     ProvisionedThroughput: {
                         ReadCapacityUnits: 4,
@@ -243,12 +243,12 @@ describe('annotations', () => {
                 @environment('key2', 'value2')
                 class EnvironmentTestClass { }
 
-                const matadata = getMetadata(CLASS_ENVIRONMENTKEY, EnvironmentTestClass)
+                const metadata = getMetadata(CLASS_ENVIRONMENTKEY, EnvironmentTestClass)
 
-                expect(matadata).to.have.all.keys('key', 'key2')
-                expect(matadata).to.have.property('key', 'value')
-                expect(matadata).to.have.property('key2', 'value2')
-                expect(matadata).to.not.have.property('key3')
+                expect(metadata).to.have.all.keys('key', 'key2')
+                expect(metadata).to.have.property('key', 'value')
+                expect(metadata).to.have.property('key2', 'value2')
+                expect(metadata).to.not.have.property('key3')
             })
             it("template", () => {
                 @environment('%ClassName%_env', 'value')
@@ -256,12 +256,12 @@ describe('annotations', () => {
                 @environment('%ClassName%_env2', '%ClassName%_value2')
                 class EnvironmentTestClass { }
 
-                const matadata = getMetadata(CLASS_ENVIRONMENTKEY, EnvironmentTestClass)
+                const metadata = getMetadata(CLASS_ENVIRONMENTKEY, EnvironmentTestClass)
 
-                expect(matadata).to.have.all.keys('EnvironmentTestClass_env', 'key', 'EnvironmentTestClass_env2')
-                expect(matadata).to.have.property('EnvironmentTestClass_env', 'value')
-                expect(matadata).to.have.property('key', 'EnvironmentTestClass_value')
-                expect(matadata).to.have.property('EnvironmentTestClass_env2', 'EnvironmentTestClass_value2')
+                expect(metadata).to.have.all.keys('EnvironmentTestClass_env', 'key', 'EnvironmentTestClass_env2')
+                expect(metadata).to.have.property('EnvironmentTestClass_env', 'value')
+                expect(metadata).to.have.property('key', 'EnvironmentTestClass_value')
+                expect(metadata).to.have.property('EnvironmentTestClass_env2', 'EnvironmentTestClass_value2')
             })
         })
         describe("functionName", () => {
@@ -397,12 +397,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('bucketName', 'mybucketname')
-                expect(matadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
-                expect(matadata).to.have.property('definedBy', S3StorageTestClass.name)
-                expect(matadata).to.not.have.property('eventSourceConfiguration')
+                expect(metadata).to.have.property('bucketName', 'mybucketname')
+                expect(metadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.not.have.property('eventSourceConfiguration')
             })
             it("bucketName LowerCase", () => {
                 @s3Storage({ bucketName: 'myBucketName' })
@@ -412,13 +412,13 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('bucketName').that.not.equal('myBucketName')
-                expect(matadata).to.have.property('bucketName', 'mybucketname')
-                expect(matadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
-                expect(matadata).to.have.property('definedBy', S3StorageTestClass.name)
-                expect(matadata).to.not.have.property('eventSourceConfiguration')
+                expect(metadata).to.have.property('bucketName').that.not.equal('myBucketName')
+                expect(metadata).to.have.property('bucketName', 'mybucketname')
+                expect(metadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.not.have.property('eventSourceConfiguration')
             })
             it("environmentKey", () => {
                 @s3Storage({ bucketName: 'mybucketname', environmentKey: 'myenvkey' })
@@ -428,12 +428,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('bucketName', 'mybucketname')
-                expect(matadata).to.have.property('environmentKey', 'myenvkey')
-                expect(matadata).to.have.property('definedBy', S3StorageTestClass.name)
-                expect(matadata).to.not.have.property('eventSourceConfiguration')
+                expect(metadata).to.have.property('bucketName', 'mybucketname')
+                expect(metadata).to.have.property('environmentKey', 'myenvkey')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.not.have.property('eventSourceConfiguration')
             })
             it("eventSourceConfiguration", () => {
                 @s3Storage({
@@ -449,12 +449,12 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('bucketName', 'mybucketname')
-                expect(matadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
-                expect(matadata).to.have.property('definedBy', S3StorageTestClass.name)
-                expect(matadata).to.have.deep.property('eventSourceConfiguration').that.deep.equal({
+                expect(metadata).to.have.property('bucketName', 'mybucketname')
+                expect(metadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.have.deep.property('eventSourceConfiguration').that.deep.equal({
                     Event: 'eventName',
                     Filter: {}
                 });
@@ -469,11 +469,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('topicName', 'myTopicName')
-                expect(matadata).to.have.property('environmentKey', 'SNSTestClass_SNS_TOPICNAME')
-                expect(matadata).to.have.property('definedBy', SNSTestClass.name)
+                expect(metadata).to.have.property('topicName', 'myTopicName')
+                expect(metadata).to.have.property('environmentKey', 'SNSTestClass_SNS_TOPICNAME')
+                expect(metadata).to.have.property('definedBy', SNSTestClass.name)
             })
             it("environmentKey", () => {
                 @sns({ topicName: 'myTopicName', environmentKey: 'myenvkey' })
@@ -483,11 +483,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('topicName', 'myTopicName')
-                expect(matadata).to.have.property('environmentKey', 'myenvkey')
-                expect(matadata).to.have.property('definedBy', SNSTestClass.name)
+                expect(metadata).to.have.property('topicName', 'myTopicName')
+                expect(metadata).to.have.property('environmentKey', 'myenvkey')
+                expect(metadata).to.have.property('definedBy', SNSTestClass.name)
             })
         })
         describe("tag", () => {
@@ -496,12 +496,12 @@ describe('annotations', () => {
                 @tag('key2', 'value2')
                 class TagTestClass { }
 
-                const matadata = getMetadata(CLASS_TAGKEY, TagTestClass)
+                const metadata = getMetadata(CLASS_TAGKEY, TagTestClass)
 
-                expect(matadata).to.have.all.keys('key', 'key2')
-                expect(matadata).to.have.property('key', 'value')
-                expect(matadata).to.have.property('key2', 'value2')
-                expect(matadata).to.not.have.property('key3')
+                expect(metadata).to.have.all.keys('key', 'key2')
+                expect(metadata).to.have.property('key', 'value')
+                expect(metadata).to.have.property('key2', 'value2')
+                expect(metadata).to.not.have.property('key3')
             })
         })
         describe("role", () => {
@@ -539,11 +539,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('serviceType', ATestClass)
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'inject')
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
             })
 
             it("functional service inject", () => {
@@ -557,11 +557,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('serviceType', ATestClass)
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'inject')
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
                 expect(environmentMetadata).to.have
@@ -580,11 +580,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('serviceType', ATestClass)
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'inject')
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
                 expect(environmentMetadata).to.have
@@ -603,9 +603,9 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('tableName', 'ATable')
+                expect(metadata).to.have.property('tableName', 'ATable')
             })
 
             it("injected CLASS_SNSCONFIGURATIONKEY", () => {
@@ -620,9 +620,9 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('topicName', 'ATopic')
+                expect(metadata).to.have.property('topicName', 'ATopic')
             })
 
             it("injected CLASS_S3CONFIGURATIONKEY", () => {
@@ -637,9 +637,9 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('bucketName', 'abucket')
+                expect(metadata).to.have.property('bucketName', 'abucket')
             })
         })
         describe("param", () => {
@@ -652,11 +652,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('from', 'name')
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'param')
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
             })
             it("inject custom name", () => {
                 class ParamClass {
@@ -667,11 +667,11 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('from', 'fullName')
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'param')
+                expect(metadata).to.have.property('from', 'fullName')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
             })
             it("inject param index", () => {
                 class ParamClass {
@@ -703,13 +703,13 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('from', 'fullName')
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'param')
-                expect(matadata).to.have.property('p1', 1)
-                expect(matadata).to.have.property('p2', 'p2')
+                expect(metadata).to.have.property('from', 'fullName')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+                expect(metadata).to.have.property('p1', 1)
+                expect(metadata).to.have.property('p2', 'p2')
             })
             it("inject with config without name", () => {
                 class ParamClass {
@@ -720,13 +720,13 @@ describe('annotations', () => {
 
                 expect(value).to.have.lengthOf(1);
 
-                const matadata = value[0]
+                const metadata = value[0]
 
-                expect(matadata).to.have.property('from', 'shortName')
-                expect(matadata).to.have.property('parameterIndex', 0)
-                expect(matadata).to.have.property('type', 'param')
-                expect(matadata).to.have.property('p1', 1)
-                expect(matadata).to.have.property('p2', 'p2')
+                expect(metadata).to.have.property('from', 'shortName')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+                expect(metadata).to.have.property('p1', 1)
+                expect(metadata).to.have.property('p2', 'p2')
             })
         })
     })

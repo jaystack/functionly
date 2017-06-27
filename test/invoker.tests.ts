@@ -48,7 +48,52 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
+        })
+
+        it("return value", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(1)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+        })
+
+        it("handler throw error", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    throw new Error('error in handle')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(false).to.equal(true, 'skippable code')
+                    done()
+                }
+            }, (e) => {
+                expect(counter).to.equal(1)
+                expect(e.message).to.equal('error in handle')
+                done()
+            })
         })
 
         it("query param", (done) => {
@@ -75,7 +120,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("body param", (done) => {
@@ -102,7 +147,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("params param", (done) => {
@@ -129,7 +174,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("headers param", (done) => {
@@ -156,7 +201,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("missing param", (done) => {
@@ -182,7 +227,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("params resolve order", (done) => {
@@ -226,7 +271,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("params resolve hint", (done) => {
@@ -270,7 +315,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("inject param", (done) => {
@@ -296,7 +341,7 @@ describe('invoker', () => {
                     expect(counter).to.equal(1)
                     done()
                 }
-            }, () => { })
+            }, (e) => { e && done(e) })
         })
 
         it("event param", (done) => {
@@ -314,7 +359,7 @@ describe('invoker', () => {
                     done()
                 }
             }
-            const next = () => { }
+            const next = (e) => { e && done(e) }
 
             class MockService extends FunctionalService {
                 handle( @param p1, @event p2) {
@@ -348,8 +393,46 @@ describe('invoker', () => {
             }
 
             const invoker = MockService.createInvoker()
-            invoker({}, {}, () => {
+            invoker({}, {}, (e) => {
                 expect(counter).to.equal(1)
+                done(e)
+            })
+        })
+
+        it("return value", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker({}, {}, (e, result) => {
+                expect(counter).to.equal(1)
+                expect(result).to.deep.equal({ ok: 1 })
+                done(e)
+            })
+        })
+
+        it("handler throw error", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    throw new Error('error in handle')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker({}, {}, (e, result) => {
+                expect(counter).to.equal(1)
+                expect(e.message).to.equal('error in handle')
                 done()
             })
         })
@@ -372,9 +455,9 @@ describe('invoker', () => {
                     p1: 'v1',
                     p2: 'v2'
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -398,9 +481,9 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -424,9 +507,9 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -450,9 +533,9 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -476,9 +559,9 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -518,9 +601,9 @@ describe('invoker', () => {
                         p4: 'headers'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
                 })
             })
 
@@ -560,9 +643,115 @@ describe('invoker', () => {
                         p4: 'headers'
                     }
                 }
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
+                })
+            })
+
+            it("api gateway return value", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return { ok: 1 }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                }
+                invoker(awsEvent, {}, (e, result) => {
+                    expect(counter).to.equal(1)
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: '{"ok":1}'
+                    })
+                    done(e)
+                })
+            })
+
+            it("api gateway return value advanced", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return {
+                            statusCode: 200,
+                            body: 'myresult'
+                        }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                }
+                invoker(awsEvent, {}, (e, result) => {
+                    expect(counter).to.equal(1)
+                    expect(result).to.deep.equal({
+                        statusCode: 200,
+                        body: 'myresult'
+                    })
+                    done(e)
+                })
+            })
+
+            it("api gateway return value advanced - error", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return {
+                            statusCode: 500,
+                            body: 'myerror'
+                        }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                }
+                invoker(awsEvent, {}, (e, result) => {
+                    expect(counter).to.equal(1)
+                    expect(result).to.deep.equal({
+                        statusCode: 500,
+                        body: 'myerror'
+                    })
+                    done(e)
+                })
+            })
+
+            it("api gateway return value advanced - throw error", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        throw new Error('error in handle')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                }
+                invoker(awsEvent, {}, (e, result) => {
+                    expect(counter).to.equal(1)
+                    expect(result).to.deep.equal({
+                        statusCode: 500,
+                        body: JSON.stringify(new Error('error in handle'))
+                    })
+                    done(e)
                 })
             })
 
@@ -595,9 +784,45 @@ describe('invoker', () => {
 
                 const invoker = MockService.createInvoker()
 
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
+                })
+            })
+
+            it("s3 param source", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+                const awsEvent = {
+                    Records: [{
+                        eventSource: 'aws:s3',
+                        s3: {
+                            "object": {
+                                "key": "filename",
+                                "size": 1234,
+                                "eTag": "rnd",
+                                "sequencer": "sssss"
+                            }
+                        }
+                    }]
+                }
+
+                class MockService extends FunctionalService {
+                    handle( @param s3, @param({ name: 'Records', source: null }) p2) {
+                        counter++
+                        expect(s3).to.deep.equal(awsEvent.Records[0].s3)
+                        expect(p2).to.have.lengthOf(1);
+                        expect(p2).to.deep.equal(awsEvent.Records)
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                invoker(awsEvent, {}, (e) => {
+                    expect(counter).to.equal(1)
+                    done(e)
                 })
             })
 
@@ -627,9 +852,42 @@ describe('invoker', () => {
 
                 const invoker = MockService.createInvoker()
 
-                invoker(awsEvent, {}, () => {
+                invoker(awsEvent, {}, (e) => {
                     expect(counter).to.equal(1)
-                    done()
+                    done(e)
+                })
+            })
+
+            it("sns param source", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+                const awsEvent = {
+                    Records: [{
+                        EventSource: 'aws:sns',
+                        Sns: {
+                            "Type": "Notification",
+                            "Subject": "subject",
+                            "Message": "message"
+                        }
+                    }]
+                }
+
+                class MockService extends FunctionalService {
+                    handle( @param Sns, @param({ name: 'Records', source: null }) p2) {
+                        counter++
+                        expect(Sns).to.deep.equal(awsEvent.Records[0].Sns)
+                        expect(p2).to.have.lengthOf(1);
+                        expect(p2).to.deep.equal(awsEvent.Records)
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                invoker(awsEvent, {}, (e) => {
+                    expect(counter).to.equal(1)
+                    done(e)
                 })
             })
         })
@@ -653,9 +911,9 @@ describe('invoker', () => {
 
             const invoker = MockService.createInvoker()
 
-            invoker({}, {}, () => {
+            invoker({}, {}, (e) => {
                 expect(counter).to.equal(1)
-                done()
+                done(e)
             })
         })
 
@@ -667,11 +925,11 @@ describe('invoker', () => {
             @injectable
             class MockInjectable extends Service { }
 
-            const awsEvent = { p1: 1, p2: "2" }
+            const awsEvent = {}
             const awsContext = {}
-            const cb = () => {
+            const cb = (e) => {
                 expect(counter).to.equal(1)
-                done()
+                done(e)
             }
 
             class MockService extends FunctionalService {
