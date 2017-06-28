@@ -12,7 +12,7 @@ import {
     tableResources, lambdaResources, roleResources, s3DeploymentBucket, s3DeploymentBucketParameter,
     apiGateway, sns, s3, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
 } from './context/resources'
-import { uploadTemplate } from './context/uploadTemplate'
+import { uploadTemplate, persistCreateTemplate } from './context/uploadTemplate'
 
 export const cloudFormation = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
@@ -23,6 +23,9 @@ export const cloudFormation = {
 
         await executor(context, cloudFormationInit)
         await executor(context, s3DeploymentBucket)
+
+        logger.info(`Functionly: Save create template...`)
+        await executor(context, persistCreateTemplate)
 
         try {
             await executor(context, getTemplate)
@@ -69,6 +72,9 @@ export const cloudFormation = {
 
         await executor(context, cloudFormationInit)
         await executor(context, s3DeploymentBucket)
+
+        logger.info(`Functionly: Save create template...`)
+        await executor(context, persistCreateTemplate)
 
         logger.info(`Functionly: Save binary...`)
         const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'

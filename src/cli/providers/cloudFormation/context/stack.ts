@@ -24,9 +24,10 @@ export const createStack = async (context) => {
                 [
                     "https://s3.amazonaws.com",
                     awsBucket,
-                    `functionly`,
+                    context.projectName || `functionly`,
+                    context.stage,
                     folderPah,
-                    `${stackName}.template`
+                    `${stackName}.template.json`
                 ]
             ]
         }

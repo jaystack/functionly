@@ -30,6 +30,7 @@ export const createStack = ExecuteStep.register('CloudFormation-CreateStack', (c
         const cfConfig: any = pick(context.CloudFormationConfig, CREATE_STACK_PRPERTIES)
         const params = {
             ...cfConfig,
+            StackName: `${cfConfig.StackName}-${context.stage}`,
             TemplateBody: JSON.stringify(context.CloudFormationTemplate, null, 2)
         }
 
@@ -53,6 +54,7 @@ export const updateStack = ExecuteStep.register('CloudFormation-UpdateStack', (c
         const cfConfig: any = pick(context.CloudFormationConfig, UPDATE_STACK_PRPERTIES)
         const params = {
             ...cfConfig,
+            StackName: `${cfConfig.StackName}-${context.stage}`,
             TemplateURL: `https://s3.eu-central-1.amazonaws.com/${context.awsBucket}/${context.S3CloudFormationTemplate}`,
             UsePreviousTemplate: false
         }
@@ -75,7 +77,7 @@ export const getTemplate = ExecuteStep.register('CloudFormation-GetTemplate', (c
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            StackName: context.CloudFormationConfig.StackName
+            StackName: `${context.CloudFormationConfig.StackName}-${context.stage}`
         }
 
         cloudFormation.getTemplate(params, function (err, data) {
@@ -89,7 +91,7 @@ export const describeStackResouce = ExecuteStep.register('CloudFormation-Describ
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            StackName: context.CloudFormationConfig.StackName,
+            StackName: `${context.CloudFormationConfig.StackName}-${context.stage}`,
             LogicalResourceId: context.LogicalResourceId
         }
 
@@ -103,13 +105,14 @@ export const describeStackResouce = ExecuteStep.register('CloudFormation-Describ
 export const describeStacks = ExecuteStep.register('CloudFormation-DescribeStacks', (context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
+        const stackName = `${context.CloudFormationConfig.StackName}-${context.stage}`
         let params = {
-            StackName: context.CloudFormationConfig.StackName
+            StackName: stackName
         }
 
         cloudFormation.describeStacks(params, function (err, data) {
             if (err) return reject(err)
-            const result = data.Stacks.find(s => s.StackName === context.CloudFormationConfig.StackName)
+            const result = data.Stacks.find(s => s.StackName === stackName)
             return resolve(result);
         });
     })

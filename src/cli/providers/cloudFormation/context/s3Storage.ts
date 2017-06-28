@@ -77,7 +77,7 @@ export const s3Storage = async (context) => {
     const { s3Config } = context
 
     const s3Properties = {
-        "BucketName": s3Config.bucketName
+        "BucketName": `${s3Config.bucketName}-${context.stage}`
     }
 
     const s3Bucket = {
@@ -115,7 +115,7 @@ export const s3StoragePolicy = async (context) => {
                     "-",
                     [
                         "functionly",
-                        serviceDefinition.roleResource.Properties.RoleName,
+                        serviceDefinition.roleName,
                         "s3"
                     ]
                 ]
@@ -135,6 +135,7 @@ export const s3StoragePolicy = async (context) => {
                 }]
             }
         }
+        serviceDefinition.roleResource.Properties.Policies = serviceDefinition.roleResource.Properties.Policies || []
         serviceDefinition.roleResource.Properties.Policies.push(policy)
     }
 
@@ -143,7 +144,7 @@ export const s3StoragePolicy = async (context) => {
             "",
             [
                 "arn:aws:s3:::",
-                s3Config.bucketName,
+                `${s3Config.bucketName}-${context.stage}`,
                 "/*"
             ]
         ]
@@ -213,7 +214,7 @@ export const s3Permissions = (context) => {
         "Principal": "s3.amazonaws.com",
         "SourceArn": {
             "Fn::Join": [":", [
-                "arn", "aws", "s3", "", "", serviceConfig.bucketName]]
+                "arn", "aws", "s3", "", "", `${serviceConfig.bucketName}-${context.stage}`]]
         }
     }
 

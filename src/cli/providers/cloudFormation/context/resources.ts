@@ -57,7 +57,7 @@ export const roleResource = async (context) => {
     const { roleName, serviceDefinitions } = context
 
     const roleProperties = {
-        "RoleName": roleName,
+        "RoleName": `${roleName}-${context.stage}`,
         "AssumeRolePolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [{
@@ -97,7 +97,7 @@ export const roleResource = async (context) => {
         }
 
 
-        const roleResourceName = `IAM${roleProperties.RoleName}`
+        const roleResourceName = `IAM${roleName}`
         const resourceName = setResource(context, roleResourceName, iamRole)
 
         await setStackParameter({
@@ -115,6 +115,7 @@ export const roleResource = async (context) => {
                 "Ref": `${resourceName}Arn`
             }
             serviceDefinition.roleResource = iamRole
+            serviceDefinition.roleName = roleName
         }
     }
 }
@@ -259,26 +260,26 @@ export const tableResource = async (context) => {
 
     const properties = {
         ...__dynamoDBDefaults,
-        TableName: tableConfig.tableName,
+        TableName: `${tableConfig.tableName}-${context.stage}`,
         ...tableConfig.nativeConfig
     };
 
-    tableConfig.tableName = properties.TableName
 
     const dynamoDb = {
         "Type": "AWS::DynamoDB::Table",
         "Properties": properties
     }
 
-    const tableResourceName = `Dynamo${properties.TableName}`
+    const tableResourceName = `Dynamo${tableConfig.tableName}`
     const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK)
-
+    
     await setStackParameter({
         ...context,
         resourceName,
         sourceStackName: DYNAMODB_TABLE_STACK
     })
 
+    tableConfig.tableName = properties.TableName
     tableConfig.resourceName = resourceName
 
 }
@@ -309,7 +310,7 @@ export const lambdaResource = async (context) => {
             S3Key: context.S3Zip
         },
         Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
-        FunctionName: getFunctionName(serviceDefinition.service),
+        FunctionName: `${getFunctionName(serviceDefinition.service)}-${context.stage}`,
         Handler: serviceDefinition.handler,
         MemorySize: serviceDefinition[CLASS_MEMORYSIZEKEY] || getMetadata(CLASS_MEMORYSIZEKEY, serviceDefinition.service),
         Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
@@ -321,6 +322,8 @@ export const lambdaResource = async (context) => {
         Tags: serviceDefinition[CLASS_TAGKEY] || getMetadata(CLASS_TAGKEY, serviceDefinition.service)
     };
 
+    updateEnvironmentVariable({ ...context, environments: properties.Environment.Variables })
+
     const lambdaResource = {
         "Type": "AWS::Lambda::Function",
         "Properties": properties,
@@ -329,7 +332,7 @@ export const lambdaResource = async (context) => {
         ]
     }
 
-    const resourceName = `Lambda${properties.FunctionName}`
+    const resourceName = `Lambda${getFunctionName(serviceDefinition.service)}`
     const name = setResource(context, resourceName, lambdaResource, getStackName(serviceDefinition))
     serviceDefinition.resourceName = name
 }
@@ -366,7 +369,7 @@ export const lambdaLogResource = async (context) => {
     const functionName = getFunctionName(serviceDefinition.service)
 
     const properties: any = {
-        "LogGroupName": `/aws/lambda/${functionName}`
+        "LogGroupName": `/aws/lambda/${functionName}-${context.stage}`
     };
 
     const lambdaResource = {
@@ -377,4 +380,15 @@ export const lambdaLogResource = async (context) => {
     const resourceName = `${functionName}LogGroup`
     const name = setResource(context, resourceName, lambdaResource, getStackName(serviceDefinition))
     serviceDefinition.logGroupResourceName = name
+}
+
+const UPDATEABLE_ENVIRONMENT_REGEXP = /^FUNCTIONAL_SERVICE_|_TABLE_NAME$|_S3_BUCKET$|_SNS_TOPICNAME$/
+const updateEnvironmentVariable = async ({ environments, stage }) => {
+    if (environments) {
+        for (const key in environments) {
+            if (UPDATEABLE_ENVIRONMENT_REGEXP.test(key)) {
+                environments[key] = `${environments[key]}-${stage}`
+            }
+        }
+    }
 }

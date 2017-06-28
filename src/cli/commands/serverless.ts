@@ -31,7 +31,7 @@ export default (api) => {
         context.serverless.provider = {
             name: FUNCTIONAL_ENVIRONMENT,
             region: context.awsRegion,
-            stage: 'dev',
+            stage: context.stage,
             environment: {}
         }
         await executor({ context, name: 'iamRoleConfig', method: iamRoleConfig })
@@ -192,6 +192,7 @@ export default (api) => {
                 .command('serverless [path]')
                 .alias('sls')
                 .option('--aws-region <awsRegion>', 'AWS_REGION')
+                .option('--stage <stage>', 'stage')
                 .description('serverless config')
                 .action(async (path, command) => {
                     process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
@@ -199,11 +200,13 @@ export default (api) => {
                     try {
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const awsRegion = requireValue(command.awsRegion || projectConfig.awsRegion, 'awsRegion')
+                        const stage = command.stage || projectConfig.stage || 'dev'
 
                         const context = await createContext(entryPoint, {
                             deployTarget: FUNCTIONAL_ENVIRONMENT,
                             awsRegion,
-                            FUNCTIONAL_ENVIRONMENT
+                            FUNCTIONAL_ENVIRONMENT,
+                            stage
                         })
 
                         await executor(context, ExecuteStep.get('SetFunctionalEnvironment'))

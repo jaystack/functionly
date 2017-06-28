@@ -16,7 +16,7 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
     const RestApi = {
         "Type": "AWS::ApiGateway::RestApi",
         "Properties": {
-            "Name": context.CloudFormationConfig.StackName
+            "Name": `${context.CloudFormationConfig.StackName}-${context.stage}`
         }
     }
 
@@ -42,7 +42,8 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
                     {
                         "Ref": resourceName
                     },
-                    ".execute-api.eu-central-1.amazonaws.com/dev"
+                    ".execute-api.eu-central-1.amazonaws.com/",
+                    context.stage
                 ]
             ]
         }
@@ -242,7 +243,7 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
             "RestApiId": {
                 "Ref": API_GATEWAY_REST_API
             },
-            "StageName": "dev"
+            "StageName": context.stage
         },
         "DependsOn": [
             ...[...lambdaDependsOn, ...stackDependsOn].filter((v, i, self) => self.indexOf(v) === i)

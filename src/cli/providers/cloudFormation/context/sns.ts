@@ -40,7 +40,7 @@ export const snsTopic = async (context) => {
     snsConfig.advTopicName = `${snsConfig.topicName}${context.date.valueOf()}`
 
     const snsProperties = {
-        "TopicName": snsConfig.advTopicName
+        "TopicName": `${snsConfig.advTopicName}-${context.stage}`
     }
 
     const snsTopic = {
@@ -135,7 +135,7 @@ const updateSNSEnvironmentVariables = (context) => {
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
-        environmentVariables[serviceConfig.environmentKey] = snsConfig.advTopicName
+        environmentVariables[serviceConfig.environmentKey] = `${snsConfig.advTopicName}-${context.stage}`
 
         setStackParameter({
             ...context,

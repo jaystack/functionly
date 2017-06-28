@@ -50,25 +50,27 @@ export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => 
             ...config.S3,
             Bucket: context.awsBucket,
             Body: binary,
-            Key: `functionly/${folderPah}/${context.upload.name}`,
+            Key: `${context.projectName || 'functionly'}/${context.stage}/${folderPah}/${context.upload.name}`,
             ContentType: context.upload.contentType
         }
 
         if (context.skipUpload) {
-            if (config.tempDirectory) {
-                writeFileSync(join(config.tempDirectory, context.upload.name), binary)
-            }
+            writeFile(context.upload.name, binary)
             return resolve(params)
         }
 
         s3.putObject(params, (err, res) => {
             if (err) return reject(err)
 
-            if (config.tempDirectory) {
-                writeFileSync(join(config.tempDirectory, context.upload.name), binary)
-            }
+            writeFile(context.upload.name, binary)
 
             return resolve(params)
         })
     })
 })
+
+export const writeFile = (fileName, binary) => {
+    if (config.tempDirectory) {
+        writeFileSync(join(config.tempDirectory, fileName), binary)
+    }
+}
