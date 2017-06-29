@@ -24,7 +24,7 @@ import { role, description } from '../src/annotations'
 
 import { inject } from '../src/annotations/parameters/inject'
 import { param } from '../src/annotations/parameters/param'
-import { FunctionalService, Service } from '../src/classes'
+import { FunctionalService, Service, DynamoDB, SimpleNotificationService, S3Storage } from '../src/classes'
 
 
 
@@ -591,10 +591,10 @@ describe('annotations', () => {
                     .property(`ATestClass_defined_environment`, 'value')
             });
 
-            it("injected CLASS_DYNAMOTABLECONFIGURATIONKEY", () => {
+            it("injected DynamoDB", () => {
                 @injectable
                 @dynamoTable({ tableName: 'ATable' })
-                class ATestClass extends Service { }
+                class ATestClass extends DynamoDB { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
                 }
@@ -608,10 +608,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('tableName', 'ATable')
             })
 
-            it("injected CLASS_SNSCONFIGURATIONKEY", () => {
+            it("injected SimpleNotificationService", () => {
                 @injectable
                 @sns({ topicName: 'ATopic' })
-                class ATestClass extends Service { }
+                class ATestClass extends SimpleNotificationService { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
                 }
@@ -625,10 +625,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('topicName', 'ATopic')
             })
 
-            it("injected CLASS_S3CONFIGURATIONKEY", () => {
+            it("injected S3Storage", () => {
                 @injectable
                 @s3Storage({ bucketName: 'ABucket' })
-                class ATestClass extends Service { }
+                class ATestClass extends S3Storage { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
                 }

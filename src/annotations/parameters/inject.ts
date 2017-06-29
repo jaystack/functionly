@@ -1,6 +1,5 @@
-import { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_INJECTABLEKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY } from '../constants'
+import { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_INJECTABLEKEY } from '../constants'
 import { getOwnMetadata, defineMetadata, getMetadata } from '../metadata'
-import { getFunctionParameters } from '../utils'
 import { getFunctionName } from '../classes/functionName'
 
 export const inject = (type: any, ...params): any => {
@@ -20,27 +19,8 @@ export const inject = (type: any, ...params): any => {
 
         defineMetadata(PARAMETER_PARAMKEY, [...existingParameters], target, targetKey);
 
-        const injectTarget = type
-        const metadata = getMetadata(CLASS_ENVIRONMENTKEY, target) || {}
-        if (injectTarget.createInvoker) {
-            const funcName = getFunctionName(injectTarget) || 'undefined'
-            metadata[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] = funcName
-            defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
-        } else {
-            const injectMetadata = getMetadata(CLASS_ENVIRONMENTKEY, injectTarget) || {}
-            if (injectMetadata) {
-                Object.keys(injectMetadata).forEach((key) => {
-                    metadata[key] = injectMetadata[key]
-                })
-                defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
-            }
+        if (typeof type.onDefineInjectTo === 'function') {
+            type.onDefineInjectTo(target, targetKey, parameterIndex)
         }
-
-        [CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY].forEach(key => {
-            const injectKeyConfig = (getMetadata(key, injectTarget) || [])
-                .map(c => { return { ...c, injected: true } })
-            const keyConfig = getMetadata(key, target) || []
-            defineMetadata(key, [...keyConfig, ...injectKeyConfig], target);
-        })
     }
 }

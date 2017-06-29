@@ -3,6 +3,8 @@ import { getMetadata, defineMetadata } from '../metadata'
 import { applyTemplates } from '../templates'
 import { environment } from './environment'
 
+export const DYNAMO_TABLE_NAME_SUFFIX = '_TABLE_NAME'
+
 export const __dynamoDBDefaults = {
     AttributeDefinitions: [
         {
@@ -22,8 +24,6 @@ export const __dynamoDBDefaults = {
     }
 }
 
-
-
 export const dynamoTable = (tableConfig: {
     tableName: string,
     environmentKey?: string,
@@ -31,7 +31,7 @@ export const dynamoTable = (tableConfig: {
 }) => (target: Function) => {
     let tableDefinitions = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, target) || [];
 
-    tableConfig.environmentKey = tableConfig.environmentKey || '%ClassName%_TABLE_NAME'
+    tableConfig.environmentKey = tableConfig.environmentKey || `%ClassName%${DYNAMO_TABLE_NAME_SUFFIX}`
     tableConfig.nativeConfig = { ...__dynamoDBDefaults, ...tableConfig.nativeConfig }
 
     const { templatedKey, templatedValue } = applyTemplates(tableConfig.environmentKey, tableConfig.tableName, target)

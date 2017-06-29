@@ -1,4 +1,5 @@
 import { intersection } from 'lodash'
+
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
 const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
@@ -272,7 +273,7 @@ export const tableResource = async (context) => {
 
     const tableResourceName = `Dynamo${tableConfig.tableName}`
     const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK)
-    
+
     await setStackParameter({
         ...context,
         resourceName,

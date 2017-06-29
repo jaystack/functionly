@@ -1,8 +1,9 @@
 import { getMetadata, constants, __dynamoDBDefaults } from '../../../annotations'
+import { DYNAMO_TABLE_NAME_SUFFIX } from '../../../annotations/classes/dynamoTable'
 import { ExecuteStep } from '../core/executeStep'
 
 export class TableDiscoveryStep extends ExecuteStep {
-    protected tableNameEnvRegexp = /_TABLE_NAME$/
+    protected tableNameEnvRegexp = new RegExp(`${DYNAMO_TABLE_NAME_SUFFIX}$`)
     public async method(context) {
         const tablesToCreate = new Map()
 

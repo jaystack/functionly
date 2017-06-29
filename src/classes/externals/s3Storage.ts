@@ -1,7 +1,7 @@
 import { S3 } from 'aws-sdk'
-import { Service } from '../service'
+import { InjectService } from '../injectService'
 import { constants, getMetadata } from '../../annotations'
-import { S3_BUCKET_PREFIX } from '../../annotations/classes/s3Storage'
+import { S3_BUCKET_SUFFIX } from '../../annotations/classes/s3Storage'
 const { CLASS_S3CONFIGURATIONKEY } = constants
 
 export { S3 } from 'aws-sdk'
@@ -28,9 +28,11 @@ const initAWSSDK = () => {
     return s3
 }
 
-export class S3Storage extends Service {
+export class S3Storage extends InjectService {
+    public static ConfigEnvironmentKey = CLASS_S3CONFIGURATIONKEY
+
     private _s3Client: S3
-    constructor() {
+    public constructor() {
         initAWSSDK()
 
         super()
@@ -58,7 +60,7 @@ export class S3Storage extends Service {
 
     protected setDefaultValues(params, command) {
         const initParams = {
-            Bucket: process.env[`${this.constructor.name}${S3_BUCKET_PREFIX}`]
+            Bucket: process.env[`${this.constructor.name}${S3_BUCKET_SUFFIX}`]
         }
 
         return { ...initParams, ...params }

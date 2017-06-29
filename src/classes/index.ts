@@ -1,4 +1,5 @@
 export { Service } from './service'
+export { InjectService } from './injectService'
 export { FunctionalApi } from './functionalApi'
 export { FunctionalService } from './functionalService'
 export { DynamoDB } from './externals/dynamoDB'

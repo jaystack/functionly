@@ -1,8 +1,11 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
-import { Service } from '../service'
+import { InjectService } from '../injectService'
 import { constants, getMetadata } from '../../annotations'
+import { DYNAMO_TABLE_NAME_SUFFIX } from '../../annotations/classes/dynamoTable'
+
+const { CLASS_DYNAMOTABLECONFIGURATIONKEY } = constants
 
 let dynamoDB = null;
 const initAWSSDK = () => {
@@ -26,9 +29,11 @@ const initAWSSDK = () => {
     return dynamoDB
 }
 
-export class DynamoDB extends Service {
+export class DynamoDB extends InjectService {
+    public static ConfigEnvironmentKey = CLASS_DYNAMOTABLECONFIGURATIONKEY
+
     private _documentClient: DocumentClient
-    constructor() {
+    public constructor() {
         initAWSSDK()
 
         super()
@@ -109,10 +114,10 @@ export class DynamoDB extends Service {
     }
 
     protected setDefaultValues(params, command) {
-        const tableConfig = (getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
+        const tableConfig = (getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
         const tableName = ({ TableName: tableConfig && tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
         const initParams = {
-            TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName
+            TableName: process.env[`${this.constructor.name}${DYNAMO_TABLE_NAME_SUFFIX}`] || tableName
         }
 
         return { ...initParams, ...params }
