@@ -1,10 +1,10 @@
-import { aws } from './aws'
+import { aws as awssdk } from './aws'
 import { local } from './local'
-import { cloudFormation as cf } from './cloudFormation'
+import { cloudFormation as aws } from './cloudFormation'
 import { ExecuteStep, executor } from '../context'
 import { getPluginDefinitions } from '../project/config'
 
-let environments = { aws, local, cf }
+let environments = { aws, local, awssdk }
 
 export class CreateEnvironmentStep extends ExecuteStep {
     public async method(context) {
