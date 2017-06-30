@@ -10,7 +10,7 @@ import { executor } from '../../context'
 import { cloudFormationInit } from './context/cloudFormationInit'
 import {
     tableResources, lambdaResources, roleResources, s3DeploymentBucket, s3DeploymentBucketParameter,
-    apiGateway, sns, s3, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
+    apiGateway, sns, s3, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME, tableSubscribers
 } from './context/resources'
 import { uploadTemplate, persistCreateTemplate } from './context/uploadTemplate'
 
@@ -58,6 +58,7 @@ export const cloudFormation = {
         await executor(context, apiGateway)
         await executor(context, sns)
         await executor(context, s3)
+        await executor(context, tableSubscribers)
 
         logger.info(`Functionly: Uploading template...`)
         await executor(context, uploadTemplate)
@@ -90,6 +91,7 @@ export const cloudFormation = {
         await executor(context, apiGateway)
         await executor(context, sns)
         await executor(context, s3)
+        await executor(context, tableSubscribers)
 
         logger.info(`Functionly: Save template...`)
         await executor({ ...context, skipUpload: true }, uploadTemplate)

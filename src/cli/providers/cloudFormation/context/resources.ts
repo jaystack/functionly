@@ -11,8 +11,7 @@ import { getBucketReference } from './s3Storage'
 export { s3DeploymentBucket, s3DeploymentBucketParameter, s3, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3Storage'
 export { apiGateway } from './apiGateway'
 export { sns } from './sns'
-
-export const DYNAMODB_TABLE_STACK = 'DynamoDBTableStack'
+export { tableResources, tableSubscribers } from './dynamoTable'
 
 
 export const initStacks = ExecuteStep.register('CloudFormation-Stack-init', async (context) => {
@@ -201,7 +200,7 @@ export const dynamoPolicy = async (context) => {
     const { roleName, serviceDefinitions, roleProperties } = context
     const tables = []
     const services = serviceDefinitions.map(s => s.service)
-    const usedTableConfigs = context.tableConfigs.filter(t => intersection(t.usedBy, services).length)
+    const usedTableConfigs = context.tableConfigs.filter(t => intersection(t.services.map(s => s.serviceDefinition.service), services).length)
 
     const policy = {
         "PolicyName": {
@@ -237,52 +236,6 @@ export const dynamoPolicy = async (context) => {
     if (usedTableConfigs.length) {
         roleProperties.Policies.push(policy)
     }
-}
-
-
-export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (context) => {
-    await executor({
-        context: { ...context, stackName: DYNAMODB_TABLE_STACK },
-        name: `CloudFormation-Stack-init-${DYNAMODB_TABLE_STACK}`,
-        method: createStack
-    })
-
-    for (const tableConfig of context.tableConfigs) {
-        await executor({
-            context: { ...context, tableConfig },
-            name: `DynamoDB-Table-${tableConfig.tableName}`,
-            method: tableResource
-        })
-    }
-})
-
-export const tableResource = async (context) => {
-    const { tableConfig } = context
-
-    const properties = {
-        ...__dynamoDBDefaults,
-        TableName: `${tableConfig.tableName}-${context.stage}`,
-        ...tableConfig.nativeConfig
-    };
-
-
-    const dynamoDb = {
-        "Type": "AWS::DynamoDB::Table",
-        "Properties": properties
-    }
-
-    const tableResourceName = `Dynamo${tableConfig.tableName}`
-    const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK)
-
-    await setStackParameter({
-        ...context,
-        resourceName,
-        sourceStackName: DYNAMODB_TABLE_STACK
-    })
-
-    tableConfig.tableName = properties.TableName
-    tableConfig.resourceName = resourceName
-
 }
 
 export const lambdaResources = ExecuteStep.register('Lambda-Functions', async (context) => {

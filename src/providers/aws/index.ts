@@ -5,6 +5,7 @@ import { ApiGateway } from './eventSources/apiGateway'
 import { LambdaCall } from './eventSources/lambdaCall'
 import { SNS } from './eventSources/sns'
 import { S3 } from './eventSources/s3'
+import { DynamoTable } from './eventSources/dynamoTable'
 
 const lambda = new Lambda();
 
@@ -12,6 +13,7 @@ const eventSourceHandlers = [
     new ApiGateway(),
     new SNS(),
     new S3(),
+    new DynamoTable(),
     new LambdaCall()
 ]
 

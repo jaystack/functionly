@@ -1,7 +1,8 @@
 import { getMetadata, constants, defineMetadata } from '../../../../annotations'
 const { CLASS_SNSCONFIGURATIONKEY, CLASS_ENVIRONMENTKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
-import { setResource, collectConfig } from '../utils'
+import { collectMetadata } from '../../../utilities/collectMetadata'
+import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
 
 export const SNS_TABLE_STACK = 'SNSStack'
@@ -17,7 +18,10 @@ export const sns = ExecuteStep.register('SNS', async (context) => {
 })
 
 export const snsTopics = ExecuteStep.register('SNS-Topics', async (context) => {
-    const configs = collectConfig(context, CLASS_SNSCONFIGURATIONKEY, (c) => c.topicName)
+    const configs = collectMetadata(context, {
+        metadataKey: CLASS_SNSCONFIGURATIONKEY,
+        selector: (c) => c.topicName
+    })
 
     for (const snsConfig of configs) {
         await executor({
@@ -79,10 +83,10 @@ export const snsTopicSubscriptions = async (context) => {
     }
 }
 
-export const snsTopicSubscription = (context) => {
+export const snsTopicSubscription = async (context) => {
     const { serviceDefinition, snsConfig } = context
 
-    setStackParameter({
+    await setStackParameter({
         ...context,
         sourceStackName: SNS_TABLE_STACK,
         resourceName: snsConfig.resourceName,
@@ -130,14 +134,14 @@ export const snsPermissions = (context) => {
     setResource(context, resourceName, snsPermission, getStackName(serviceDefinition), true)
 }
 
-const updateSNSEnvironmentVariables = (context) => {
+const updateSNSEnvironmentVariables = async (context) => {
     const { snsConfig } = context
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
         environmentVariables[serviceConfig.environmentKey] = `${snsConfig.advTopicName}-${context.stage}`
 
-        setStackParameter({
+        await setStackParameter({
             ...context,
             sourceStackName: SNS_TABLE_STACK,
             resourceName: snsConfig.resourceName,

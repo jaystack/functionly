@@ -1,7 +1,8 @@
 import { getMetadata, constants, defineMetadata, getFunctionName } from '../../../../annotations'
 const { CLASS_S3CONFIGURATIONKEY, CLASS_ENVIRONMENTKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
-import { setResource, collectConfig } from '../utils'
+import { collectMetadata } from '../../../utilities/collectMetadata'
+import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
 
 export const S3_STORAGE_STACK = 'S3Stack'
@@ -56,7 +57,10 @@ export const s3 = ExecuteStep.register('S3', async (context) => {
 })
 
 export const s3Storages = ExecuteStep.register('S3-Storages', async (context) => {
-    const configs = collectConfig(context, CLASS_S3CONFIGURATIONKEY, (c) => c.bucketName)
+    const configs = collectMetadata(context, {
+        metadataKey: CLASS_S3CONFIGURATIONKEY,
+        selector: (c) => c.bucketName
+    })
 
     for (const s3Config of configs) {
         const s3BucketDefinition = await executor({
@@ -171,17 +175,17 @@ export const s3StorageSubscriptions = async (context) => {
     }
 }
 
-export const s3BucketSubscription = (context) => {
+export const s3BucketSubscription = async (context) => {
     const { serviceDefinition, serviceConfig, s3Config, s3BucketDefinition } = context
 
-    setStackParameter({
+    await setStackParameter({
         ...context,
         sourceStackName: getStackName(serviceDefinition),
         resourceName: serviceDefinition.resourceName,
         targetStackName: S3_STORAGE_STACK
     })
 
-    setStackParameter({
+    await setStackParameter({
         ...context,
         sourceStackName: getStackName(serviceDefinition),
         resourceName: serviceDefinition.resourceName,
