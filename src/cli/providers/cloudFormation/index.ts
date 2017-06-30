@@ -7,7 +7,7 @@ import { createStack, updateStack, getTemplate, describeStackResouce, describeSt
 import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
-import { cloudFormationInit } from './context/cloudFormationInit'
+import { cloudFormationInit, cloudFormationMerge } from './context/cloudFormationInit'
 import {
     tableResources, lambdaResources, roleResources, s3DeploymentBucket, s3DeploymentBucketParameter,
     apiGateway, sns, s3, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME, tableSubscribers
@@ -48,6 +48,8 @@ export const cloudFormation = {
         const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
         await executor(context, uploadZipStep(fileName, context.zipData()))
 
+        await executor(context, cloudFormationMerge)
+
         await executor(context, initStacks)
         await executor(context, s3DeploymentBucketParameter)
 
@@ -81,6 +83,8 @@ export const cloudFormation = {
         const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
         await executor({ ...context, skipUpload: true }, uploadZipStep(fileName, context.zipData()))
 
+        await executor(context, cloudFormationMerge)
+        
         await executor(context, initStacks)
         await executor(context, s3DeploymentBucketParameter)
 

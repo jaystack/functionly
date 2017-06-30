@@ -3,15 +3,19 @@ import { setResource, getResourceName } from '../utils'
 import { getFunctionName } from '../../../../annotations'
 import { getBucketReference } from './s3Storage'
 
+import { defaultsDeep } from 'lodash'
+export const __createdStackNames = []
+
 export const createStack = async (context) => {
     const { stackName } = context
 
-    context.CloudFormationStacks[stackName] = {
+    __createdStackNames.push(stackName)
+    context.CloudFormationStacks[stackName] = defaultsDeep({
         "AWSTemplateFormatVersion": "2010-09-09",
         "Parameters": {},
         "Resources": {},
         "Outputs": {}
-    }
+    }, context.CloudFormationStacks[stackName] || {})
 
     const folderPah = context.version ? `${context.version}/${context.date.toISOString()}` : `${context.date.toISOString()}`
     const awsBucket = await getBucketReference(context)
@@ -85,7 +89,7 @@ export const setStackParameter = (context) => {
         }
     }
 
-    for (const stackName in context.CloudFormationStacks) {
+    for (const stackName of __createdStackNames) {
         const template = context.CloudFormationStacks[stackName]
         const stackDefinition = context.CloudFormationTemplate.Resources[stackName]
         if (stackName !== sourceStackName && (!targetStackName || targetStackName === stackName)) {

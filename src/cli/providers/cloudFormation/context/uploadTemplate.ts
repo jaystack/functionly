@@ -11,7 +11,7 @@ export const persistCreateTemplate = ExecuteStep.register('PersistCreateTemplate
 export const uploadTemplate = ExecuteStep.register('UploadTemplate', async (context) => {
     for (const stackName in context.CloudFormationStacks) {
         const stack = context.CloudFormationStacks[stackName]
-        if (!Object.keys(stack.Resources).length) {
+        if (!stack.Resources || !Object.keys(stack.Resources).length) {
             delete context.CloudFormationStacks[stackName]
             delete context.CloudFormationTemplate.Resources[stackName]
         }
