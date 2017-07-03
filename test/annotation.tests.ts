@@ -5,7 +5,7 @@ import {
     CLASS_APIGATEWAYKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_ENVIRONMENTKEY, CLASS_NAMEKEY,
     CLASS_INJECTABLEKEY, CLASS_LOGKEY, CLASS_RUNTIMEKEY, CLASS_MEMORYSIZEKEY, CLASS_TIMEOUTKEY,
     CLASS_S3CONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_TAGKEY, CLASS_ROLEKEY, CLASS_DESCRIPTIONKEY,
-    PARAMETER_PARAMKEY
+    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
@@ -20,11 +20,13 @@ import { runtime } from '../src/annotations/classes/runtime'
 import { s3Storage } from '../src/annotations/classes/s3Storage'
 import { sns } from '../src/annotations/classes/sns'
 import { tag } from '../src/annotations/classes/tag'
+import { eventSource } from '../src/annotations/classes/eventSource'
+import { classConfig } from '../src/annotations/classes/classConfig'
 import { role, description } from '../src/annotations'
 
 import { inject } from '../src/annotations/parameters/inject'
 import { param } from '../src/annotations/parameters/param'
-import { FunctionalService, Service, DynamoDB, SimpleNotificationService, S3Storage } from '../src/classes'
+import { FunctionalService, Service, DynamoDB, SimpleNotificationService, S3Storage, InjectService } from '../src/classes'
 
 
 
@@ -522,6 +524,129 @@ describe('annotations', () => {
                 const descriptionValue = getMetadata(CLASS_DESCRIPTIONKEY, DescriptionTestClass)
 
                 expect(descriptionValue).to.equal('desc...')
+            })
+        })
+        describe("classConfig", () => {
+            it("classConfig", () => {
+                @classConfig({ customValue: 'v1' })
+                class EventSourceTestClass { }
+
+                const config = getMetadata(CLASS_CLASSCONFIGKEY, EventSourceTestClass)
+
+                expect(config).to.deep.equal({ customValue: 'v1' })
+            })
+            
+            it("classConfig inherited", () => {
+                @classConfig({ customValue: 'v1' })
+                class ClassConfigTestClass { }
+
+                class ClassConfigTestClassInherited extends ClassConfigTestClass { }
+
+                const config = getMetadata(CLASS_CLASSCONFIGKEY, ClassConfigTestClassInherited)
+
+                expect(config).to.deep.equal({ customValue: 'v1' })
+            })
+
+            it("classConfig extended", () => {
+                @classConfig({ customValue: 'v1' })
+                class ClassConfigTestClass { }
+
+                @classConfig({ customValue2: 'v2' })
+                class ClassConfigTestClassInherited extends ClassConfigTestClass { }
+
+                const config = getMetadata(CLASS_CLASSCONFIGKEY, ClassConfigTestClassInherited)
+
+                expect(config).to.deep.equal({ customValue: 'v1', customValue2: 'v2' })
+            })
+
+            it("classConfig override", () => {
+                @classConfig({ customValue: 'v1' })
+                class ClassConfigTestClass { }
+
+                @classConfig({ customValue: 'v2' })
+                class ClassConfigTestClassInherited extends ClassConfigTestClass { }
+
+                const config = getMetadata(CLASS_CLASSCONFIGKEY, ClassConfigTestClassInherited)
+
+                expect(config).to.deep.equal({ customValue: 'v2' })
+            })
+        })
+        describe("eventSource", () => {
+            it("eventSource", () => {
+                let counter = 0
+
+                class ATestClass {
+                    public static toEventSource(target: Function, definitionConfig: any) {
+                        counter++
+                    }
+                }
+
+                @eventSource(ATestClass)
+                class BTestClass { }
+
+                expect(counter).to.equal(1)
+            })
+
+            it("multiple eventSource", () => {
+                let counter = 0
+
+                class ATestClass {
+                    public static toEventSource(target: Function) {
+                        counter++
+                    }
+                }
+
+                class AATestClass extends ATestClass {
+                    public static toEventSource(target: Function) {
+                        counter++
+                    }
+                }
+
+                @eventSource(ATestClass)
+                @eventSource(AATestClass)
+                @eventSource(AATestClass)
+                class BTestClass { }
+
+                expect(counter).to.equal(3)
+            })
+
+            it("multiple eventSource single definition", () => {
+                let counter = 0
+
+                class ATestClass {
+                    public static toEventSource(target: Function) {
+                        counter++
+                    }
+                }
+
+                class AATestClass extends ATestClass {
+                    public static toEventSource(target: Function) {
+                        counter++
+                    }
+                }
+
+                @eventSource(ATestClass, AATestClass, AATestClass)
+                class BTestClass { }
+
+                expect(counter).to.equal(3)
+            })
+
+            it("eventSource inject service", () => {
+                @dynamoTable({ tableName: 't1' })
+                @classConfig({ injectServiceEventSourceKey: CLASS_DYNAMOTABLECONFIGURATIONKEY })
+                class ATestClass extends InjectService { }
+
+                @eventSource(ATestClass)
+                class BTestClass extends FunctionalService { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, BTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 't1')
+                expect(metadata).to.have.property('eventSource', true)
             })
         })
     })

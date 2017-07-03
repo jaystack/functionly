@@ -67,7 +67,7 @@ export const snsTopicSubscriptions = async (context) => {
     const { snsConfig } = context
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
-        if (serviceConfig.injected) continue
+        if (!serviceConfig.eventSource) continue
 
         await executor({
             context: { ...context, serviceDefinition },

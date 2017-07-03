@@ -159,7 +159,7 @@ export const s3StorageSubscriptions = async (context) => {
     const { s3Config } = context
 
     for (const { serviceDefinition, serviceConfig } of s3Config.services) {
-        if (serviceConfig.injected) continue
+        if (!serviceConfig.eventSource) continue
 
         await executor({
             context: { ...context, serviceDefinition, serviceConfig },

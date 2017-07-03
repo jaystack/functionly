@@ -32,8 +32,8 @@ export const tableResource = async (context) => {
     };
 
 
-    const subscribers = tableConfig.services.filter(s => s.serviceConfig.definedBy === s.serviceDefinition.service.name)
-    if (subscribers.length) {
+    const hasSubscribers = tableConfig.services.some(s => s.serviceConfig.eventSource)
+    if (hasSubscribers) {
         defaultsDeep(properties, {
             StreamSpecification: {
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
@@ -62,7 +62,7 @@ export const tableResource = async (context) => {
 
 export const tableSubscribers = ExecuteStep.register('DynamoDB-Table-Subscriptions', async (context) => {
     for (const tableConfig of context.tableConfigs) {
-        const subscribers = tableConfig.services.filter(s => s.serviceConfig.definedBy === s.serviceDefinition.service.name)
+        const subscribers = tableConfig.services.filter(s => s.serviceConfig.eventSource)
         for (const subscriber of subscribers) {
             await executor({
                 context: { ...context, tableConfig, subscriber },
