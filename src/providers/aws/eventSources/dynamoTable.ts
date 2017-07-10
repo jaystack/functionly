@@ -1,4 +1,4 @@
-import { EventSource } from './eventSource'
+import { EventSource } from '../../core/eventSource'
 import { get } from '../../../helpers/property'
 
 export class DynamoTable extends EventSource {

@@ -45,14 +45,17 @@ export const bundleConfig = ExecuteStep.register('WebpackBundleConfig', (context
         entry[nameKey] = file
     })
 
+    const externals = []
+    if (context.deployTarget === 'aws') {
+        externals.push({
+            'aws-sdk': 'commonjs aws-sdk'
+        })
+    }
+
     const webpackConfig = {
         ...config.webpack,
         entry: entry,
-        externals: [
-            {
-                'aws-sdk': 'commonjs aws-sdk'
-            }
-        ]
+        externals
     }
 
     return webpackConfig

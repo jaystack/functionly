@@ -40,6 +40,7 @@
     "config": "^1.26.1",
     "cors": "^2.8.3",
     "express": "^4.15.2",
+    "fs-extra": "^3.0.1",
     "lodash": "^4.14.1",
     "node-zip": "^1.1.1",
     "reflect-metadata": "^0.1.10",
@@ -50,13 +51,5 @@
   },
   "bin": {
     "functionly": "./lib/src/cli/cli.js"
-  },
-  "CloudFormation": {
-    "StackName": "TestStack",
-    "OnFailure": "ROLLBACK",
-    "TimeoutInMinutes": 10,
-    "Capabilities": [
-      "CAPABILITY_NAMED_IAM"
-    ]
   }
 }

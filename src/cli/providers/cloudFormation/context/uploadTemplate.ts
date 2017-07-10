@@ -1,4 +1,5 @@
-import { uploaderStep, writeFile } from '../../../utilities/aws/s3Upload'
+import { uploaderStep } from '../../../utilities/aws/s3Upload'
+import { writeFile } from '../../../utilities/local/file'
 import { ExecuteStep, executor } from '../../../context'
 import { projectConfig } from '../../../project/config'
 

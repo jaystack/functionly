@@ -1,9 +1,7 @@
 import { S3 } from 'aws-sdk'
 import { config } from '../config'
 import { ExecuteStep, executor } from '../../context'
-
-import { writeFileSync } from 'fs'
-import { join, normalize } from 'path'
+import { writeFile } from '../local/file'
 
 let s3 = null;
 const initAWSSDK = (context) => {
@@ -68,9 +66,3 @@ export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => 
         })
     })
 })
-
-export const writeFile = (fileName, binary) => {
-    if (config.tempDirectory) {
-        writeFileSync(join(config.tempDirectory, fileName), binary)
-    }
-}

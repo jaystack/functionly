@@ -1,10 +1,11 @@
 import { aws as awssdk } from './aws'
 import { local } from './local'
 import { cloudFormation as aws } from './cloudFormation'
+import { azure } from './azureARM'
 import { ExecuteStep, executor } from '../context'
 import { getPluginDefinitions } from '../project/config'
 
-let environments = { aws, local, awssdk }
+let environments = { aws, local, awssdk, azure }
 
 export class CreateEnvironmentStep extends ExecuteStep {
     public async method(context) {

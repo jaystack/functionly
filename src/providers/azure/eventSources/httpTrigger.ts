@@ -1,23 +1,18 @@
 import { EventSource } from '../../core/eventSource'
 import { get } from '../../../helpers/property'
 
-export class ApiGateway extends EventSource {
-    public available(eventContext: any): boolean {
-        const { event } = eventContext
-        return event && event.requestContext && event.requestContext.apiId ? true : false
-    }
-
+export class HttpTrigger extends EventSource {
     public async parameterResolver(parameter, event) {
-        const body = event.event.body
-        const query = event.event.queryStringParameters
-        const params = event.event.pathParameters
-        const headers = event.event.headers
+        const body = event.req.body
+        const query = event.req.query
+        const params = event.req.params
+        const headers = event.req.headers
 
         switch (parameter.type) {
             case 'param':
                 const source = parameter.source;
                 if (typeof source !== 'undefined') {
-                    const holder = !source ? event.event : get(event.event, source)
+                    const holder = !source ? event.req : get(event.req, source)
                     if (holder) {
                         return get(holder, parameter.from)
                     }
@@ -35,20 +30,20 @@ export class ApiGateway extends EventSource {
         }
     }
 
-    public async resultTransform(err, result, event) {
-        if (err) {
+    public async resultTransform(error, result, eventContext) {
+        if (error) {
             return {
-                statusCode: 500,
-                body: JSON.stringify(err)
+                status: 500,
+                body: `${error.message} - ${error.stack}`
             }
         }
 
-        if (result && typeof result.statusCode === 'number' && typeof result.body === 'string') {
+        if (result && typeof result.status === 'number' && typeof result.body === 'string') {
             return result
         }
 
         return {
-            statusCode: 200,
+            status: 200,
             body: JSON.stringify(result)
         }
     }

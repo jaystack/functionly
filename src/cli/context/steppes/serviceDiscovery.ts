@@ -41,6 +41,7 @@ export class ServiceDiscoveryStep extends ExecuteStep {
                 const item = {
                     service: exportItem.serviceType,
                     exportName: key,
+                    fileName: nameKey,
                     invoker: exportItem,
                     handler: `${nameKey}.${key}`,
                     file

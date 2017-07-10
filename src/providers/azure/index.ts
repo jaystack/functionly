@@ -1,37 +1,18 @@
-import { Lambda } from 'aws-sdk'
 import { Provider } from '../core/provider'
 import { getFunctionName } from '../../annotations'
-import { ApiGateway } from './eventSources/apiGateway'
-import { LambdaCall } from './eventSources/lambdaCall'
-import { SNS } from './eventSources/sns'
-import { S3 } from './eventSources/s3'
-import { DynamoTable } from './eventSources/dynamoTable'
-
-let lambda = null;
-const initAWSSDK = () => {
-    if (!lambda) {
-        lambda = new Lambda();
-    }
-    return lambda
-}
-
+import { HttpTrigger } from './eventSources/httpTrigger'
 
 const eventSourceHandlers = [
-    new ApiGateway(),
-    new SNS(),
-    new S3(),
-    new DynamoTable(),
-    new LambdaCall()
+    new HttpTrigger()
 ]
 
-
-export class AWSProvider extends Provider {
+export class AzureProvider extends Provider {
     public getInvoker(serviceType, serviceInstance, params): Function {
         const parameters = this.getParameters(serviceType, 'handle')
 
-        const invoker = async (event, context, cb) => {
+        const invoker = async (context, req) => {
             try {
-                const eventContext = { event, context, cb }
+                const eventContext = { context, req }
 
                 const eventSourceHandler = eventSourceHandlers.find(h => h.available(eventContext))
 
@@ -49,10 +30,13 @@ export class AWSProvider extends Provider {
                 }
                 const response = await eventSourceHandler.resultTransform(error, result, eventContext)
 
-                cb(null, response)
+                context.res = response
                 return response
             } catch (e) {
-                cb(e)
+                context.res = {
+                    status: 500,
+                    body: `${e.message} - ${e.stack}`
+                }
             }
         }
         return invoker
@@ -68,8 +52,6 @@ export class AWSProvider extends Provider {
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
-        initAWSSDK()
-
         return new Promise((resolve, reject) => {
 
             const funcName = getFunctionName(serviceInstance)
@@ -80,12 +62,9 @@ export class AWSProvider extends Provider {
                 Payload: JSON.stringify(params)
             };
 
-            lambda.invoke(invokeParams, function (err, data) {
-                if (err) reject(err)
-                else resolve(JSON.parse(data.Payload.toString()));
-            });
+            // TODO invoke
         })
     }
 }
 
-export const provider = new AWSProvider()
+export const provider = new AzureProvider()

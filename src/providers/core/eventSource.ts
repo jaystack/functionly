@@ -1,4 +1,4 @@
-import { get } from '../../../helpers/property'
+import { get } from '../../helpers/property'
 
 export abstract class EventSource {
     public available(event: any) {

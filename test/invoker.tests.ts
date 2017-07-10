@@ -946,4 +946,429 @@ describe('invoker', () => {
             invoker(awsEvent, awsContext, cb)
         })
     })
+
+    describe("azure", () => {
+
+        afterEach(() => {
+            delete process.env.FUNCTIONAL_ENVIRONMENT
+        })
+
+        it("invoke", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            const context = {}
+            const req = {}
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+        })
+
+        it("return value", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            const context = {}
+            const req = {}
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+            expect(context).to.have.nested.property('res.status', 200)
+            expect(context).to.have.nested.property('res.body', JSON.stringify({ ok: 1 }))
+        })
+
+        it("handler throw error", async () => {
+            let counter = 0
+            let ex
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+                    ex = new Error('error in handle')
+                    throw ex
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            const context = {}
+            const req = {}
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+            expect(context).to.have.nested.property('res.status', 500)
+            expect(context).to.have.nested.property('res.body', `${ex.message} - ${ex.stack}`)
+        })
+
+        describe("eventSources", () => {
+            it("httpTrigger body param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    body: {
+                        p1: 'v1',
+                        p2: 'v2'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger query param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    query: {
+                        p1: 'v1',
+                        p2: 'v2'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger pathParameters param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    params: {
+                        p1: 'v1',
+                        p2: 'v2'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger header param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    headers: {
+                        p1: 'v1',
+                        p2: 'v2'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger params resolve order", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2, @param p3, @param p4) {
+                        counter++
+                        expect(p1).to.equal('body')
+                        expect(p2).to.equal('queryStringParameters')
+                        expect(p3).to.equal('pathParameters')
+                        expect(p4).to.equal('headers')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    body: {
+                        p1: 'body'
+                    },
+                    query: {
+                        p1: 'queryStringParameters',
+                        p2: 'queryStringParameters'
+                    },
+                    params: {
+                        p1: 'pathParameters',
+                        p2: 'pathParameters',
+                        p3: 'pathParameters'
+                    },
+                    headers: {
+                        p1: 'headers',
+                        p2: 'headers',
+                        p3: 'headers',
+                        p4: 'headers'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger params resolve hint", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle( @param({ source: 'queryStringParameters' }) p1, @param({ source: 'pathParameters' }) p2, @param({ source: 'headers' }) p3, @param p4) {
+                        counter++
+                        expect(p1).to.equal('queryStringParameters')
+                        expect(p2).to.equal('pathParameters')
+                        expect(p3).to.equal('headers')
+                        expect(p4).to.equal('headers')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {
+                    body: {
+                        p1: 'body'
+                    },
+                    query: {
+                        p1: 'queryStringParameters',
+                        p2: 'queryStringParameters'
+                    },
+                    params: {
+                        p1: 'pathParameters',
+                        p2: 'pathParameters',
+                        p3: 'pathParameters'
+                    },
+                    headers: {
+                        p1: 'headers',
+                        p2: 'headers',
+                        p3: 'headers',
+                        p4: 'headers'
+                    }
+                }
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+            })
+
+            it("httpTrigger return value", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return { ok: 1 }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {}
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+                expect(context).to.have.nested.property('res.status', 200)
+                expect(context).to.have.nested.property('res.body', JSON.stringify({ ok: 1 }))
+            })
+
+            it("httpTrigger return value advanced", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return {
+                            status: 200,
+                            body: 'myresult'
+                        }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {}
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+                expect(context).to.have.nested.property('res.status', 200)
+                expect(context).to.have.nested.property('res.body', 'myresult')
+            })
+
+            it("httpTrigger return value advanced - error", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        return {
+                            status: 500,
+                            body: 'myerror'
+                        }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {}
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+                expect(context).to.have.nested.property('res.status', 500)
+                expect(context).to.have.nested.property('res.body', 'myerror')
+            })
+
+            it("httpTrigger return value advanced - throw error", async () => {
+                let counter = 0
+                let ex
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+                        ex = new Error('error in handle')
+                        throw ex
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+
+                const context = {}
+                const req = {}
+
+                await invoker(context, req)
+
+                expect(counter).to.equal(1)
+                expect(context).to.have.nested.property('res.status', 500)
+                expect(context).to.have.nested.property('res.body', `${ex.message} - ${ex.stack}`)
+            })
+        })
+
+        it("inject param", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @inject(MockInjectable) p2) {
+                    counter++
+                    expect(p1).to.undefined
+                    expect(p2).to.instanceof(Service)
+                    expect(p2).to.instanceof(MockInjectable)
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            const context = {}
+            const req = {}
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+        })
+
+        it("event param", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const context = {}
+            const req = {}
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @event p2) {
+                    counter++
+                    expect(p1).to.undefined
+                    expect(p2).to.have.property('context').that.to.equal(context)
+                    expect(p2).to.have.property('req').that.to.equal(req)
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+        })
+    })
 })
