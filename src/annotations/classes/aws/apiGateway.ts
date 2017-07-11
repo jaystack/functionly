@@ -1,5 +1,6 @@
-import { CLASS_APIGATEWAYKEY } from '../constants'
-import { getMetadata, defineMetadata } from '../metadata'
+import { CLASS_APIGATEWAYKEY } from '../../constants'
+import { getMetadata, defineMetadata } from '../../metadata'
+import { rest } from '../rest'
 
 export const defaultEndpoint = {
     method: 'get',
@@ -17,3 +18,15 @@ export const apiGateway = (endpoint: {
         defineMetadata(CLASS_APIGATEWAYKEY, [...metadata], target);
     }
 }
+
+rest.extension('aws', (target, config) => {
+    for(const method of config.methods){
+        const decorator = apiGateway({
+            path: config.path,
+            method,
+            cors: config.cors,
+            authorization: config.anonymous ? 'NONE' : 'AWS_IAM'
+         })
+         decorator(target)
+    }
+})

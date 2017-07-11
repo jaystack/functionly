@@ -1,3 +1,5 @@
+export const CLASS_KEY_PREFIX = 'functionly:class:'
+
 export const PARAMETER_PARAMKEY = 'functionly:param:parameters'
 export const CLASS_DESCRIPTIONKEY = 'functionly:class:description'
 export const CLASS_ROLEKEY = 'functionly:class:role'
@@ -14,3 +16,5 @@ export const CLASS_DYNAMOTABLECONFIGURATIONKEY = 'functionly:class:dynamoTableCo
 export const CLASS_SNSCONFIGURATIONKEY = 'functionly:class:snsConfiguration'
 export const CLASS_S3CONFIGURATIONKEY = 'functionly:class:s3Configuration'
 export const CLASS_CLASSCONFIGKEY = 'functionly:class:classConfig'
+
+export const CLASS_HTTPTRIGGER = 'functionly:class:httpTrigger'

@@ -1,6 +1,8 @@
 export { templates, applyTemplates } from './templates'
 export { injectable } from './classes/injectable'
-export { apiGateway } from './classes/apiGateway'
+export { apiGateway } from './classes/aws/apiGateway'
+export { httpTrigger } from './classes/azure/httpTrigger'
+export { rest } from './classes/rest'
 export { environment } from './classes/environment'
 export { tag } from './classes/tag'
 export { log } from './classes/log'
@@ -11,6 +13,8 @@ export { sns } from './classes/sns'
 export { s3Storage } from './classes/s3Storage'
 export { eventSource } from './classes/eventSource'
 export { classConfig, getClassConfigValue } from './classes/classConfig'
+export { simpleClassAnnotation } from './classes/simpleAnnotation'
+export { expandableDecorator } from './classes/expandableDecorator'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 

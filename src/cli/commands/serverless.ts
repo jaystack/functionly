@@ -195,12 +195,13 @@ export default (api) => {
                 .option('--stage <stage>', 'stage')
                 .description('serverless config')
                 .action(async (path, command) => {
-                    process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
 
                     try {
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const awsRegion = requireValue(command.awsRegion || projectConfig.awsRegion, 'awsRegion')
                         const stage = command.stage || projectConfig.stage || 'dev'
+
+                        process.env.FUNCTIONAL_ENVIRONMENT = FUNCTIONAL_ENVIRONMENT
 
                         const context = await createContext(entryPoint, {
                             deployTarget: FUNCTIONAL_ENVIRONMENT,

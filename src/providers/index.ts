@@ -4,13 +4,11 @@ import { callExtension } from '../classes'
 export { Provider } from './core/provider'
 export { AWSProvider } from './aws'
 export { LocalProvider } from './local'
-export { DeployProvider } from './deploy'
 export { AzureProvider } from './azure'
 
 import { Provider } from './core/provider'
 import { provider as aws } from './aws'
 import { provider as local } from './local'
-import { provider as deploy } from './deploy'
 import { provider as azure } from './azure'
 
 const environments = {}
@@ -28,7 +26,6 @@ export const removeProvider = (name) => {
 
 addProvider('aws', aws)
 addProvider('local', local)
-addProvider('deploy', deploy)
 addProvider('azure', azure)
 
 export const getInvoker = (serviceType, params) => {

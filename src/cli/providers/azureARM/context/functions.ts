@@ -1,7 +1,7 @@
 import { basename, join } from 'path'
 import { readFileSync } from 'fs'
 import { getFunctionName, getMetadata, constants } from '../../../../annotations'
-const { CLASS_APIGATEWAYKEY, CLASS_ENVIRONMENTKEY } = constants
+const { CLASS_HTTPTRIGGER, CLASS_ENVIRONMENTKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { writeFile, copyFile, removePath } from '../../../utilities/local/file'
 
@@ -33,17 +33,17 @@ export const azureFunction = async (context) => {
         })
     }
 
-    const httpMetadata = getMetadata(CLASS_APIGATEWAYKEY, serviceDefinition.service) || []
+    const httpMetadata = getMetadata(CLASS_HTTPTRIGGER, serviceDefinition.service) || []
     for (let metadata of httpMetadata) {
         await executor({
-            context: { ...context, metadata, endpointCache: {} },
+            context: { ...context, metadata },
             name: `Azure-ARM-Function-Endpoint-${metadata.method}-${metadata.path}`,
             method: azureFunctionEndpoint
         })
     }
 }
 export const azureFunctionEndpoint = async (context) => {
-    const { serviceDefinition, site, metadata, endpointCache } = context
+    const { serviceDefinition, site, metadata } = context
 
     const funcname = getFunctionName(serviceDefinition.service)
 
@@ -82,26 +82,22 @@ export const azureFunctionEndpoint = async (context) => {
 export const functionBindings = async (context) => {
     const { serviceDefinition, metadata, resourceDefinition } = context
 
-    let pathParts = metadata.path.split('/').filter(p => p)
-
-    if (pathParts.length) {
-        resourceDefinition.properties.config.bindings = [
-            ...resourceDefinition.properties.config.bindings,
-            {
-                "authLevel": metadata.authorization === 'NONE' ? "anonymous" : "function",
-                "name": "req",
-                "type": "httpTrigger",
-                "direction": "in",
-                "methods": [metadata.method],
-                "route": pathParts.join('/')
-            },
-            {
-                "name": "res",
-                "type": "http",
-                "direction": "out"
-            }
-        ]
-    }
+    resourceDefinition.properties.config.bindings = [
+        ...resourceDefinition.properties.config.bindings,
+        {
+            "authLevel": metadata.authLevel,
+            "name": "req",
+            "type": "httpTrigger",
+            "direction": "in",
+            "methods": metadata.methods,
+            "route": metadata.route
+        },
+        {
+            "name": "res",
+            "type": "http",
+            "direction": "out"
+        }
+    ]
 }
 
 export const functionFiles = async (context) => {

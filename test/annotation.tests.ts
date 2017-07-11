@@ -5,12 +5,15 @@ import {
     CLASS_APIGATEWAYKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_ENVIRONMENTKEY, CLASS_NAMEKEY,
     CLASS_INJECTABLEKEY, CLASS_LOGKEY, CLASS_RUNTIMEKEY, CLASS_MEMORYSIZEKEY, CLASS_TIMEOUTKEY,
     CLASS_S3CONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_TAGKEY, CLASS_ROLEKEY, CLASS_DESCRIPTIONKEY,
-    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY
+    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY, CLASS_HTTPTRIGGER
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
 import { getMetadata, getOwnMetadata } from '../src/annotations/metadata'
-import { apiGateway } from '../src/annotations/classes/apiGateway'
+import { expandableDecorator } from '../src/annotations/classes/expandableDecorator'
+import { apiGateway } from '../src/annotations/classes/aws/apiGateway'
+import { httpTrigger } from '../src/annotations/classes/azure/httpTrigger'
+import { rest } from '../src/annotations/classes/rest'
 import { dynamoTable, __dynamoDBDefaults } from '../src/annotations/classes/dynamoTable'
 import { environment } from '../src/annotations/classes/environment'
 import { functionName, getFunctionName } from '../src/annotations/classes/functionName'
@@ -117,6 +120,80 @@ describe('annotations', () => {
     })
 
     describe("classes", () => {
+        describe("expandableDecorator", () => {
+            it("interface", () => {
+                const mockDecorator = expandableDecorator<{ name: string, p1?: number }>({ name: 'mockDecorator', defaultValues: { p1: 2 } })
+
+                expect(mockDecorator).to.be.a('function')
+                expect(mockDecorator).to.have.property('environmentKey', 'functionly:class:mockDecorator')
+                expect(mockDecorator).to.have.property('extension').to.be.a('function')
+            })
+            it("environmentKey", () => {
+                const mockDecorator = expandableDecorator<{ name: string, p1?: number }>({ name: 'mockDecorator', defaultValues: { p1: 2 }, environmentKey: 'mockDecorator_environment_key' })
+
+                expect(mockDecorator).to.be.a('function')
+                expect(mockDecorator).to.have.property('environmentKey', 'mockDecorator_environment_key')
+                expect(mockDecorator).to.have.property('extension').to.be.a('function')
+            })
+            it("default value", () => {
+                const mockDecorator = expandableDecorator<{ name: string, p1?: number }>({ name: 'mockDecorator', defaultValues: { p1: 2 } })
+
+                @mockDecorator({ name: 'n1' })
+                class TestClass { }
+
+                const value = getMetadata(mockDecorator.environmentKey, TestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('name', 'n1')
+                expect(metadata).to.have.property('p1', 2)
+            })
+            it("configured value", () => {
+                const mockDecorator = expandableDecorator<{ name: string, p1?: number }>({ name: 'mockDecorator', defaultValues: { p1: 2 } })
+
+                @mockDecorator({ name: 'n1', p1: 3 })
+                class TestClass { }
+
+                const value = getMetadata(mockDecorator.environmentKey, TestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('name', 'n1')
+                expect(metadata).to.have.property('p1', 3)
+            })
+            describe("extension", () => {
+                afterEach(() => {
+                    delete process.env.FUNCTIONAL_ENVIRONMENT
+                })
+                it("environment extension", () => {
+                    let counter = 0
+                    const mockDecorator = expandableDecorator<{ name: string, p1?: number }>({ name: 'mockDecorator', defaultValues: { p1: 2 } })
+                    mockDecorator.extension('custom', (target, config) => {
+                        expect(target).to.equal(TestClass)
+                        expect(config).to.deep.equal({ name: 'n1', p1: 2 })
+                        counter++
+                    })
+
+                    process.env.FUNCTIONAL_ENVIRONMENT = 'custom'
+                    @mockDecorator({ name: 'n1' })
+                    class TestClass { }
+
+                    const value = getMetadata(mockDecorator.environmentKey, TestClass)
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('name', 'n1')
+                    expect(metadata).to.have.property('p1', 2)
+                    expect(counter).to.equal(1)
+                })
+            })
+        })
         describe("apiGateway", () => {
             it("path", () => {
                 @apiGateway({ path: '/v1/test' })
@@ -177,6 +254,131 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('method', 'get')
                 expect(metadata).to.have.property('cors', false)
                 expect(metadata).to.have.property('authorization', 'NONE')
+            })
+        })
+        describe("httpTrigger", () => {
+            it("path", () => {
+                @httpTrigger({ route: '/v1/test' })
+                class HttpTriggerTestClass { }
+
+                const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('route', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authLevel', 'function')
+            })
+            it("method", () => {
+                @httpTrigger({ route: '/v1/test', methods: ['post'] })
+                class HttpTriggerTestClass { }
+
+                const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('route', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['post'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authLevel', 'function')
+            })
+            it("cors", () => {
+                @httpTrigger({ route: '/v1/test', cors: true })
+                class HttpTriggerTestClass { }
+
+                const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('route', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.property('authLevel', 'function')
+            })
+            it("authorization", () => {
+                @httpTrigger({ route: '/v1/test', authLevel: 'anonymous' })
+                class HttpTriggerTestClass { }
+
+                const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+
+                expect(metadata).to.have.property('route', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('authLevel', 'anonymous')
+            })
+        })
+        describe("rest", () => {
+            it("path", () => {
+                @rest({ path: '/v1/test' })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("method", () => {
+                @rest({ path: '/v1/test', methods: ['post'] })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['post'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("cors", () => {
+                @rest({ path: '/v1/test', cors: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("authorization", () => {
+                @rest({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
             })
         })
         describe("dynamoTable", () => {
@@ -535,7 +737,7 @@ describe('annotations', () => {
 
                 expect(config).to.deep.equal({ customValue: 'v1' })
             })
-            
+
             it("classConfig inherited", () => {
                 @classConfig({ customValue: 'v1' })
                 class ClassConfigTestClass { }

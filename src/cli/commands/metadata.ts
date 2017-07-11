@@ -6,12 +6,12 @@ export default ({ createContext, annotations: { getMetadata, getMetadataKeys }, 
                 .command('metadata [target] [path]')
                 .description('service metadata')
                 .action(async (target, path, command) => {
-                    process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
 
                     try {
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const deployTarget = requireValue(target || projectConfig.deployTarget, 'missing deploy target')
 
+                        process.env.FUNCTIONAL_ENVIRONMENT = deployTarget
 
                         const context = await createContext(entryPoint, {
                             deployTarget

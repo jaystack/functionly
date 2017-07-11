@@ -8,14 +8,14 @@ export default ({ createContext, executor, ExecuteStep, projectConfig, requireVa
                 .option('--aws-bucket <awsBucket>', 'aws bucket')
                 .option('--stage <stage>', 'stage')
                 .action(async (target, path, command) => {
-                    process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
-
                     try {
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const deployTarget = requireValue(target || projectConfig.deployTarget, 'missing deploy target')
                         const awsRegion = requireValue(command.awsRegion || projectConfig.awsRegion, 'awsRegion')
                         const awsBucket = command.awsBucket || projectConfig.awsBucket
                         const stage = command.stage || projectConfig.stage || 'dev'
+
+                        process.env.FUNCTIONAL_ENVIRONMENT = deployTarget
 
                         const context = await createContext(entryPoint, {
                             deployTarget,
