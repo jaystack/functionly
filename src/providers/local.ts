@@ -1,6 +1,7 @@
 import * as request from 'request'
 import { Provider } from './core/provider'
-import { constants, getOwnMetadata, getMetadata, getFunctionName } from '../annotations'
+import { constants, getOwnMetadata, getMetadata, getFunctionName, rest } from '../annotations'
+const { CLASS_LOGKEY } = constants
 import { get } from '../helpers/property'
 
 export class LocalProvider extends Provider {
@@ -51,17 +52,18 @@ export class LocalProvider extends Provider {
     public async invoke(serviceInstance, params, invokeConfig?) {
         return new Promise((resolve, reject) => {
 
-            const httpAttr = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceInstance)[0]
+            const httpAttr = (getMetadata(rest.environmentKey, serviceInstance) || [])[0]
             if (!httpAttr) {
                 return reject(new Error('missing http configuration'))
             }
 
+            const method = httpAttr.methods[0] || 'GET'
             const invokeParams: any = {
-                method: httpAttr.method || 'GET',
+                method,
                 url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
             };
 
-            if (!httpAttr.method || httpAttr.method.toLowerCase() === 'get') {
+            if (method.toLowerCase() === 'get') {
                 invokeParams.qs = params
             } else {
                 invokeParams.body = params
@@ -70,7 +72,7 @@ export class LocalProvider extends Provider {
 
             try {
 
-                const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceInstance)
+                const isLoggingEnabled = getMetadata(CLASS_LOGKEY, serviceInstance)
                 if (isLoggingEnabled) {
                     console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
                 }

@@ -4,17 +4,19 @@ import { getFunctionName, getMetadata, constants } from '../../../../annotations
 const { CLASS_HTTPTRIGGER, CLASS_ENVIRONMENTKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { writeFile, copyFile, removePath } from '../../../utilities/local/file'
+import { addEnvironmentSetting } from './init'
 
 export const azureFunctions = ExecuteStep.register('AzureFunctions', async (context) => {
     const site = context.ARMTemplate.resources.find(r => r.type === "Microsoft.Web/sites")
     if (site) {
         const config = site.resources.find(r => r.type === "config") || { properties: {} }
-        const appsettings = site.properties.siteConfig.appSettings
+
+        addEnvironmentSetting('FUNCION_APP_BASEURL', `[concat('https://', toLower(variables('functionAppName')), '.azurewebsites.net/api')]`, site)
 
         for (const serviceDefinition of context.publishedFunctions) {
             const funcname = getFunctionName(serviceDefinition.service)
             await executor({
-                context: { ...context, serviceDefinition, site, appsettings },
+                context: { ...context, serviceDefinition, site },
                 name: `Azure-ARM-Function-${funcname}`,
                 method: azureFunction
             })
@@ -23,14 +25,11 @@ export const azureFunctions = ExecuteStep.register('AzureFunctions', async (cont
 })
 
 export const azureFunction = async (context) => {
-    const { serviceDefinition, appsettings } = context
+    const { serviceDefinition, site } = context
 
     const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
     for (const key in environmentVariables) {
-        appsettings.push({
-            name: key,
-            value: environmentVariables[key]
-        })
+        addEnvironmentSetting(key, environmentVariables[key], site)
     }
 
     const httpMetadata = getMetadata(CLASS_HTTPTRIGGER, serviceDefinition.service) || []
@@ -82,6 +81,8 @@ export const azureFunctionEndpoint = async (context) => {
 export const functionBindings = async (context) => {
     const { serviceDefinition, metadata, resourceDefinition } = context
 
+    const route = metadata.route.split('/').filter(p => p).join('/')
+
     resourceDefinition.properties.config.bindings = [
         ...resourceDefinition.properties.config.bindings,
         {
@@ -90,7 +91,7 @@ export const functionBindings = async (context) => {
             "type": "httpTrigger",
             "direction": "in",
             "methods": metadata.methods,
-            "route": metadata.route
+            "route": route
         },
         {
             "name": "res",
@@ -110,12 +111,13 @@ export const functionFiles = async (context) => {
 }
 
 export const persistAzureGithubRepo = ExecuteStep.register('PersistAzureGithubRepo', async (context) => {
+    const { deploymentFolder } = context
     const site = context.ARMTemplate.resources.find(r => r.type === "Microsoft.Web/sites")
     if (site) {
-        removePath('azuregithubrepo')
+        removePath(context.projectName || `functionly`)
 
         for (const file of context.files) {
-            copyFile(file, join('azuregithubrepo', basename(file)))
+            copyFile(file, join(context.projectName || `functionly`, basename(file)), deploymentFolder)
         }
 
         const functions = site.resources.filter(f => f.type === 'functions')
@@ -130,16 +132,15 @@ export const persistAzureGithubRepo = ExecuteStep.register('PersistAzureGithubRe
 })
 
 export const persistFunction = (context) => {
-    const { functionResource, site } = context
-    const basePath = join('azuregithubrepo', functionResource.name)
-
+    const { functionResource, site, deploymentFolder } = context
+    const basePath = join(context.projectName || `functionly`, functionResource.name)
 
     for (const file in functionResource.properties.files) {
-        writeFile(join(basePath, file), new Buffer(functionResource.properties.files[file], 'utf8'))
+        writeFile(join(basePath, file), new Buffer(functionResource.properties.files[file], 'utf8'), deploymentFolder)
     }
 
     const bindings = JSON.stringify(functionResource.properties.config, null, 4)
-    writeFile(join(basePath, 'function.json'), new Buffer(bindings, 'utf8'))
+    writeFile(join(basePath, 'function.json'), new Buffer(bindings, 'utf8'), deploymentFolder)
 
     const idx = site.resources.indexOf(functionResource)
     site.resources.splice(idx, 1)

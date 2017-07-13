@@ -23,7 +23,6 @@ export const expandableDecorator = function <T>(decoratorConfig: {
                 }
 
                 const environment = process.env.FUNCTIONAL_ENVIRONMENT
-                console.log(`expandableDecorator '${decoratorConfig.name}' environment: ${environment}`)
                 if (!environment || !environmentExtensions.has(environment)) {
                     return;
                 }

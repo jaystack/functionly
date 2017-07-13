@@ -2,29 +2,31 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import * as cors from 'cors'
 
-export default ({ createContext, annotations: { getMetadata, constants, getFunctionName }, projectConfig, requireValue, executor }) => {
+export default ({ createContext, annotations: { getMetadata, constants, getFunctionName, rest }, projectConfig, requireValue, executor }) => {
 
     const startLocal = async (context) => {
         let app = express()
         app.use(bodyParser.json())
 
         for (let serviceDefinition of context.publishedFunctions) {
-            let httpMetadata = getMetadata(constants.CLASS_APIGATEWAYKEY, serviceDefinition.service)
+            let httpMetadata = getMetadata(rest.environmentKey, serviceDefinition.service) || []
 
             for (let event of httpMetadata) {
                 const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceDefinition.service)
-                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', method: '${event.method}', cors: ${event.cors ? true : false} }`)
+                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', methods: '${event.methods}', cors: ${event.cors ? true : false} }`)
 
                 if (event.cors) {
                     app.use(event.path, cors())
                 }
 
-                app[event.method](
-                    event.path,
-                    logMiddleware(isLoggingEnabled, serviceDefinition.service),
-                    environmentConfigMiddleware(serviceDefinition.service),
-                    serviceDefinition.invoker
-                )
+                for(const method of event.methods){
+                    app[method](
+                        event.path,
+                        logMiddleware(isLoggingEnabled, serviceDefinition.service),
+                        environmentConfigMiddleware(serviceDefinition.service),
+                        serviceDefinition.invoker
+                    )
+                }
             }
         }
 

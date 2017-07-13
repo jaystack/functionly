@@ -993,7 +993,7 @@ describe('invoker', () => {
 
             expect(counter).to.equal(1)
             expect(context).to.have.nested.property('res.status', 200)
-            expect(context).to.have.nested.property('res.body', JSON.stringify({ ok: 1 }))
+            expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
         })
 
         it("handler throw error", async () => {
@@ -1236,7 +1236,7 @@ describe('invoker', () => {
 
                 expect(counter).to.equal(1)
                 expect(context).to.have.nested.property('res.status', 200)
-                expect(context).to.have.nested.property('res.body', JSON.stringify({ ok: 1 }))
+                expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
             })
 
             it("httpTrigger return value advanced", async () => {

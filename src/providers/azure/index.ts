@@ -1,10 +1,15 @@
 import { Provider } from '../core/provider'
-import { getFunctionName } from '../../annotations'
+import { getFunctionName, constants, getMetadata } from '../../annotations'
+const { CLASS_HTTPTRIGGER } = constants
 import { HttpTrigger } from './eventSources/httpTrigger'
+import * as request from 'request'
 
 const eventSourceHandlers = [
     new HttpTrigger()
 ]
+
+export const FUNCTIONLY_FUNCTION_KEY = 'FUNCTIONLY_FUNCTION_KEY'
+
 
 export class AzureProvider extends Provider {
     public getInvoker(serviceType, serviceInstance, params): Function {
@@ -54,15 +59,50 @@ export class AzureProvider extends Provider {
     public async invoke(serviceInstance, params, invokeConfig?) {
         return new Promise((resolve, reject) => {
 
-            const funcName = getFunctionName(serviceInstance)
-            const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
+            const httpAttr = (getMetadata(CLASS_HTTPTRIGGER, serviceInstance) || [])[0]
+            if (!httpAttr) {
+                return reject(new Error('missing http configuration'))
+            }
 
-            const invokeParams = {
-                FunctionName: resolvedFuncName,
-                Payload: JSON.stringify(params)
+            const method = httpAttr.methods[0] || 'GET'
+            const invokeParams: any = {
+                method,
+                url: `${process.env.FUNCION_APP_BASEURL}${httpAttr.route}`,
             };
 
-            // TODO invoke
+            if (method.toLowerCase() === 'get') {
+                invokeParams.qs = params
+            } else {
+                invokeParams.body = params
+                invokeParams.json = true
+            }
+
+            if (httpAttr.authLevel !== 'anonymous') {
+                if (!process.env.FUNCTIONLY_FUNCTION_KEY) {
+                    return reject(new Error(`process.env.FUNCTIONLY_FUNCTION_KEY is not set, create host key to all functions`))
+                }
+                invokeParams.qs = { ...(invokeParams.qs || {}), code: process.env.FUNCTIONLY_FUNCTION_KEY }
+            }
+
+            try {
+
+                request(invokeParams, (error, response, body) => {
+
+                    if (error) return reject(error)
+
+                    let result = body
+                    try {
+                        result = JSON.parse(result)
+                    }
+                    catch (e) { }
+
+                    return resolve(result)
+
+                })
+
+            } catch (e) {
+                return reject(e);
+            }
         })
     }
 }

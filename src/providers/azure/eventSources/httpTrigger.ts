@@ -44,7 +44,7 @@ export class HttpTrigger extends EventSource {
 
         return {
             status: 200,
-            body: JSON.stringify(result)
+            body: result
         }
     }
 }

@@ -32,29 +32,13 @@ export const ARMInit = ExecuteStep.register('ARMInit', async (context) => {
                 "metadata": {
                     "description": "Storage Account type"
                 }
-            },
-            "gitUrl": {
-                "type": "string",
-                // "defaultValue": "https://github.com/borzav/azure-function-test",
-                "metadata": {
-                    "description": "Git repository URL"
-                }
-            },
-            "branch": {
-                "type": "string",
-                // "defaultValue": "master",
-                "metadata": {
-                    "description": "Git repository branch"
-                }
             }
         },
         "variables": {
             "functionAppName": "[parameters('functionAppName')]",
             "hostingPlanName": "[parameters('functionAppName')]",
             "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
-            "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "gitRepoUrl": "[parameters('gitUrl')]",
-            "gitBranch": "[parameters('branch')]"
+            "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
         },
         "resources": [
             {
@@ -118,21 +102,7 @@ export const ARMInit = ExecuteStep.register('ARMInit', async (context) => {
                         ]
                     }
                 },
-                "resources": [
-                    {
-                        "apiVersion": "2015-08-01",
-                        "name": "web",
-                        "type": "sourcecontrols",
-                        "dependsOn": [
-                            "[resourceId('Microsoft.Web/Sites', parameters('functionAppName'))]"
-                        ],
-                        "properties": {
-                            "RepoUrl": "[variables('gitRepoUrl')]",
-                            "branch": "[variables('gitBranch')]",
-                            "IsManualIntegration": true
-                        }
-                    }
-                ]
+                "resources": []
             }
         ]
     }
@@ -144,3 +114,56 @@ export const ARMMerge = ExecuteStep.register('ARMAfterCreateDefaults', async (co
     defaultsDeep(context.ARMTemplate, projectConfig.ARMTemplate || {})
     defaultsDeep(context.ARMStacks, projectConfig.ARMStacksTemplate || {})
 })
+
+export const initGitTemplate = (context) => {
+    const { site } = context
+
+    if (context.ARMConfig.deploymentOptions === 'git') {
+        const gitUrl = context.ARMTemplate.parameters.gitUrl || {}
+        context.ARMTemplate.parameters.gitUrl = {
+            ...gitUrl,
+            "type": "string",
+            // "defaultValue": "https://github.com/borzav/azure-function-test",
+            "metadata": {
+                "description": "Git repository URL"
+            }
+        }
+
+        const branch = context.ARMTemplate.parameters.branch || {}
+        context.ARMTemplate.parameters.branch = {
+            ...branch,
+            "type": "string",
+            // "defaultValue": "master",
+            "metadata": {
+                "description": "Git repository branch"
+            }
+        }
+
+        context.ARMTemplate.variables.gitRepoUrl = "[parameters('gitUrl')]"
+        context.ARMTemplate.variables.gitBranch = "[parameters('branch')]"
+
+        const site = context.ARMTemplate.resources.find(r => r.type === 'Microsoft.Web/sites')
+        if (site) {
+            site.resources.push({
+                "apiVersion": "2015-08-01",
+                "name": "web",
+                "type": "sourcecontrols",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/Sites', parameters('functionAppName'))]"
+                ],
+                "properties": {
+                    "RepoUrl": "[variables('gitRepoUrl')]",
+                    "branch": "[variables('gitBranch')]",
+                    "IsManualIntegration": true
+                }
+            })
+        }
+    }
+}
+
+export const addEnvironmentSetting = (name, value, site) => {
+    const exists = site.properties.siteConfig.appSettings.find(s => s.name === name && s.value === value)
+    if (!exists) {
+        site.properties.siteConfig.appSettings.push({ name, value })
+    }
+}

@@ -6,14 +6,31 @@ import { writeFile } from '../../utilities/local/file'
 import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
-import { ARMInit, ARMMerge } from './context/init'
+import { ARMInit, ARMMerge, initGitTemplate } from './context/init'
 import { azureFunctions, persistAzureGithubRepo } from './context/functions'
 
 
 export const azure = {
     FUNCTIONAL_ENVIRONMENT: 'azure',
     createEnvironment: async (context) => {
-        throw new Error('deploy not implemented, use package command')
+        logger.info(`Functionly: Packgaging...`)
+        await executor(context, bundle)
+        await executor(context, zip)
+
+        await executor(context, ARMInit)
+
+
+        await executor(context, ARMMerge)
+        await executor(context, azureFunctions)
+        await executor(context, initGitTemplate)
+
+
+        logger.info(`Functionly: Create project...`)
+        await executor({ ...context, deploymentFolder: projectConfig.ARM.deploymentFolder }, persistAzureGithubRepo)
+        logger.info(`Functionly: Save template...`)
+        await executor(context, persistFile)
+
+        logger.info(`Functionly: Complete`)
     },
     package: async (context) => {
         logger.info(`Functionly: Packgaging...`)
@@ -25,10 +42,12 @@ export const azure = {
 
         await executor(context, ARMMerge)
         await executor(context, azureFunctions)
+        await executor(context, initGitTemplate)
 
 
-        logger.info(`Functionly: Save template...`)
+        logger.info(`Functionly: Create project...`)
         await executor(context, persistAzureGithubRepo)
+        logger.info(`Functionly: Save template...`)
         await executor(context, persistFile)
 
         logger.info(`Functionly: Complete`)
