@@ -57,36 +57,39 @@ export class AzureProvider extends Provider {
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
+
+        const httpAttr = (getMetadata(CLASS_HTTPTRIGGER, serviceInstance) || [])[0]
+        if (!httpAttr) {
+            throw new Error('missing http configuration')
+        }
+
+        const method = httpAttr.methods[0] || 'GET'
+        const invokeParams: any = {
+            method,
+            url: `${process.env.FUNCION_APP_BASEURL}${httpAttr.route}`,
+        };
+
+        if (method.toLowerCase() === 'get') {
+            invokeParams.qs = params
+        } else {
+            invokeParams.body = params
+            invokeParams.json = true
+        }
+
+        if (httpAttr.authLevel !== 'anonymous') {
+            if (!process.env.FUNCTIONLY_FUNCTION_KEY) {
+                throw new Error(`process.env.FUNCTIONLY_FUNCTION_KEY is not set, create host key to all functions`)
+            }
+            invokeParams.qs = { ...(invokeParams.qs || {}), code: process.env.FUNCTIONLY_FUNCTION_KEY }
+        }
+
+        return await this.invokeExec(invokeParams)
+    }
+
+    public async invokeExec(config: any): Promise<any> {
         return new Promise((resolve, reject) => {
-
-            const httpAttr = (getMetadata(CLASS_HTTPTRIGGER, serviceInstance) || [])[0]
-            if (!httpAttr) {
-                return reject(new Error('missing http configuration'))
-            }
-
-            const method = httpAttr.methods[0] || 'GET'
-            const invokeParams: any = {
-                method,
-                url: `${process.env.FUNCION_APP_BASEURL}${httpAttr.route}`,
-            };
-
-            if (method.toLowerCase() === 'get') {
-                invokeParams.qs = params
-            } else {
-                invokeParams.body = params
-                invokeParams.json = true
-            }
-
-            if (httpAttr.authLevel !== 'anonymous') {
-                if (!process.env.FUNCTIONLY_FUNCTION_KEY) {
-                    return reject(new Error(`process.env.FUNCTIONLY_FUNCTION_KEY is not set, create host key to all functions`))
-                }
-                invokeParams.qs = { ...(invokeParams.qs || {}), code: process.env.FUNCTIONLY_FUNCTION_KEY }
-            }
-
             try {
-
-                request(invokeParams, (error, response, body) => {
+                request(config, (error, response, body) => {
 
                     if (error) return reject(error)
 

@@ -70,17 +70,20 @@ export class AWSProvider extends Provider {
     public async invoke(serviceInstance, params, invokeConfig?) {
         initAWSSDK()
 
+        const funcName = getFunctionName(serviceInstance)
+        const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
+
+        const invokeParams = {
+            FunctionName: resolvedFuncName,
+            Payload: JSON.stringify(params)
+        };
+
+        return await this.invokeExec(invokeParams)
+    }
+
+    public async invokeExec(config: any): Promise<any> {
         return new Promise((resolve, reject) => {
-
-            const funcName = getFunctionName(serviceInstance)
-            const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
-
-            const invokeParams = {
-                FunctionName: resolvedFuncName,
-                Payload: JSON.stringify(params)
-            };
-
-            lambda.invoke(invokeParams, function (err, data) {
+            lambda.invoke(config, function (err, data) {
                 if (err) reject(err)
                 else resolve(JSON.parse(data.Payload.toString()));
             });

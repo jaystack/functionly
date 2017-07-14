@@ -50,34 +50,38 @@ export class LocalProvider extends Provider {
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
+
+        const httpAttr = (getMetadata(rest.environmentKey, serviceInstance) || [])[0]
+        if (!httpAttr) {
+            throw new Error('missing http configuration')
+        }
+
+        const method = httpAttr.methods[0] || 'GET'
+        const invokeParams: any = {
+            method,
+            url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
+        };
+
+        if (method.toLowerCase() === 'get') {
+            invokeParams.qs = params
+        } else {
+            invokeParams.body = params
+            invokeParams.json = true
+        }
+
+
+        const isLoggingEnabled = getMetadata(CLASS_LOGKEY, serviceInstance)
+        if (isLoggingEnabled) {
+            console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
+        }
+
+        return await this.invokeExec(invokeParams)
+    }
+
+    public async invokeExec(config: any): Promise<any> {
         return new Promise((resolve, reject) => {
-
-            const httpAttr = (getMetadata(rest.environmentKey, serviceInstance) || [])[0]
-            if (!httpAttr) {
-                return reject(new Error('missing http configuration'))
-            }
-
-            const method = httpAttr.methods[0] || 'GET'
-            const invokeParams: any = {
-                method,
-                url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
-            };
-
-            if (method.toLowerCase() === 'get') {
-                invokeParams.qs = params
-            } else {
-                invokeParams.body = params
-                invokeParams.json = true
-            }
-
             try {
-
-                const isLoggingEnabled = getMetadata(CLASS_LOGKEY, serviceInstance)
-                if (isLoggingEnabled) {
-                    console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
-                }
-
-                request(invokeParams, (error, response, body) => {
+                request(config, (error, response, body) => {
 
                     if (error) return reject(error)
 

@@ -11,6 +11,10 @@ export abstract class Provider {
 
     }
 
+    public async invokeExec(config: any): Promise<any> {
+
+    }
+
 
     protected async parameterResolver(parameter, event): Promise<any> {
         switch (parameter.type) {
