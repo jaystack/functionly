@@ -10,8 +10,9 @@ export const azureFunctions = ExecuteStep.register('AzureFunctions', async (cont
     const site = context.ARMTemplate.resources.find(r => r.type === "Microsoft.Web/sites")
     if (site) {
         const config = site.resources.find(r => r.type === "config") || { properties: {} }
+        const routePrefix = context.ARMHost.http.routePrefix ? `/${context.ARMHost.http.routePrefix}` : ''
 
-        addEnvironmentSetting('FUNCION_APP_BASEURL', `[concat('https://', toLower(variables('functionAppName')), '.azurewebsites.net/api')]`, site)
+        addEnvironmentSetting('FUNCION_APP_BASEURL', `[concat('https://', toLower(variables('functionAppName')), '.azurewebsites.net${routePrefix}')]`, site)
 
         for (const serviceDefinition of context.publishedFunctions) {
             const funcname = getFunctionName(serviceDefinition.service)
@@ -114,10 +115,11 @@ export const persistAzureGithubRepo = ExecuteStep.register('PersistAzureGithubRe
     const { deploymentFolder } = context
     const site = context.ARMTemplate.resources.find(r => r.type === "Microsoft.Web/sites")
     if (site) {
-        removePath(context.projectName || `functionly`)
+        context.projectFolder = `${context.projectName || 'functionly'}-${context.stage}`
+        removePath(context.projectFolder)
 
         for (const file of context.files) {
-            copyFile(file, join(context.projectName || `functionly`, basename(file)), deploymentFolder)
+            copyFile(file, join(context.projectFolder, basename(file)), deploymentFolder)
         }
 
         const functions = site.resources.filter(f => f.type === 'functions')
@@ -133,7 +135,7 @@ export const persistAzureGithubRepo = ExecuteStep.register('PersistAzureGithubRe
 
 export const persistFunction = (context) => {
     const { functionResource, site, deploymentFolder } = context
-    const basePath = join(context.projectName || `functionly`, functionResource.name)
+    const basePath = join(context.projectFolder, functionResource.name)
 
     for (const file in functionResource.properties.files) {
         writeFile(join(basePath, file), new Buffer(functionResource.properties.files[file], 'utf8'), deploymentFolder)

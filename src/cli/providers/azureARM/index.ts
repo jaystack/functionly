@@ -6,7 +6,7 @@ import { writeFile } from '../../utilities/local/file'
 import { projectConfig } from '../../project/config'
 import { executor } from '../../context'
 
-import { ARMInit, ARMMerge, initGitTemplate } from './context/init'
+import { ARMInit, ARMMerge, initGitTemplate, persistHostJson } from './context/init'
 import { azureFunctions, persistAzureGithubRepo } from './context/functions'
 
 
@@ -27,6 +27,7 @@ export const azure = {
 
         logger.info(`Functionly: Create project...`)
         await executor({ ...context, deploymentFolder: projectConfig.ARM.deploymentFolder }, persistAzureGithubRepo)
+        await executor({ ...context, deploymentFolder: projectConfig.ARM.deploymentFolder }, persistHostJson)
         logger.info(`Functionly: Save template...`)
         await executor(context, persistFile)
 
@@ -47,6 +48,7 @@ export const azure = {
 
         logger.info(`Functionly: Create project...`)
         await executor(context, persistAzureGithubRepo)
+        await executor(context, persistHostJson)
         logger.info(`Functionly: Save template...`)
         await executor(context, persistFile)
 

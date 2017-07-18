@@ -2,7 +2,9 @@ import { resolvePath } from '../../../utilities/cli'
 import { projectConfig } from '../../../project/config'
 import { ExecuteStep } from '../../../context'
 
+import { writeFile } from '../../../utilities/local/file'
 import { defaultsDeep } from 'lodash'
+import { join } from 'path'
 
 export const ARMInit = ExecuteStep.register('ARMInit', async (context) => {
     context.ARMConfig = {
@@ -15,7 +17,7 @@ export const ARMInit = ExecuteStep.register('ARMInit', async (context) => {
         "parameters": {
             "functionAppName": {
                 "type": "string",
-                "defaultValue": projectConfig.name,
+                "defaultValue": `${context.projectName || 'functionly'}-${context.stage}`,
                 "metadata": {
                     "description": "The name of the function app that you wish to create."
                 }
@@ -108,11 +110,17 @@ export const ARMInit = ExecuteStep.register('ARMInit', async (context) => {
     }
     context.ARMStacks = {}
     context.deploymentResources = []
+    context.ARMHost = {
+        "http": {
+            "routePrefix": ""
+        }
+    }
 })
 
 export const ARMMerge = ExecuteStep.register('ARMAfterCreateDefaults', async (context) => {
     defaultsDeep(context.ARMTemplate, projectConfig.ARMTemplate || {})
     defaultsDeep(context.ARMStacks, projectConfig.ARMStacksTemplate || {})
+    defaultsDeep(context.ARMHost, projectConfig.ARMHost || {})
 })
 
 export const initGitTemplate = (context) => {
@@ -166,4 +174,11 @@ export const addEnvironmentSetting = (name, value, site) => {
     if (!exists) {
         site.properties.siteConfig.appSettings.push({ name, value })
     }
+}
+
+
+export const persistHostJson = async (context) => {
+    const { deploymentFolder } = context
+    const host = JSON.stringify(context.ARMHost, null, 4)
+    writeFile(join(`${context.projectName || 'functionly'}-${context.stage}`, 'host.json'), new Buffer(host, 'utf8'), deploymentFolder)
 }
