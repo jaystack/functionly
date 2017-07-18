@@ -4,6 +4,7 @@ import { applyTemplates } from '../templates'
 import { environment } from './environment'
 
 export const S3_BUCKET_SUFFIX = '_S3_BUCKET'
+export const S3_BUCKET_NAME_REGEXP = /^[a-z0-9][a-z0-9-.]{1,61}[a-z0-9]$/
 
 export const s3Storage = (s3Config: {
     bucketName: string,
@@ -19,6 +20,11 @@ export const s3Storage = (s3Config: {
 
     const { templatedKey, templatedValue } = applyTemplates(s3Config.environmentKey, s3Config.bucketName, target)
     const lowerCaseTemplatedValue = templatedValue ? templatedValue.toLowerCase() : templatedValue
+
+    if (!S3_BUCKET_NAME_REGEXP.test(lowerCaseTemplatedValue)) {
+        throw new Error(`invalid bucket name '${lowerCaseTemplatedValue}' validator: ${S3_BUCKET_NAME_REGEXP}`)
+    }
+
     s3Definitions.push({
         ...s3Config,
         environmentKey: templatedKey,
