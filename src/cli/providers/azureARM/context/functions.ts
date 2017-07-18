@@ -1,7 +1,7 @@
 import { basename, join } from 'path'
 import { readFileSync } from 'fs'
 import { getFunctionName, getMetadata, constants } from '../../../../annotations'
-const { CLASS_HTTPTRIGGER, CLASS_ENVIRONMENTKEY } = constants
+const { CLASS_HTTPTRIGGER, CLASS_ENVIRONMENTKEY, CLASS_AZURENODEKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { writeFile, copyFile, removePath } from '../../../utilities/local/file'
 import { addEnvironmentSetting } from './init'
@@ -31,6 +31,11 @@ export const azureFunction = async (context) => {
     const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
     for (const key in environmentVariables) {
         addEnvironmentSetting(key, environmentVariables[key], site)
+    }
+
+    const nodeVersion = getMetadata(CLASS_AZURENODEKEY, serviceDefinition.service)
+    if (nodeVersion) {
+        addEnvironmentSetting('WEBSITE_NODE_DEFAULT_VERSION', nodeVersion, site)
     }
 
     const httpMetadata = getMetadata(CLASS_HTTPTRIGGER, serviceDefinition.service) || []

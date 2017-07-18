@@ -22,6 +22,7 @@ import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_RUNTIMEKEY } from './constan
 export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
 export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
 
+export { azure } from './classes/azure/azure'
 
 export { param, event } from './parameters/param'
 export { inject } from './parameters/inject'
