@@ -5,7 +5,13 @@ import { ensureDirSync, copySync, removeSync } from 'fs-extra'
 import { join, normalize, dirname } from 'path'
 
 export const writeFile = (fileName, binary, basePath?) => {
-    if (!basePath) basePath = config.tempDirectory
+    if (!basePath) {
+        basePath = config.tempDirectory
+        const mode = process.env.FUNCTIONAL_ENVIRONMENT
+        if (mode) {
+            basePath = join(basePath, mode)
+        }
+    }
 
     if (basePath) {
         const filePath = join(basePath, fileName)
@@ -16,7 +22,13 @@ export const writeFile = (fileName, binary, basePath?) => {
 }
 
 export const copyFile = (from, to, basePath?) => {
-    if (!basePath) basePath = config.tempDirectory
+    if (!basePath) {
+        basePath = config.tempDirectory
+        const mode = process.env.FUNCTIONAL_ENVIRONMENT
+        if (mode) {
+            basePath = join(basePath, mode)
+        }
+    }
 
     if (basePath) {
         const destinationFilePath = join(basePath, to)
@@ -27,7 +39,13 @@ export const copyFile = (from, to, basePath?) => {
 }
 
 export const removePath = (path, basePath?) => {
-    if (!basePath) basePath = config.tempDirectory
+    if (!basePath) {
+        basePath = config.tempDirectory
+        const mode = process.env.FUNCTIONAL_ENVIRONMENT
+        if (mode) {
+            basePath = join(basePath, mode)
+        }
+    }
 
     if (basePath) {
         const targetFilePath = join(basePath, path)
