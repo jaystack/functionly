@@ -13,7 +13,7 @@ import { getMetadata, getOwnMetadata } from '../src/annotations/metadata'
 import { expandableDecorator } from '../src/annotations/classes/expandableDecorator'
 import { apiGateway } from '../src/annotations/classes/aws/apiGateway'
 import { httpTrigger } from '../src/annotations/classes/azure/httpTrigger'
-import { rest } from '../src/annotations/classes/rest'
+import { rest, httpGet, httpPost, httpPut, httpPatch, httpDelete } from '../src/annotations/classes/rest'
 import { dynamoTable, __dynamoDBDefaults } from '../src/annotations/classes/dynamoTable'
 import { environment } from '../src/annotations/classes/environment'
 import { functionName, getFunctionName } from '../src/annotations/classes/functionName'
@@ -380,6 +380,166 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
+            })
+        })
+        describe("httpGet", () => {
+            it("path", () => {
+                @httpGet('/v1/test')
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("config", () => {
+                @httpGet({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
+            })
+        })
+        describe("httpPost", () => {
+            it("path", () => {
+                @httpPost('/v1/test')
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['post'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("config", () => {
+                @httpPost({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['post'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
+            })
+        })
+        describe("httpPut", () => {
+            it("path", () => {
+                @httpPut('/v1/test')
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['put'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("config", () => {
+                @httpPut({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['put'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
+            })
+        })
+        describe("httpPatch", () => {
+            it("path", () => {
+                @httpPatch('/v1/test')
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['patch'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("config", () => {
+                @httpPatch({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['patch'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', true)
+            })
+        })
+        describe("httpDelete", () => {
+            it("path", () => {
+                @httpDelete('/v1/test')
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['delete'])
+                expect(metadata).to.have.property('cors', false)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+            it("config", () => {
+                @httpDelete({ path: '/v1/test', anonymous: true })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['delete'])
                 expect(metadata).to.have.property('cors', false)
                 expect(metadata).to.have.property('anonymous', true)
             })
