@@ -3,9 +3,9 @@ import { expect } from 'chai'
 
 import {
     CLASS_APIGATEWAYKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_ENVIRONMENTKEY, CLASS_NAMEKEY,
-    CLASS_INJECTABLEKEY, CLASS_LOGKEY, CLASS_RUNTIMEKEY, CLASS_MEMORYSIZEKEY, CLASS_TIMEOUTKEY,
+    CLASS_INJECTABLEKEY, CLASS_LOGKEY, CLASS_AWSRUNTIMEKEY, CLASS_AWSMEMORYSIZEKEY, CLASS_AWSTIMEOUTKEY,
     CLASS_S3CONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_TAGKEY, CLASS_ROLEKEY, CLASS_DESCRIPTIONKEY,
-    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY, CLASS_HTTPTRIGGER
+    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY, CLASS_HTTPTRIGGER, CLASS_AZURENODEKEY
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
@@ -19,13 +19,16 @@ import { environment } from '../src/annotations/classes/environment'
 import { functionName, getFunctionName } from '../src/annotations/classes/functionName'
 import { injectable } from '../src/annotations/classes/injectable'
 import { log } from '../src/annotations/classes/log'
-import { runtime } from '../src/annotations/classes/runtime'
 import { s3Storage } from '../src/annotations/classes/s3Storage'
 import { sns } from '../src/annotations/classes/sns'
 import { tag } from '../src/annotations/classes/tag'
 import { eventSource } from '../src/annotations/classes/eventSource'
 import { classConfig } from '../src/annotations/classes/classConfig'
 import { role, description } from '../src/annotations'
+
+import { aws } from '../src/annotations/classes/aws/aws'
+import { azure } from '../src/annotations/classes/azure/azure'
+
 
 import { inject } from '../src/annotations/parameters/inject'
 import { param } from '../src/annotations/parameters/param'
@@ -542,56 +545,6 @@ describe('annotations', () => {
                 expect(value).to.undefined
             })
         })
-        describe("runtime", () => {
-            it("type", () => {
-                @runtime({ type: 'nodejs6.10' })
-                class RuntimeTestClass { }
-
-                const runtimeValue = getMetadata(CLASS_RUNTIMEKEY, RuntimeTestClass)
-                const memoryValue = getMetadata(CLASS_MEMORYSIZEKEY, RuntimeTestClass)
-                const timeoutValue = getMetadata(CLASS_TIMEOUTKEY, RuntimeTestClass)
-
-                expect(runtimeValue).to.equal('nodejs6.10')
-                expect(memoryValue).to.undefined
-                expect(timeoutValue).to.undefined
-            })
-            it("memorySize", () => {
-                @runtime({ memorySize: 100 })
-                class RuntimeTestClass { }
-
-                const runtimeValue = getMetadata(CLASS_RUNTIMEKEY, RuntimeTestClass)
-                const memoryValue = getMetadata(CLASS_MEMORYSIZEKEY, RuntimeTestClass)
-                const timeoutValue = getMetadata(CLASS_TIMEOUTKEY, RuntimeTestClass)
-
-                expect(runtimeValue).to.undefined
-                expect(memoryValue).to.equal(100)
-                expect(timeoutValue).to.undefined
-            })
-            it("timeout", () => {
-                @runtime({ timeout: 3 })
-                class RuntimeTestClass { }
-
-                const runtimeValue = getMetadata(CLASS_RUNTIMEKEY, RuntimeTestClass)
-                const memoryValue = getMetadata(CLASS_MEMORYSIZEKEY, RuntimeTestClass)
-                const timeoutValue = getMetadata(CLASS_TIMEOUTKEY, RuntimeTestClass)
-
-                expect(runtimeValue).to.undefined
-                expect(memoryValue).to.undefined
-                expect(timeoutValue).to.equal(3)
-            })
-            it("all", () => {
-                @runtime({ type: 'nodejs6.10', memorySize: 100, timeout: 3 })
-                class RuntimeTestClass { }
-
-                const runtimeValue = getMetadata(CLASS_RUNTIMEKEY, RuntimeTestClass)
-                const memoryValue = getMetadata(CLASS_MEMORYSIZEKEY, RuntimeTestClass)
-                const timeoutValue = getMetadata(CLASS_TIMEOUTKEY, RuntimeTestClass)
-
-                expect(runtimeValue).to.equal('nodejs6.10')
-                expect(memoryValue).to.equal(100)
-                expect(timeoutValue).to.equal(3)
-            })
-        })
         describe("s3Storage", () => {
             it("bucketName", () => {
                 @s3Storage({ bucketName: 'mybucketname' })
@@ -849,6 +802,66 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 't1')
                 expect(metadata).to.have.property('eventSource', true)
+            })
+        })
+        describe("aws", () => {
+            it("type", () => {
+                @aws({ type: 'nodejs6.10' })
+                class RuntimeTestClass { }
+
+                const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
+                const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
+                const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
+
+                expect(runtimeValue).to.equal('nodejs6.10')
+                expect(memoryValue).to.undefined
+                expect(timeoutValue).to.undefined
+            })
+            it("memorySize", () => {
+                @aws({ memorySize: 100 })
+                class RuntimeTestClass { }
+
+                const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
+                const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
+                const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
+
+                expect(runtimeValue).to.undefined
+                expect(memoryValue).to.equal(100)
+                expect(timeoutValue).to.undefined
+            })
+            it("timeout", () => {
+                @aws({ timeout: 3 })
+                class RuntimeTestClass { }
+
+                const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
+                const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
+                const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
+
+                expect(runtimeValue).to.undefined
+                expect(memoryValue).to.undefined
+                expect(timeoutValue).to.equal(3)
+            })
+            it("all", () => {
+                @aws({ type: 'nodejs6.10', memorySize: 100, timeout: 3 })
+                class RuntimeTestClass { }
+
+                const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
+                const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
+                const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
+
+                expect(runtimeValue).to.equal('nodejs6.10')
+                expect(memoryValue).to.equal(100)
+                expect(timeoutValue).to.equal(3)
+            })
+        })
+        describe("azure", () => {
+            it("node", () => {
+                @azure({ node: '6.5.0' })
+                class RuntimeTestClass { }
+
+                const nodeValue = getMetadata(CLASS_AZURENODEKEY, RuntimeTestClass)
+
+                expect(nodeValue).to.equal('6.5.0')
             })
         })
     })

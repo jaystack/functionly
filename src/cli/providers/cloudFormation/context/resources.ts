@@ -1,7 +1,7 @@
 import { intersection } from 'lodash'
 
 import { getMetadata, constants, getFunctionName, __dynamoDBDefaults } from '../../../../annotations'
-const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_MEMORYSIZEKEY, CLASS_RUNTIMEKEY, CLASS_TIMEOUTKEY,
+const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_AWSMEMORYSIZEKEY, CLASS_AWSRUNTIMEKEY, CLASS_AWSTIMEOUTKEY,
     CLASS_ENVIRONMENTKEY, CLASS_TAGKEY, CLASS_APIGATEWAYKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
@@ -266,10 +266,10 @@ export const lambdaResource = async (context) => {
         Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
         FunctionName: `${getFunctionName(serviceDefinition.service)}-${context.stage}`,
         Handler: serviceDefinition.handler,
-        MemorySize: serviceDefinition[CLASS_MEMORYSIZEKEY] || getMetadata(CLASS_MEMORYSIZEKEY, serviceDefinition.service),
+        MemorySize: serviceDefinition[CLASS_AWSMEMORYSIZEKEY] || getMetadata(CLASS_AWSMEMORYSIZEKEY, serviceDefinition.service),
         Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
-        Runtime: serviceDefinition[CLASS_RUNTIMEKEY] || getMetadata(CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
-        Timeout: serviceDefinition[CLASS_TIMEOUTKEY] || getMetadata(CLASS_TIMEOUTKEY, serviceDefinition.service),
+        Runtime: serviceDefinition[CLASS_AWSRUNTIMEKEY] || getMetadata(CLASS_AWSRUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+        Timeout: serviceDefinition[CLASS_AWSTIMEOUTKEY] || getMetadata(CLASS_AWSTIMEOUTKEY, serviceDefinition.service),
         Environment: {
             Variables: serviceDefinition[CLASS_ENVIRONMENTKEY] || getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
         },

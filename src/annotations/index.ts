@@ -6,7 +6,6 @@ export { rest } from './classes/rest'
 export { environment } from './classes/environment'
 export { tag } from './classes/tag'
 export { log } from './classes/log'
-export { runtime } from './classes/runtime'
 export { functionName, getFunctionName } from './classes/functionName'
 export { dynamoTable, __dynamoDBDefaults } from './classes/dynamoTable'
 export { sns } from './classes/sns'
@@ -18,9 +17,11 @@ export { expandableDecorator } from './classes/expandableDecorator'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
-import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_RUNTIMEKEY } from './constants'
+import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY } from './constants'
 export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
 export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
+
+export { aws } from './classes/aws/aws'
 
 export { azure } from './classes/azure/azure'
 

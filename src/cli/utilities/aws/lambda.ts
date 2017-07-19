@@ -31,11 +31,11 @@ export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction',
             Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, context.serviceDefinition.service),
             FunctionName: getFunctionName(context.serviceDefinition.service),
             Handler: context.serviceDefinition.handler,
-            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, context.serviceDefinition.service),
+            MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
             Publish: true,
             Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, context.serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
             Environment: {
                 Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, context.serviceDefinition.service)
             },
@@ -116,10 +116,10 @@ export const updateLambdaFunctionConfiguration = ExecuteStep.register('UpdateLam
                 Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, context.serviceDefinition.service)
             },
             Handler: context.serviceDefinition.handler,
-            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, context.serviceDefinition.service),
+            MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
             Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, context.serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
             VpcConfig: {
             }
         };
