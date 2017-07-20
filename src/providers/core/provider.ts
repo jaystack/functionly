@@ -29,7 +29,7 @@ export abstract class Provider {
                 const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
                 await callExtension(instance, 'onInject', { parameter })
                 return instance
-            case 'event': 
+            case 'serviceParams': 
                 return event;
             default:
                 return undefined

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
 import { FunctionalService, Service } from '../src/classes'
-import { param, inject, injectable, event } from '../src/annotations'
+import { param, inject, injectable, serviceParams } from '../src/annotations'
 
 
 describe('invoker', () => {
@@ -344,7 +344,7 @@ describe('invoker', () => {
             }, (e) => { e && done(e) })
         })
 
-        it("event param", (done) => {
+        it("serviceParams param", (done) => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
@@ -362,7 +362,7 @@ describe('invoker', () => {
             const next = (e) => { e && done(e) }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @event p2) {
+                handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('req').that.to.equal(req)
@@ -917,7 +917,7 @@ describe('invoker', () => {
             })
         })
 
-        it("event param", (done) => {
+        it("serviceParams param", (done) => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
@@ -933,7 +933,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @event p2) {
+                handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('event').that.to.equal(awsEvent)
@@ -1344,7 +1344,7 @@ describe('invoker', () => {
             expect(counter).to.equal(1)
         })
 
-        it("event param", async () => {
+        it("serviceParams param", async () => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
@@ -1356,7 +1356,7 @@ describe('invoker', () => {
             const req = {}
 
             class MockService extends FunctionalService {
-                handle( @param p1, @event p2) {
+                handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('context').that.to.equal(context)

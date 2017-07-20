@@ -33,7 +33,7 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
     }
 }
 
-export const event = (target, targetKey, parameterIndex: number) => {
+export const serviceParams = (target, targetKey, parameterIndex: number) => {
     let parameterNames = getFunctionParameters(target, targetKey);
 
     let existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
@@ -41,7 +41,7 @@ export const event = (target, targetKey, parameterIndex: number) => {
     existingParameters.push({
         from: paramName,
         parameterIndex,
-        type: 'event'
+        type: 'serviceParams'
     });
     defineMetadata(PARAMETER_PARAMKEY, existingParameters, target, targetKey);
 }

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { FunctionalService, Service } from '../src/classes'
-import { param, inject, injectable, event } from '../src/annotations'
+import { param, inject, injectable } from '../src/annotations'
 import { addProvider, removeProvider } from '../src/providers'
 import { LocalProvider } from '../src/providers/local'
 
