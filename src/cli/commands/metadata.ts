@@ -1,4 +1,4 @@
-export default ({ createContext, annotations: { getMetadata, getMetadataKeys }, projectConfig, requireValue }) => {
+export default ({ createContext, executor, ExecuteStep, annotations: { getMetadata, getMetadataKeys }, projectConfig, requireValue }) => {
 
     return {
         commands({ commander }) {
@@ -17,18 +17,9 @@ export default ({ createContext, annotations: { getMetadata, getMetadataKeys }, 
                             deployTarget
                         })
 
-                        console.log(JSON.stringify(context, null, 4))
+                        await executor(context, ExecuteStep.get('ServiceMetadata'))
 
-                        for (let serviceDefinitions of context.publishedFunctions) {
-                            let keys = getMetadataKeys(serviceDefinitions.service)
-                            let metadata = {}
-                            for (let key of keys) {
-                                metadata[key] = getMetadata(key, serviceDefinitions.service)
-                            }
-
-                            console.log(serviceDefinitions.handler, JSON.stringify(metadata, null, 4))
-                        }
-
+                        console.log(JSON.stringify(context.serviceMetadata, null, 4))
 
                         console.log(`done`)
                     } catch (e) {

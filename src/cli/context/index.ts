@@ -3,6 +3,7 @@ export { ExecuteStep } from './core/executeStep'
 import { serviceDiscovery } from './steppes/serviceDiscovery'
 import { tableDiscovery } from './steppes/tableDiscovery'
 import './steppes/setFunctionalEnvironment'
+import './steppes/metadata/serviceMetadata'
 
 import { resolvePath } from '../utilities/cli'
 import { logger } from '../utilities/logger'
