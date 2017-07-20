@@ -1,8 +1,8 @@
 import { getFunctionName } from '../../annotations'
 import { bundle } from '../utilities/webpack'
 import { zip } from '../utilities/compress'
-import { uploadZipStep } from '../utilities/aws/s3Upload'
-import { createTables } from '../utilities/aws/dynamoDB'
+import { upload } from '../utilities/aws/s3Upload'
+import { collectAndCreateTables } from '../utilities/aws/dynamoDB'
 import {
     getLambdaFunction,
     deleteLambdaFunction,
@@ -12,39 +12,35 @@ import {
     updateLambdaFunctionConfiguration,
     updateLambdaFunctionTags
 } from '../utilities/aws/lambda'
-import { ExecuteStep, executor } from '../context'
-import { projectConfig } from '../project/config'
 
-export const aws = {
-    FUNCTIONAL_ENVIRONMENT: 'aws',
-    createEnvironment: ExecuteStep.register('CreateEnvironment_aws', async (context) => {
-        await executor(context, bundle)
-        await executor(context, zip)
-        const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
-        await executor(context, uploadZipStep(fileName, context.zipData()))
-        await executor(context, createTables)
 
-        for (let serviceDefinition of context.publishedFunctions) {
-            const serviceName = getFunctionName(serviceDefinition.service)
-            if (serviceName) {
-                console.log(`${serviceName} deploying...`)
-                context.serviceDefinition = serviceDefinition
-                try {
-                    await executor(context, getLambdaFunction)
-                    await executor(context, updateLambdaFunctionCode)
-                    await executor(context, updateLambdaFunctionConfiguration)
-                    await executor(context, updateLambdaFunctionTags)
-                } catch (e) {
-                    if (e.code === "ResourceNotFoundException") {
-                        await executor(context, createLambdaFunction)
-                    } else {
-                        throw e
-                    }
+export const createEnvironment = async (context) => {
+    await bundle(context)
+    await zip(context)
+    await upload(context)
+    await collectAndCreateTables(context)
+
+    for (let serviceDefinition of context.publishedFunctions) {
+        const serviceName = getFunctionName(serviceDefinition.service)
+        if (serviceName) {
+
+            console.log(`${serviceName} deploying...`)
+            try {
+                await getLambdaFunction(serviceDefinition, context)
+                await updateLambdaFunctionCode(serviceDefinition, context)
+                await updateLambdaFunctionConfiguration(serviceDefinition, context)
+                await updateLambdaFunctionTags(serviceDefinition, context)
+            } catch (e) {
+                if (e.code === "ResourceNotFoundException") {
+                    await createLambdaFunction(serviceDefinition, context)
+                } else {
+                    throw e
                 }
-                delete context.serviceDefinition
-
-                console.log('completed')
             }
+
+            console.log('completed')
         }
-    })
+    }
 }
+
+

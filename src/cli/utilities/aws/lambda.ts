@@ -1,14 +1,13 @@
 import { Lambda } from 'aws-sdk'
-import { difference } from 'lodash'
+import { merge, difference } from 'lodash'
 import { config } from '../../utilities/config'
 import { getMetadata, constants, getFunctionName } from '../../../annotations'
-import { ExecuteStep, executor } from '../../context'
 
 
 let lambda = null;
 const initAWSSDK = (context) => {
     if (!lambda) {
-        let awsConfig = { ...config.aws.Lambda }
+        let awsConfig = merge({}, config.aws.Lambda)
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -20,7 +19,7 @@ const initAWSSDK = (context) => {
 
 
 
-export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction', (context) => {
+export const createLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
@@ -28,18 +27,18 @@ export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction',
                 S3Bucket: context.awsBucket,
                 S3Key: context.S3Zip
             },
-            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, context.serviceDefinition.service),
-            FunctionName: getFunctionName(context.serviceDefinition.service),
-            Handler: context.serviceDefinition.handler,
-            MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
+            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, serviceDefinition.service),
+            FunctionName: getFunctionName(serviceDefinition.service),
+            Handler: serviceDefinition.handler,
+            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, serviceDefinition.service),
             Publish: true,
-            Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
+            Role: getMetadata(constants.CLASS_ROLEKEY, serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, serviceDefinition.service),
             Environment: {
-                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, context.serviceDefinition.service)
+                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceDefinition.service)
             },
-            Tags: getMetadata(constants.CLASS_TAGKEY, context.serviceDefinition.service),
+            Tags: getMetadata(constants.CLASS_TAGKEY, serviceDefinition.service),
             VpcConfig: {
             }
         };
@@ -49,52 +48,52 @@ export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction',
             else resolve(data);
         });
     })
-})
+}
 
-export const getLambdaFunction = ExecuteStep.register('GetLambdaFunction', (context) => {
+export const getLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise<any>((resolve, reject) => {
         let params = {
-            FunctionName: getFunctionName(context.serviceDefinition.service)
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.getFunction(params, function (err, data) {
             if (err) reject(err)
             else resolve(data);
         });
     })
-})
+}
 
-export const deleteLambdaFunction = ExecuteStep.register('DeleteLambdaFunction', (context) => {
+export const deleteLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getFunctionName(context.serviceDefinition.service)
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.deleteFunction(params, function (err, data) {
             if (err) reject(err)
             else resolve(data);
         });
     })
-})
+}
 
-export const publishLambdaFunction = ExecuteStep.register('PublishLambdaFunction', (context) => {
+export const publishLambdaFunction = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getFunctionName(context.serviceDefinition.service)
+            FunctionName: getFunctionName(serviceDefinition.service)
         };
         lambda.publishVersion(params, function (err, data) {
             if (err) reject(err)
             else resolve(data);
         });
     })
-})
+}
 
-export const updateLambdaFunctionCode = ExecuteStep.register('UpdateLambdaFunctionCode', (context) => {
+export const updateLambdaFunctionCode = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getFunctionName(context.serviceDefinition.service),
+            FunctionName: getFunctionName(serviceDefinition.service),
             S3Bucket: context.awsBucket,
             S3Key: context.S3Zip,
             Publish: true
@@ -104,22 +103,22 @@ export const updateLambdaFunctionCode = ExecuteStep.register('UpdateLambdaFuncti
             else resolve(data);
         });
     })
-})
+}
 
-export const updateLambdaFunctionConfiguration = ExecuteStep.register('UpdateLambdaFunctionConfiguration', (context) => {
+export const updateLambdaFunctionConfiguration = (serviceDefinition, context) => {
     initAWSSDK(context)
     return new Promise((resolve, reject) => {
         let params = {
-            FunctionName: getFunctionName(context.serviceDefinition.service),
-            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, context.serviceDefinition.service),
+            FunctionName: getFunctionName(serviceDefinition.service),
+            Description: getMetadata(constants.CLASS_DESCRIPTIONKEY, serviceDefinition.service),
             Environment: {
-                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, context.serviceDefinition.service)
+                Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceDefinition.service)
             },
-            Handler: context.serviceDefinition.handler,
-            MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
-            Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs6.10",
-            Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
+            Handler: serviceDefinition.handler,
+            MemorySize: getMetadata(constants.CLASS_MEMORYSIZEKEY, serviceDefinition.service),
+            Role: getMetadata(constants.CLASS_ROLEKEY, serviceDefinition.service),
+            Runtime: getMetadata(constants.CLASS_RUNTIMEKEY, serviceDefinition.service) || "nodejs6.10",
+            Timeout: getMetadata(constants.CLASS_TIMEOUTKEY, serviceDefinition.service),
             VpcConfig: {
             }
         };
@@ -128,12 +127,12 @@ export const updateLambdaFunctionConfiguration = ExecuteStep.register('UpdateLam
             else resolve(data);
         });
     })
-})
+}
 
-export const updateLambdaFunctionTags = ExecuteStep.register('UpdateLambdaFunctionTags', async (context) => {
+export const updateLambdaFunctionTags = async (serviceDefinition, context) => {
     initAWSSDK(context)
-    const getLambdaFunctionResult = await executor(context, getLambdaFunction)
-    const Tags = getMetadata(constants.CLASS_TAGKEY, context.serviceDefinition.service) || {}
+    const getLambdaFunctionResult = await getLambdaFunction(serviceDefinition, context)
+    const Tags = getMetadata(constants.CLASS_TAGKEY, serviceDefinition.service) || {}
 
     const listTagParams = {
         Resource: getLambdaFunctionResult.Configuration.FunctionArn
@@ -157,7 +156,7 @@ export const updateLambdaFunctionTags = ExecuteStep.register('UpdateLambdaFuncti
 
         await tagResource(tagResourceParams, context)
     }
-})
+}
 
 export const listTags = (params, context) => {
     initAWSSDK(context)

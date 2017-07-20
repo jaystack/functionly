@@ -8,8 +8,7 @@
     "build": "node_modules/.bin/tsc",
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
-    "test:fast": "mocha --recursive lib/test/**/*.tests.js",
-    "metadata": "node ./lib/src/cli/cli.js metadata aws --"
+    "test:fast": "mocha --recursive lib/test/**/*.tests.js"
   },
   "repository": {
     "type": "git",
@@ -23,13 +22,13 @@
   "homepage": "https://github.com/jaystack/functionly#readme",
   "devDependencies": {
     "@types/async": "^2.0.33",
-    "@types/chai": "^4.0.1",
+    "@types/chai": "^3.4.34",
     "@types/lodash": "^4.14.38",
-    "@types/mocha": "^2.2.41",
+    "@types/mocha": "^2.2.33",
     "@types/node": "^6.0.46",
     "@types/winston": "0.0.30",
-    "chai": "^4.0.2",
-    "mocha": "^3.4.2",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
     "typescript": "^2.3.0"
   },
   "dependencies": {
@@ -40,14 +39,12 @@
     "config": "^1.26.1",
     "cors": "^2.8.3",
     "express": "^4.15.2",
-    "fs-extra": "^3.0.1",
     "lodash": "^4.14.1",
     "node-zip": "^1.1.1",
     "reflect-metadata": "^0.1.10",
     "request": "^2.81.0",
     "webpack": "^2.5.1",
-    "winston": "^2.3.0",
-    "yamljs": "^0.2.10"
+    "winston": "^2.3.0"
   },
   "bin": {
     "functionly": "./lib/src/cli/cli.js"

@@ -1,11 +1,9 @@
 import * as AWS from 'aws-sdk'
+import { merge } from 'lodash'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
-import { InjectService } from '../injectService'
-import { constants, getMetadata, classConfig } from '../../annotations'
-import { DYNAMO_TABLE_NAME_SUFFIX } from '../../annotations/classes/dynamoTable'
-
-const { CLASS_DYNAMOTABLECONFIGURATIONKEY } = constants
+import { Service } from '../service'
+import { constants, getMetadata } from '../../annotations'
 
 let dynamoDB = null;
 const initAWSSDK = () => {
@@ -15,13 +13,6 @@ const initAWSSDK = () => {
             awsConfig.apiVersion = '2012-08-10'
             awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
             awsConfig.endpoint = process.env.DYNAMODB_LOCAL_ENDPOINT || 'http://localhost:8000'
-
-            console.log('Local DynamoDB configuration')
-            console.log(JSON.stringify({
-                apiVersion: awsConfig.apiVersion,
-                'region (process.env.AWS_REGION)': awsConfig.region,
-                'endpoint (process.env.SNS_LOCAL_ENDPOINT)': awsConfig.endpoint,
-            }, null, 2))
         }
 
         dynamoDB = new AWS.DynamoDB(awsConfig);
@@ -29,13 +20,9 @@ const initAWSSDK = () => {
     return dynamoDB
 }
 
-@classConfig({
-    injectServiceCopyMetadataKey: CLASS_DYNAMOTABLECONFIGURATIONKEY,
-    injectServiceEventSourceKey: CLASS_DYNAMOTABLECONFIGURATIONKEY
-})
-export class DynamoDB extends InjectService {
+export class DynamoDB extends Service {
     private _documentClient: DocumentClient
-    public constructor() {
+    constructor() {
         initAWSSDK()
 
         super()
@@ -116,12 +103,12 @@ export class DynamoDB extends InjectService {
     }
 
     protected setDefaultValues(params, command) {
-        const tableConfig = (getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
-        const tableName = ({ TableName: tableConfig && tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
+        const tableConfig = getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || {}
+        const tableName = (tableConfig[this.constructor.name] && tableConfig[this.constructor.name].TableName)
         const initParams = {
-            TableName: process.env[`${this.constructor.name}${DYNAMO_TABLE_NAME_SUFFIX}`] || tableName
+            TableName: process.env[`${this.constructor.name}_TABLE_NAME`] || tableName
         }
 
-        return { ...initParams, ...params }
+        return merge({}, initParams, params)
     }
 }

@@ -1,12 +1,12 @@
 import { DynamoDB } from 'aws-sdk'
+import { merge } from 'lodash'
 import { config } from '../config'
-import { __dynamoDBDefaults } from '../../../annotations'
-import { ExecuteStep, executor } from '../../context'
+import { getMetadata, constants, __dynamoDBDefaults } from '../../../annotations'
 
 let dynamoDB = null;
 const initAWSSDK = (context) => {
     if (!dynamoDB) {
-        let awsConfig = { ...config.aws.DynamoDB }
+        let awsConfig = merge({}, config.aws.DynamoDB)
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -21,35 +21,54 @@ const initAWSSDK = (context) => {
 }
 
 
-export const createTables = ExecuteStep.register('CreateTables', async (context) => {
+export const tableNameEnvRegexp = /_TABLE_NAME$/
+export const collectAndCreateTables = async (context) => {
     initAWSSDK(context)
 
-    for (let tableConfig of context.tableConfigs) {
+    let tablesToCreate = new Map()
+
+    for (let serviceDefinition of context.publishedFunctions) {
+        let tableConfigs = getMetadata(constants.CLASS_DYNAMOTABLECONFIGURATIONKEY, serviceDefinition.service) || []
+        for (const tableConfig of tableConfigs) {
+            if (tablesToCreate.has(tableConfig.tableName)) {
+                continue
+            }
+
+            tablesToCreate.set(tableConfig.tableName, merge({}, {
+                TableName: tableConfig.tableName
+            }, tableConfig.nativeConfig))
+        }
+
+        let metadata = getMetadata(constants.CLASS_ENVIRONMENTKEY, serviceDefinition.service)
+        if (metadata) {
+            let keys = Object.keys(metadata)
+            for (const key of keys) {
+                if (tableNameEnvRegexp.test(key) && !tablesToCreate.has(metadata[key])) {
+                    tablesToCreate.set(metadata[key], {
+                        TableName: metadata[key]
+                    })
+                }
+            }
+        }
+    }
+
+    for (let tableConfig of tablesToCreate.values()) {
         try {
-            let data = await executor({
-                context: { ...context, tableConfig },
-                name: `CreateTable-${tableConfig.tableName}`,
-                method: createTable
-            })
-            console.log(`${data.TableDescription.TableName} DynamoDB table created.`)
+            await createTable(tableConfig, context)
+            console.log(`${tableConfig.TableName} DynamoDB table created.`)
         } catch (e) {
             if (e.code !== 'ResourceInUseException') {
                 throw e
             }
         }
     }
-})
+}
 
-export const createTable = (context) => {
+export const createTable = (tableConfig, context) => {
     initAWSSDK(context)
-    const { tableConfig } = context
-    return new Promise<any>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
-        let params = {
-            ...__dynamoDBDefaults,
-            TableName: tableConfig.tableName,
-            ...tableConfig.nativeConfig
-        };
+        let params = merge({}, tableConfig, __dynamoDBDefaults);
 
         dynamoDB.createTable(params, function (err, data) {
             if (err) reject(err)

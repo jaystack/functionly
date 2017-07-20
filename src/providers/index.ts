@@ -1,69 +1,33 @@
-import { constants, getOwnMetadata } from '../annotations'
-import { callExtension } from '../classes'
+import { get } from 'lodash'
 
-export { Provider } from './core/provider'
-export { AWSProvider } from './aws'
-export { LocalProvider } from './local'
-export { AzureProvider } from './azure'
+import * as aws from './aws'
+import * as local from './local'
+import * as deploy from './deploy'
 
-import { Provider } from './core/provider'
-import { provider as aws } from './aws'
-import { provider as local } from './local'
-import { provider as azure } from './azure'
-
-const environments = {}
-const invokeEnvironments = {}
-
-export const addProvider = (name, provider: Provider) => {
-    environments[name] = provider
-    invokeEnvironments[name] = provider
-}
-
-export const removeProvider = (name) => {
-    delete environments[name]
-    delete invokeEnvironments[name]
-}
-
-addProvider('aws', aws)
-addProvider('local', local)
-addProvider('azure', azure)
+let environments = { aws, local, deploy }
+let invokeEnvironments = { aws, local }
 
 export const getInvoker = (serviceType, params) => {
-    const environment = process.env.FUNCTIONAL_ENVIRONMENT;
 
-    if (!environment || !environments[environment]) {
-        throw new Error(`missing environment: '${environment}'`)
+    if (!process.env.FUNCTIONAL_ENVIRONMENT || !environments[process.env.FUNCTIONAL_ENVIRONMENT]) {
+        throw new Error(`missing environment: process.env.FUNCTIONAL_ENVIRONMENT`)
     }
 
-    const currentEnvironment = environments[environment]
+    let currentEnvironment = environments[process.env.FUNCTIONAL_ENVIRONMENT]
 
-    const serviceInstance = new serviceType(...params)
-    const invoker = currentEnvironment.getInvoker(serviceType, serviceInstance, params)
+    let invoker = currentEnvironment.getInvoker(serviceType, params)
 
-    const invokeHandler = async (...params) => {
-        const onHandleResult = await callExtension(serviceInstance, `onHandle_${environment}`, ...params)
-        if (typeof onHandleResult !== 'undefined') {
-            return onHandleResult
-        }
-        return await invoker(...params)
-    }
-
-    Object.defineProperty(invokeHandler, 'serviceType', {
+    Object.defineProperty(invoker, 'serviceType', {
         enumerable: false,
         configurable: false,
         writable: false,
         value: serviceType,
     })
 
-    return invokeHandler
+    return invoker
 }
 
 export const invoke = async (serviceInstance, params?, invokeConfig?) => {
-    await callExtension(serviceInstance, 'onInvoke', {
-        params,
-        invokeConfig,
-    })
-
     const environmentMode = (invokeConfig && invokeConfig.mode) || process.env.FUNCTIONAL_ENVIRONMENT
 
     if (!environmentMode || !invokeEnvironments[environmentMode]) {
@@ -72,22 +36,5 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
 
     let currentEnvironment = invokeEnvironments[environmentMode]
 
-    const availableParams = {}
-    const parameterMapping = (getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
-    parameterMapping.forEach((target) => {
-        if (params && target && target.type === 'param') {
-            availableParams[target.from] = params[target.from]
-        }
-    })
-
-    await callExtension(serviceInstance, `onInvoke_${environmentMode}`, {
-        invokeParams: params,
-        params: availableParams,
-        invokeConfig,
-        parameterMapping,
-        currentEnvironment,
-        environmentMode
-    })
-
-    return await currentEnvironment.invoke(serviceInstance, availableParams, invokeConfig)
+    return await currentEnvironment.invoke(serviceInstance, params, invokeConfig)
 }
