@@ -1,13 +1,13 @@
-import { merge } from 'lodash'
 import * as webpack from 'webpack'
 import { config } from './config'
 import { basename, extname, join } from 'path'
+import { ExecuteStep, executor } from '../context'
 
 
-export const bundle = (context) => {
+export const bundle = ExecuteStep.register('WebpackBundle', (context) => {
 
-    return new Promise((resolve, reject) => {
-        const webpackConfig = createConfig(context)
+    return new Promise(async (resolve, reject) => {
+        const webpackConfig = await executor(context, bundleConfig)
 
         webpack(webpackConfig, function (err, stats) {
             if (err) return reject()
@@ -34,9 +34,9 @@ export const bundle = (context) => {
             resolve()
         });
     })
-}
+})
 
-export const createConfig = (context) => {
+export const bundleConfig = ExecuteStep.register('WebpackBundleConfig', (context) => {
     let entry = {}
     context.files.forEach((file) => {
         let name = basename(file)
@@ -45,14 +45,18 @@ export const createConfig = (context) => {
         entry[nameKey] = file
     })
 
-    const webpackConfig = merge({}, config.webpack, {
+    const externals = []
+    if (context.deployTarget === 'aws') {
+        externals.push({
+            'aws-sdk': 'commonjs aws-sdk'
+        })
+    }
+
+    const webpackConfig = {
+        ...config.webpack,
         entry: entry,
-        externals: [
-            {
-                'aws-sdk': 'commonjs aws-sdk'
-            }
-        ]
-    })
+        externals
+    }
 
     return webpackConfig
-}
+})

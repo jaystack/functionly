@@ -4,6 +4,7 @@ import { getFunctionParameters } from '../utils'
 
 export const param = (target: any, targetKey?: string, parameterIndex?: number): any => {
     let name;
+    let config = {};
     let decorator = function (target, targetKey, parameterIndex: number) {
         let parameterNames = getFunctionParameters(target, targetKey);
 
@@ -11,6 +12,7 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
         let paramName = parameterNames[parameterIndex];
 
         existingParameters.push({
+            ...config,
             from: name || paramName,
             parameterIndex,
             type: 'param'
@@ -22,7 +24,24 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
     if (typeof target == "string" || typeof target == "undefined" || !target) {
         name = target;
         return decorator;
+    } else if (typeof target === 'object' && target && !targetKey) {
+        name = target.name;
+        config = target
+        return decorator
     } else {
         return decorator(target, targetKey, parameterIndex);
     }
+}
+
+export const serviceParams = (target, targetKey, parameterIndex: number) => {
+    let parameterNames = getFunctionParameters(target, targetKey);
+
+    let existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+    let paramName = parameterNames[parameterIndex];
+    existingParameters.push({
+        from: paramName,
+        parameterIndex,
+        type: 'serviceParams'
+    });
+    defineMetadata(PARAMETER_PARAMKEY, existingParameters, target, targetKey);
 }

@@ -1,39 +1,31 @@
-import { serviceDiscovery } from '../utilities/serviceDiscovery'
-import { local } from '../utilities/local'
-import { resolvePath } from '../utilities/cli'
-import { getMetadata, getMetadataKeys } from '../../annotations'
+export default ({ createContext, executor, ExecuteStep, annotations: { getMetadata, getMetadataKeys }, projectConfig, requireValue }) => {
 
-export const init = (commander) => {
-    commander
-        .command('metadata <target> <path>')
-        .description('service metadata')
-        .action(async (target, path, command) => {
-            process.env.FUNCTIONAL_ENVIRONMENT = 'deploy'
+    return {
+        commands({ commander }) {
+            commander
+                .command('metadata [target] [path]')
+                .description('service metadata')
+                .action(async (target, path, command) => {
 
-            let context: any = {
-                deployTarget: target,
-                serviceRoot: resolvePath(path)
-            }
+                    try {
+                        const entryPoint = requireValue(path || projectConfig.main, 'entry point')
+                        const deployTarget = requireValue(target || projectConfig.deployTarget, 'missing deploy target')
 
-            try {
-                await serviceDiscovery(context)
+                        process.env.FUNCTIONAL_ENVIRONMENT = deployTarget
 
-                console.log(JSON.stringify(context, null, 4))
+                        const context = await createContext(entryPoint, {
+                            deployTarget
+                        })
 
-                for (let serviceDefinitions of context.publishedFunctions) {
-                    let keys = getMetadataKeys(serviceDefinitions.service)
-                    let metadata = {}
-                    for (let key of keys) {
-                        metadata[key] = getMetadata(key, serviceDefinitions.service)
+                        await executor(context, ExecuteStep.get('ServiceMetadata'))
+
+                        console.log(JSON.stringify(context.serviceMetadata, null, 4))
+
+                        console.log(`done`)
+                    } catch (e) {
+                        console.log(`error`, e)
                     }
-
-                    console.log(serviceDefinitions.handler, JSON.stringify(metadata, null, 4))
-                }
-
-
-                console.log(`done`)
-            } catch (e) {
-                console.log(`error`, e)
-            }
-        });
+                });
+        }
+    }
 }

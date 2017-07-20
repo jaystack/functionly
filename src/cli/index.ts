@@ -1,12 +1,22 @@
 import { normalize, join } from 'path'
 import './utilities/config'
+import './providers'
 
-import { init as initDeployCommand } from './commands/deploy'
-import { init as initLocalCommand } from './commands/local'
-import { init as initMetadataCommand } from './commands/metadata'
+//built-in commands
+import * as deploy from './commands/deploy'
+import * as deployPackage from './commands/package'
+import * as local from './commands/local'
+import * as metadata from './commands/metadata'
+import * as serverless from './commands/serverless'
+
+import { init as initProjectConfig, internalPluginLoad } from './project/init'
 
 export const init = (commander) => {
-    initDeployCommand(commander)
-    initLocalCommand(commander)
-    initMetadataCommand(commander)
+    internalPluginLoad(deploy)
+    internalPluginLoad(deployPackage)
+    internalPluginLoad(local)
+    internalPluginLoad(metadata)
+    internalPluginLoad(serverless)
+
+    initProjectConfig(commander)
 }

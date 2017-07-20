@@ -1,11 +1,12 @@
 import { S3 } from 'aws-sdk'
-import { merge } from 'lodash'
 import { config } from '../config'
+import { ExecuteStep, executor } from '../../context'
+import { writeFile } from '../local/file'
 
 let s3 = null;
 const initAWSSDK = (context) => {
     if (!s3) {
-        let awsConfig = merge({}, config.aws.S3)
+        let awsConfig = { ...config.aws.S3 }
         if (context.awsRegion) {
             awsConfig.region = context.awsRegion
         }
@@ -15,25 +16,53 @@ const initAWSSDK = (context) => {
     return s3
 }
 
+export const uploadZipStep = (name, data) => {
+    return async (context) => {
+        const step = uploaderStep(name, data, 'application/zip')
+        const uploadResult = await executor(context, step)
+        context.S3Zip = uploadResult.Key
+        return uploadResult
+    }
+}
 
-export const upload = (context) => {
+export const uploaderStep = (name, data, contentType) => {
+    return async (context) => {
+        context.upload = {
+            name,
+            data,
+            contentType
+        }
+        const uploadResult = await executor(context, uploadToAws)
+        delete context.upload
+        return uploadResult
+    }
+}
+
+export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => {
     initAWSSDK(context)
-    return new Promise((resolve, reject) => {
-
-        const date = new Date()
-        let params = merge({}, config.S3, {
+    return new Promise<any>((resolve, reject) => {
+        const version = context.version ? `${context.version}/` : ''
+        const folderPah = context.version ? `${context.version}/${context.date.toISOString()}` : `${context.date.toISOString()}`
+        const binary = new Buffer(context.upload.data, 'binary')
+        let params = {
+            ...config.S3,
             Bucket: context.awsBucket,
-            Body: new Buffer(context.zipData(), 'binary'),
-            Key: `services-${date.toISOString()}.zip`,
-            ContentType: 'application/zip'
-        })
+            Body: binary,
+            Key: `${context.projectName || 'functionly'}/${context.stage}/${folderPah}/${context.upload.name}`,
+            ContentType: context.upload.contentType
+        }
+
+        if (context.skipUpload) {
+            writeFile(context.upload.name, binary)
+            return resolve(params)
+        }
 
         s3.putObject(params, (err, res) => {
-            if(err) return reject(err)
+            if (err) return reject(err)
 
-            context.S3Zip = params.Key
+            writeFile(context.upload.name, binary)
 
-            return resolve()
+            return resolve(params)
         })
     })
-}
+})
