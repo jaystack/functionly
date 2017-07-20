@@ -247,11 +247,11 @@ export const lambdaResources = ExecuteStep.register('Lambda-Functions', async (c
             name: `Lambda-Function-${serviceDefinition.service.name}`,
             method: lambdaResource
         })
-        await executor({
+        /* await executor({
             context: { ...context, serviceDefinition },
             name: `Lambda-Version-${serviceDefinition.service.name}`,
             method: lambdaVersionResource
-        })
+        }) */
     }
 })
 
