@@ -4,6 +4,26 @@ import * as cors from 'cors'
 
 export default ({ createContext, annotations: { getMetadata, constants, getFunctionName, rest }, projectConfig, requireValue, executor }) => {
 
+    const pathPattern = /\{([^+\}]+)(\+?)\}/
+    const pathTransform = (path, middlewares, idx = 0) => {
+        const match = pathPattern.exec(path)
+        if (match) {
+            if (match[2]) {
+                path = path.replace(match[0], '*')
+                middlewares.push((req, res, next) => {
+                    req.params[match[1]] = req.params[idx]
+                    next()
+                })
+                return pathTransform(path, middlewares, idx + 1)
+            } else {
+                path = path.replace(match[0], `:${match[1]}`)
+                return pathTransform(path, middlewares, idx)
+            }
+        }
+
+        return path;
+    }
+
     const startLocal = async (context) => {
         let app = express()
         app.use(bodyParser.json())
@@ -13,17 +33,20 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
 
             for (let event of httpMetadata) {
                 const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceDefinition.service)
-                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${event.path}', methods: '${event.methods}', cors: ${event.cors ? true : false} }`)
+                const transformMiddlewares = []
+                const path = pathTransform(event.path, transformMiddlewares)
+                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${path}', methods: '${event.methods}', cors: ${event.cors ? true : false} }`)
 
                 if (event.cors) {
-                    app.use(event.path, cors())
+                    app.use(path, cors())
                 }
 
-                for(const method of event.methods){
+                for (const method of event.methods) {
                     app[method](
-                        event.path,
+                        path,
                         logMiddleware(isLoggingEnabled, serviceDefinition.service),
                         environmentConfigMiddleware(serviceDefinition.service),
+                        ...transformMiddlewares,
                         serviceDefinition.invoker
                     )
                 }
