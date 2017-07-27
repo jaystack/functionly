@@ -9,7 +9,7 @@ import {
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
-import { getMetadata, getOwnMetadata } from '../src/annotations/metadata'
+import { getMetadata } from '../src/annotations/metadata'
 import { expandableDecorator } from '../src/annotations/classes/expandableDecorator'
 import { apiGateway } from '../src/annotations/classes/aws/apiGateway'
 import { httpTrigger } from '../src/annotations/classes/azure/httpTrigger'
@@ -1035,7 +1035,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1053,7 +1053,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1076,7 +1076,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1148,7 +1148,7 @@ describe('annotations', () => {
                     method( @param name) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1163,7 +1163,7 @@ describe('annotations', () => {
                     method( @param('fullName') name) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1178,7 +1178,7 @@ describe('annotations', () => {
                     method( @param name, @param fullName) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(2);
 
@@ -1199,7 +1199,7 @@ describe('annotations', () => {
                     method( @param({ name: 'fullName', p1: 1, p2: 'p2' }) name) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1216,7 +1216,7 @@ describe('annotations', () => {
                     method( @param({ p1: 1, p2: 'p2' }) shortName) { }
                 }
 
-                const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1238,7 +1238,7 @@ describe('annotations', () => {
                         method( @myDecorator p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1256,7 +1256,7 @@ describe('annotations', () => {
                         method( @myDecorator() p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1274,7 +1274,7 @@ describe('annotations', () => {
                         method( @myDecorator p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1293,7 +1293,7 @@ describe('annotations', () => {
                         method( @myDecorator() p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1312,7 +1312,7 @@ describe('annotations', () => {
                         method( @myDecorator({ d: 3 }) p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1331,7 +1331,7 @@ describe('annotations', () => {
                         method( @myDecorator({ c: 2 }) p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1350,7 +1350,7 @@ describe('annotations', () => {
                         method( @request p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1365,7 +1365,7 @@ describe('annotations', () => {
                         method( @request() p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1383,7 +1383,7 @@ describe('annotations', () => {
                         method( @serviceParams p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1398,7 +1398,7 @@ describe('annotations', () => {
                         method( @serviceParams() p1) { }
                     }
 
-                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 

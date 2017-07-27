@@ -13,8 +13,8 @@ export const FUNCTIONLY_FUNCTION_KEY = 'FUNCTIONLY_FUNCTION_KEY'
 
 
 export class AzureProvider extends Provider {
-    public getInvoker(serviceType, serviceInstance, params): Function {
-        const parameters = this.getParameters(serviceType, 'handle')
+    public getInvoker(serviceInstance, params): Function {
+        const callContext = this.createCallContext(serviceInstance, 'handle')
 
         const invoker = async (context, req) => {
             try {
@@ -22,15 +22,10 @@ export class AzureProvider extends Provider {
 
                 const eventSourceHandler = eventSourceHandlers.find(h => h.available(eventContext))
 
-                const params = []
-                for (const parameter of parameters) {
-                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { eventSourceHandler, event: eventContext })
-                }
-
                 let result
                 let error
                 try {
-                    result = await serviceInstance.handle(...params)
+                    result = await callContext({ eventSourceHandler, event: eventContext })
                 } catch (err) {
                     error = err
                 }
@@ -103,7 +98,7 @@ export class AzureProvider extends Provider {
 }
 
 AzureProvider.addParameterDecoratorImplementation("param", async (parameter, context, provider) => {
-    return await context.eventSourceHandler.parameterResolver(parameter, context.event)
+    return await context.eventSourceHandler.parameterResolver(parameter, context)
 })
 
 

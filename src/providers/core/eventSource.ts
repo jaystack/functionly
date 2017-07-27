@@ -5,22 +5,12 @@ export abstract class EventSource {
         return true
     }
 
-    public async parameterResolver(parameter, event: any) {
+    public async parameterResolver(parameter, context: any) {
         return undefined
     }
 
     public async resultTransform(err, result, event: any) {
         if (err) throw err
         return result
-    }
-
-    protected getHolder(suggestedHolder, data, parameter) {
-        const source = parameter.source;
-        if (typeof source !== 'undefined') {
-            const holder = !source ? data : get(data, source)
-            return holder
-        } else {
-            return suggestedHolder
-        }
     }
 }

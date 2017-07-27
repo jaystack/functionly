@@ -1,22 +1,17 @@
 import * as request from 'request'
 import { Provider } from './core/provider'
-import { constants, getOwnMetadata, getMetadata, getFunctionName, rest } from '../annotations'
+import { constants, getMetadata, getFunctionName, rest } from '../annotations'
 const { CLASS_LOGKEY } = constants
 import { get } from '../helpers/property'
 import { parse } from 'url'
 
 export class LocalProvider extends Provider {
-    public getInvoker(serviceType, serviceInstance, params) {
-        const parameters = this.getParameters(serviceType, 'handle')
+    public getInvoker(serviceInstance, params) {
+        const callContext = this.createCallContext(serviceInstance, 'handle')
 
         const invoker = async (req, res, next) => {
             try {
-                const params = []
-                for (const parameter of parameters) {
-                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { event: { req, res, next } })
-                }
-
-                const r = await serviceInstance.handle(...params)
+                const r = await callContext({ event: { req, res, next } })
                 res.send(r)
                 return r
             } catch (e) {
@@ -82,7 +77,7 @@ LocalProvider.addParameterDecoratorImplementation("param", async (parameter, con
     const req = context.event.req
     const source = parameter.source;
     if (typeof source !== 'undefined') {
-        const holder = !source ? req : get(req, source)
+        const holder = !source ? context : get(context, source)
         if (holder) {
             return get(holder, parameter.from)
         }
@@ -92,6 +87,7 @@ LocalProvider.addParameterDecoratorImplementation("param", async (parameter, con
         if (typeof (value = get(req.query, parameter.from)) !== 'undefined') return value
         if (typeof (value = get(req.params, parameter.from)) !== 'undefined') return value
         if (typeof (value = get(req.headers, parameter.from)) !== 'undefined') return value
+        if (typeof (value = get(context.context, parameter.from)) !== 'undefined') return value
         return value
     }
     return undefined

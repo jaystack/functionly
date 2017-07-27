@@ -14,6 +14,7 @@ export { eventSource } from './classes/eventSource'
 export { classConfig, getClassConfigValue } from './classes/classConfig'
 export { simpleClassAnnotation } from './classes/simpleAnnotation'
 export { expandableDecorator } from './classes/expandableDecorator'
+export { use } from './classes/use'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
@@ -25,7 +26,7 @@ export { aws } from './classes/aws/aws'
 
 export { azure } from './classes/azure/azure'
 
-export { param, serviceParams, createParameterDecorator, request } from './parameters/param'
+export { param, serviceParams, createParameterDecorator, request, context, error } from './parameters/param'
 export { inject } from './parameters/inject'
 
 import * as _constants from './constants'

@@ -7,17 +7,17 @@ export class ApiGateway extends EventSource {
         return event && event.requestContext && event.requestContext.apiId ? true : false
     }
 
-    public async parameterResolver(parameter, event) {
-        const body = event.event.body
-        const query = event.event.queryStringParameters
-        const params = event.event.pathParameters
-        const headers = event.event.headers
+    public async parameterResolver(parameter, context) {
+        const body = context.event.event.body
+        const query = context.event.event.queryStringParameters
+        const params = context.event.event.pathParameters
+        const headers = context.event.event.headers
 
         switch (parameter.type) {
             case 'param':
                 const source = parameter.source;
                 if (typeof source !== 'undefined') {
-                    const holder = !source ? event.event : get(event.event, source)
+                    const holder = !source ? context : get(context, source)
                     if (holder) {
                         return get(holder, parameter.from)
                     }
@@ -27,11 +27,12 @@ export class ApiGateway extends EventSource {
                     if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(context, parameter.from)) !== 'undefined') return value
                     return value;
                 }
                 return undefined
             default:
-                return await super.parameterResolver(parameter, event)
+                return await super.parameterResolver(parameter, context)
         }
     }
 

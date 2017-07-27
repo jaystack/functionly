@@ -1,5 +1,5 @@
 import { PARAMETER_PARAMKEY } from '../constants'
-import { getOwnMetadata, defineMetadata } from '../metadata'
+import { getMetadata, defineMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
 
 export const param = (target: any, targetKey?: string, parameterIndex?: number): any => {
@@ -8,7 +8,7 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
     let decorator = function (target, targetKey, parameterIndex: number) {
         let parameterNames = getFunctionParameters(target, targetKey);
 
-        let existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+        let existingParameters: any[] = getMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
         let paramName = parameterNames[parameterIndex];
 
         existingParameters.push({
@@ -39,11 +39,12 @@ export const createParameterDecorator = (type: string, defaultConfig?: any) => (
     const decorator = function (target, targetKey, parameterIndex: number) {
         const parameterNames = getFunctionParameters(target, targetKey);
 
-        const existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+        const existingParameters: any[] = getMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
         const paramName = parameterNames[parameterIndex];
         existingParameters.push({
             from: paramName,
             parameterIndex,
+            targetKey,
             type,
             config
         });
@@ -62,3 +63,5 @@ export const createParameterDecorator = (type: string, defaultConfig?: any) => (
 
 export const serviceParams = createParameterDecorator('serviceParams')
 export const request = createParameterDecorator('request')
+export const context = createParameterDecorator('context')
+export const error = createParameterDecorator('error')

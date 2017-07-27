@@ -280,7 +280,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param({ source: 'query' }) p1, @param({ source: 'params' }) p2, @param({ source: 'headers' }) p3, @param p4) {
+                handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
                     counter++
                     expect(p1).to.equal('query')
                     expect(p2).to.equal('params')
@@ -714,7 +714,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param({ source: 'queryStringParameters' }) p1, @param({ source: 'pathParameters' }) p2, @param({ source: 'headers' }) p3, @param p4) {
+                    handle( @param({ source: 'event.event.queryStringParameters' }) p1, @param({ source: 'event.event.pathParameters' }) p2, @param({ source: 'event.event.headers' }) p3, @param p4) {
                         counter++
                         expect(p1).to.equal('queryStringParameters')
                         expect(p2).to.equal('pathParameters')
@@ -912,7 +912,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param s3, @param({ name: 'Records', source: null }) p2) {
+                    handle( @param s3, @param({ name: 'event.event.Records', source: null }) p2) {
                         counter++
                         expect(s3).to.deep.equal(awsEvent.Records[0].s3)
                         expect(p2).to.have.lengthOf(1);
@@ -977,7 +977,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param Sns, @param({ name: 'Records', source: null }) p2) {
+                    handle( @param Sns, @param({ name: 'event.event.Records', source: null }) p2) {
                         counter++
                         expect(Sns).to.deep.equal(awsEvent.Records[0].Sns)
                         expect(p2).to.have.lengthOf(1);
@@ -1197,6 +1197,7 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
 
@@ -1224,6 +1225,7 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
 
@@ -1251,6 +1253,7 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
 
@@ -1278,6 +1281,7 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
 
@@ -1321,15 +1325,16 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
-
+            
             it("httpTrigger params resolve hint", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param({ source: 'queryStringParameters' }) p1, @param({ source: 'pathParameters' }) p2, @param({ source: 'headers' }) p3, @param p4) {
+                    handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
                         counter++
                         expect(p1).to.equal('queryStringParameters')
                         expect(p2).to.equal('pathParameters')
@@ -1364,6 +1369,7 @@ describe('invoker', () => {
 
                 await invoker(context, req)
 
+                expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
 
@@ -1492,6 +1498,7 @@ describe('invoker', () => {
 
             await invoker(context, req)
 
+            expect(context).to.have.nested.property('res.status', 200)
             expect(counter).to.equal(1)
         })
 
@@ -1519,6 +1526,7 @@ describe('invoker', () => {
 
             await invoker(context, req)
 
+            expect(context).to.have.nested.property('res.status', 200)
             expect(counter).to.equal(1)
         })
 
@@ -1565,6 +1573,7 @@ describe('invoker', () => {
 
             await invoker(context, req)
 
+            expect(context).to.have.nested.property('res.status', 200)
             expect(counter).to.equal(1)
         })
     })

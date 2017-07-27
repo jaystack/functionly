@@ -1,4 +1,5 @@
-import { constants, getOwnMetadata } from '../annotations'
+import { constants, getMetadata } from '../annotations'
+const { PARAMETER_PARAMKEY } = constants
 import { callExtension } from '../classes'
 
 export { Provider } from './core/provider'
@@ -38,7 +39,7 @@ export const getInvoker = (serviceType, params) => {
     const currentEnvironment = environments[environment]
 
     const serviceInstance = new serviceType(...params)
-    const invoker = currentEnvironment.getInvoker(serviceType, serviceInstance, params)
+    const invoker = currentEnvironment.getInvoker(serviceInstance, params)
 
     const invokeHandler = async (...params) => {
         const onHandleResult = await callExtension(serviceInstance, `onHandle_${environment}`, ...params)
@@ -73,7 +74,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     let currentEnvironment = invokeEnvironments[environmentMode]
 
     const availableParams = {}
-    const parameterMapping = (getOwnMetadata(constants.PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
+    const parameterMapping = (getMetadata(PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
     parameterMapping.forEach((target) => {
         if (params && target && target.type === 'param') {
             availableParams[target.from] = params[target.from]

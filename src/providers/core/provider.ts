@@ -1,8 +1,9 @@
-import { constants, getOwnMetadata } from '../../annotations'
-import { callExtension } from '../../classes'
+import { constants, getMetadata } from '../../annotations'
+import { getMiddlewares } from '../../annotations/classes/use'
+import { callExtension, PreHook, PostHook } from '../../classes'
 
 export abstract class Provider {
-    public getInvoker(serviceType, serviceInstance, params): Function {
+    public getInvoker(serviceInstance, params): Function {
         const invoker = () => { }
         return invoker
     }
@@ -16,15 +17,65 @@ export abstract class Provider {
     }
 
     protected async parameterResolver(parameter, context): Promise<any> {
-        const implementation = this.getParameterDecoratorImplementation(parameter.type) || (() => {})
+        const implementation = this.getParameterDecoratorImplementation(parameter.type) || (() => { })
         return implementation(parameter, context, this)
     }
 
-    protected getParameters(target, method) {
-        return (getOwnMetadata(constants.PARAMETER_PARAMKEY, target, 'handle') || [])
-            .filter(t => t && typeof t.parameterIndex === 'number');
+    protected createCallContext(target, method) {
+        const hooks = getMiddlewares(target).map(m => new m())
+        const parameters = this.getParameters(target.constructor, method)
+
+        const preHooks = hooks.filter(h => h instanceof PreHook)
+            .map(h => this.createCallContext(h, 'handle'))
+        const postHookInstances = hooks.filter(h => h instanceof PostHook)
+        const postHooks = postHookInstances.map(h => this.createCallContext(h, 'handle'))
+        const catchHooks = postHookInstances.map(h => this.createCallContext(h, 'catch'))
+
+        return async (context) => {
+            const preic: any = {}
+            const preContext = { context: preic, ...context }
+
+            try {
+                for (const hook of preHooks) {
+                    await hook(preContext)
+                }
+
+                const params = []
+                for (const parameter of parameters) {
+                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, preContext)
+                }
+
+                preic.result = await target[method](...params)
+                preic.error = undefined
+            } catch (e) {
+                preic.error = e
+                preic.result = undefined
+            }
+
+            const ic = { ...preic }
+            const postContext = { ...preContext, context: ic }
+            for (let hookIndex = 0; hookIndex < postHookInstances.length; hookIndex++) {
+                try {
+                    if (ic.error) {
+                        ic.result = await catchHooks[hookIndex](postContext)
+                    } else {
+                        ic.result = await postHooks[hookIndex](postContext)
+                    }
+                    ic.error = undefined
+                } catch (e) {
+                    ic.error = e
+                }
+            }
+
+            if (ic.error) throw ic.error
+            return ic.result
+        }
     }
 
+    protected getParameters(target, method) {
+        return (getMetadata(constants.PARAMETER_PARAMKEY, target, method) || [])
+            .filter(t => t && typeof t.parameterIndex === 'number');
+    }
 
     public static __supportedDecorators: { [key: string]: Function }
     public static __getDecoratorHolder() {
@@ -59,4 +110,11 @@ Provider.addParameterDecoratorImplementation("inject", async (parameter, context
 
 Provider.addParameterDecoratorImplementation("serviceParams", async (parameter, context, provider) => {
     return context.event
+})
+
+Provider.addParameterDecoratorImplementation("context", async (parameter, context, provider) => {
+    return context.context
+})
+Provider.addParameterDecoratorImplementation("error", async (parameter, context, provider) => {
+    return parameter.targetKey === 'catch' ? (context.context && context.context.error) : undefined
 })

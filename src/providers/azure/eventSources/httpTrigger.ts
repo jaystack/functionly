@@ -2,17 +2,17 @@ import { EventSource } from '../../core/eventSource'
 import { get } from '../../../helpers/property'
 
 export class HttpTrigger extends EventSource {
-    public async parameterResolver(parameter, event) {
-        const body = event.req.body
-        const query = event.req.query
-        const params = event.req.params
-        const headers = event.req.headers
+    public async parameterResolver(parameter, context) {
+        const body = context.event.req.body
+        const query = context.event.req.query
+        const params = context.event.req.params
+        const headers = context.event.req.headers
 
         switch (parameter.type) {
             case 'param':
                 const source = parameter.source;
                 if (typeof source !== 'undefined') {
-                    const holder = !source ? event.req : get(event.req, source)
+                    const holder = !source ? context : get(context, source)
                     if (holder) {
                         return get(holder, parameter.from)
                     }
@@ -22,11 +22,12 @@ export class HttpTrigger extends EventSource {
                     if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
+                    if (typeof (value = get(context, parameter.from)) !== 'undefined') return value
                     return value;
                 }
                 return undefined
             default:
-                return await super.parameterResolver(parameter, event)
+                return await super.parameterResolver(parameter, context)
         }
     }
 
