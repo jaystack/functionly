@@ -3,6 +3,7 @@ import { getFunctionName, constants, getMetadata } from '../../annotations'
 const { CLASS_HTTPTRIGGER } = constants
 import { HttpTrigger } from './eventSources/httpTrigger'
 import * as request from 'request'
+import { parse } from 'url'
 
 const eventSourceHandlers = [
     new HttpTrigger()
@@ -23,7 +24,7 @@ export class AzureProvider extends Provider {
 
                 const params = []
                 for (const parameter of parameters) {
-                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { eventSourceHandler, eventContext })
+                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { eventSourceHandler, event: eventContext })
                 }
 
                 let result
@@ -45,15 +46,6 @@ export class AzureProvider extends Provider {
             }
         }
         return invoker
-    }
-
-    protected async parameterResolver(parameter, event) {
-        switch (parameter.type) {
-            case 'param':
-                return event.eventSourceHandler.parameterResolver(parameter, event.eventContext)
-            default:
-                return await super.parameterResolver(parameter, event.eventContext)
-        }
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
@@ -109,5 +101,23 @@ export class AzureProvider extends Provider {
         })
     }
 }
+
+AzureProvider.addParameterDecoratorImplementation("param", async (parameter, context, provider) => {
+    return await context.eventSourceHandler.parameterResolver(parameter, context.event)
+})
+
+
+AzureProvider.addParameterDecoratorImplementation("request", async (parameter, context, provider) => {
+    if (context.eventSourceHandler.constructor.name === 'HttpTrigger') {
+        return {
+            url: parse(context.event.req.originalUrl),
+            method: context.event.req.method,
+            body: context.event.req.body,
+            query: context.event.req.query,
+            params: context.event.req.params,
+            headers: context.event.req.headers
+        }
+    }
+})
 
 export const provider = new AzureProvider()

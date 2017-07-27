@@ -3,6 +3,7 @@ import { Provider } from './core/provider'
 import { constants, getOwnMetadata, getMetadata, getFunctionName, rest } from '../annotations'
 const { CLASS_LOGKEY } = constants
 import { get } from '../helpers/property'
+import { parse } from 'url'
 
 export class LocalProvider extends Provider {
     public getInvoker(serviceType, serviceInstance, params) {
@@ -12,7 +13,7 @@ export class LocalProvider extends Provider {
             try {
                 const params = []
                 for (const parameter of parameters) {
-                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { req, res, next })
+                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { event: { req, res, next } })
                 }
 
                 const r = await serviceInstance.handle(...params)
@@ -23,30 +24,6 @@ export class LocalProvider extends Provider {
             }
         }
         return invoker
-    }
-
-    protected async parameterResolver(parameter, event) {
-        const req = event.req
-        const source = parameter.source;
-        switch (parameter.type) {
-            case 'param':
-                if (typeof source !== 'undefined') {
-                    const holder = !source ? req : get(req, source)
-                    if (holder) {
-                        return get(holder, parameter.from)
-                    }
-                } else {
-                    let value = undefined
-                    if (typeof (value = get(req.body, parameter.from)) !== 'undefined') return value
-                    if (typeof (value = get(req.query, parameter.from)) !== 'undefined') return value
-                    if (typeof (value = get(req.params, parameter.from)) !== 'undefined') return value
-                    if (typeof (value = get(req.headers, parameter.from)) !== 'undefined') return value
-                    return value
-                }
-                return undefined
-            default:
-                return await super.parameterResolver(parameter, event)
-        }
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
@@ -100,5 +77,35 @@ export class LocalProvider extends Provider {
         })
     }
 }
+
+LocalProvider.addParameterDecoratorImplementation("param", async (parameter, context, provider) => {
+    const req = context.event.req
+    const source = parameter.source;
+    if (typeof source !== 'undefined') {
+        const holder = !source ? req : get(req, source)
+        if (holder) {
+            return get(holder, parameter.from)
+        }
+    } else {
+        let value = undefined
+        if (typeof (value = get(req.body, parameter.from)) !== 'undefined') return value
+        if (typeof (value = get(req.query, parameter.from)) !== 'undefined') return value
+        if (typeof (value = get(req.params, parameter.from)) !== 'undefined') return value
+        if (typeof (value = get(req.headers, parameter.from)) !== 'undefined') return value
+        return value
+    }
+    return undefined
+})
+
+LocalProvider.addParameterDecoratorImplementation("request", async (parameter, context, provider) => {
+    return {
+        url: context.event.req._parsedUrl || parse(context.event.req.originalUrl),
+        method: context.event.req.method,
+        body: context.event.req.body,
+        query: context.event.req.query,
+        params: context.event.req.params,
+        headers: context.event.req.headers
+    }
+})
 
 export const provider = new LocalProvider()

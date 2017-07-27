@@ -31,7 +31,7 @@ import { azure } from '../src/annotations/classes/azure/azure'
 
 
 import { inject } from '../src/annotations/parameters/inject'
-import { param } from '../src/annotations/parameters/param'
+import { param, request, serviceParams, createParameterDecorator } from '../src/annotations/parameters/param'
 import { FunctionalService, Service, DynamoDB, SimpleNotificationService, S3Storage, InjectService } from '../src/classes'
 
 
@@ -1227,6 +1227,187 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('type', 'param')
                 expect(metadata).to.have.property('p1', 1)
                 expect(metadata).to.have.property('p2', 'p2')
+            })
+
+            describe('createParameterDecorator', () => {
+                it("inject", () => {
+
+                    const myDecorator = createParameterDecorator('myDecorator')
+
+                    class ParamClass {
+                        method( @myDecorator p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                })
+                it("inject call", () => {
+
+                    const myDecorator = createParameterDecorator('myDecorator')
+
+                    class ParamClass {
+                        method( @myDecorator() p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                })
+                it("inject default config", () => {
+                    const defaultConfig = { c: 1 }
+                    const myDecorator = createParameterDecorator('myDecorator', defaultConfig)
+
+                    class ParamClass {
+                        method( @myDecorator p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                    expect(metadata).to.have.property('config').that.deep.equal(defaultConfig)
+                })
+                it("inject call default config", () => {
+                    const defaultConfig = { c: 1 }
+                    const myDecorator = createParameterDecorator('myDecorator', defaultConfig)
+
+                    class ParamClass {
+                        method( @myDecorator() p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                    expect(metadata).to.have.property('config').that.deep.equal(defaultConfig)
+                })
+                it("inject config", () => {
+                    const defaultConfig = { c: 1 }
+                    const myDecorator = createParameterDecorator('myDecorator', defaultConfig)
+
+                    class ParamClass {
+                        method( @myDecorator({ d: 3 }) p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                    expect(metadata).to.have.property('config').that.deep.equal({ c: 1, d: 3 })
+                })
+                it("inject config override", () => {
+                    const defaultConfig = { c: 1 }
+                    const myDecorator = createParameterDecorator('myDecorator', defaultConfig)
+
+                    class ParamClass {
+                        method( @myDecorator({ c: 2 }) p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'myDecorator')
+                    expect(metadata).to.have.property('config').that.deep.equal({ c: 2 })
+                })
+            })
+
+            describe('request', () => {
+                it("inject", () => {
+                    class ParamClass {
+                        method( @request p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'request')
+                })
+                it("inject call", () => {
+                    class ParamClass {
+                        method( @request() p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'request')
+                })
+            })
+
+            describe('serviceParams', () => {
+                it("inject", () => {
+                    class ParamClass {
+                        method( @serviceParams p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'serviceParams')
+                })
+                it("inject call", () => {
+                    class ParamClass {
+                        method( @serviceParams() p1) { }
+                    }
+
+                    const value = getOwnMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                    expect(value).to.have.lengthOf(1);
+
+                    const metadata = value[0]
+
+                    expect(metadata).to.have.property('from', 'p1')
+                    expect(metadata).to.have.property('parameterIndex', 0)
+                    expect(metadata).to.have.property('type', 'serviceParams')
+                })
             })
         })
     })

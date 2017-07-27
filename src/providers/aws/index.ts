@@ -6,6 +6,7 @@ import { LambdaCall } from './eventSources/lambdaCall'
 import { SNS } from './eventSources/sns'
 import { S3 } from './eventSources/s3'
 import { DynamoTable } from './eventSources/dynamoTable'
+import { parse } from 'url'
 
 let lambda = null;
 const initAWSSDK = () => {
@@ -37,7 +38,7 @@ export class AWSProvider extends Provider {
 
                 const params = []
                 for (const parameter of parameters) {
-                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { eventSourceHandler, eventContext })
+                    params[parameter.parameterIndex] = await this.parameterResolver(parameter, { eventSourceHandler, event: eventContext })
                 }
 
                 let result
@@ -56,15 +57,6 @@ export class AWSProvider extends Provider {
             }
         }
         return invoker
-    }
-
-    protected async parameterResolver(parameter, event) {
-        switch (parameter.type) {
-            case 'param':
-                return event.eventSourceHandler.parameterResolver(parameter, event.eventContext)
-            default:
-                return await super.parameterResolver(parameter, event.eventContext)
-        }
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {
@@ -90,5 +82,21 @@ export class AWSProvider extends Provider {
         })
     }
 }
+
+AWSProvider.addParameterDecoratorImplementation("param", async (parameter, context, provider) => {
+    return await context.eventSourceHandler.parameterResolver(parameter, context.event)
+})
+AWSProvider.addParameterDecoratorImplementation("request", async (parameter, context, provider) => {
+    if (context.eventSourceHandler.constructor.name === 'ApiGateway') {
+        return {
+            url: parse(context.event.event.path),
+            method: context.event.event.httpMethod,
+            body: context.event.event.body,
+            query: context.event.event.queryStringParameters,
+            params: context.event.event.pathParameters,
+            headers: context.event.event.headers
+        }
+    }
+})
 
 export const provider = new AWSProvider()

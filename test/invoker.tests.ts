@@ -2,7 +2,8 @@ import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
 import { FunctionalService, Service } from '../src/classes'
-import { param, inject, injectable, serviceParams } from '../src/annotations'
+import { param, inject, injectable, serviceParams, request } from '../src/annotations'
+import { parse } from 'url'
 
 
 describe('invoker', () => {
@@ -368,6 +369,107 @@ describe('invoker', () => {
                     expect(p2).to.have.property('req').that.to.equal(req)
                     expect(p2).to.have.property('res').that.to.equal(res)
                     expect(p2).to.have.property('next').that.to.equal(next)
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker(req, res, next)
+        })
+
+        it("request originalUrl param", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const req = {
+                originalUrl: '/a/b',
+                method: 'GET',
+                body: {
+                    p1: 'body'
+                },
+                query: {
+                    p2: 'query'
+                },
+                params: {
+                    p3: 'params'
+                },
+                headers: {
+                    p4: 'headers'
+                },
+                anyprop: {}
+            }
+            const res = {
+                send: () => {
+                    expect(counter).to.equal(1)
+                    done()
+                }
+            }
+            const next = (e) => { e && done(e) }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(parse(req.originalUrl))
+                    expect(r).to.have.property('method', req.method)
+                    expect(r).to.have.property('body').that.deep.equal(req.body)
+                    expect(r).to.have.property('query').that.deep.equal(req.query)
+                    expect(r).to.have.property('params').that.deep.equal(req.params)
+                    expect(r).to.have.property('headers').that.deep.equal(req.headers)
+                    expect(r).to.not.have.property('anyprop')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker(req, res, next)
+        })
+
+        it("request _parsedUrl param", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const req = {
+                originalUrl: '/a/b?a=b',
+                _parsedUrl: parse('/b/c?a=b2'),
+                method: 'GET',
+                body: {
+                    p1: 'body'
+                },
+                query: {
+                    p2: 'query'
+                },
+                params: {
+                    p3: 'params'
+                },
+                headers: {
+                    p4: 'headers'
+                },
+                anyprop: {}
+            }
+            const res = {
+                send: () => {
+                    expect(counter).to.equal(1)
+                    done()
+                }
+            }
+            const next = (e) => { e && done(e) }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(req._parsedUrl)
+                    expect(r).to.have.property('method', req.method)
+                    expect(r).to.have.property('body').that.deep.equal(req.body)
+                    expect(r).to.have.property('query').that.deep.equal(req.query)
+                    expect(r).to.have.property('params').that.deep.equal(req.params)
+                    expect(r).to.have.property('headers').that.deep.equal(req.headers)
+                    expect(r).to.not.have.property('anyprop')
                 }
             }
 
@@ -945,6 +1047,55 @@ describe('invoker', () => {
             const invoker = MockService.createInvoker()
             invoker(awsEvent, awsContext, cb)
         })
+
+        it("request param", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const awsEvent = {
+                path: '/a/b',
+                httpMethod: 'GET',
+                requestContext: { apiId: 'apiId' },
+                body: {
+                    p1: 'body'
+                },
+                queryStringParameters: {
+                    p2: 'queryStringParameters'
+                },
+                pathParameters: {
+                    p3: 'pathParameters'
+                },
+                headers: {
+                    p4: 'headers'
+                },
+                anyprop: {}
+            }
+            const awsContext = {}
+            const cb = (e) => {
+                expect(counter).to.equal(1)
+                done(e)
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
+                    expect(r).to.have.property('method', awsEvent.httpMethod)
+                    expect(r).to.have.property('body').that.deep.equal(awsEvent.body)
+                    expect(r).to.have.property('query').that.deep.equal(awsEvent.queryStringParameters)
+                    expect(r).to.have.property('params').that.deep.equal(awsEvent.pathParameters)
+                    expect(r).to.have.property('headers').that.deep.equal(awsEvent.headers)
+                    expect(r).to.not.have.property('anyprop')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker(awsEvent, awsContext, cb)
+        })
     })
 
     describe("azure", () => {
@@ -1361,6 +1512,52 @@ describe('invoker', () => {
                     expect(p1).to.undefined
                     expect(p2).to.have.property('context').that.to.equal(context)
                     expect(p2).to.have.property('req').that.to.equal(req)
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(counter).to.equal(1)
+        })
+
+        it("request param", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const context = {}
+            const req = {
+                originalUrl: 'https://asd.azure.com/api/a/b?code=a&a=b',
+                method: 'GET',
+                body: {
+                    p1: 'body'
+                },
+                query: {
+                    p2: 'queryStringParameters'
+                },
+                params: {
+                    p3: 'pathParameters'
+                },
+                headers: {
+                    p4: 'headers'
+                }
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(parse(req.originalUrl))
+                    expect(r).to.have.property('method', req.method)
+                    expect(r).to.have.property('body').that.deep.equal(req.body)
+                    expect(r).to.have.property('query').that.deep.equal(req.query)
+                    expect(r).to.have.property('params').that.deep.equal(req.params)
+                    expect(r).to.have.property('headers').that.deep.equal(req.headers)
+                    expect(r).to.not.have.property('anyprop')
                 }
             }
 

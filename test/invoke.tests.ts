@@ -5,7 +5,7 @@ import { LocalProvider } from '../src/providers/local'
 import { AWSProvider } from '../src/providers/aws'
 import { addProvider, removeProvider } from '../src/providers'
 import { FunctionalService } from '../src/classes/functionalService'
-import { httpTrigger, inject, injectable, param, rest } from '../src/annotations'
+import { httpTrigger, inject, injectable, param, rest, createParameterDecorator } from '../src/annotations'
 
 describe('invoke', () => {
     const FUNCTIONAL_ENVIRONMENT = 'custom'
@@ -180,7 +180,7 @@ describe('invoke', () => {
             }
 
             const invoker = B.createInvoker()
-            process.env.FUNCTIONAL_ENVIRONMENT = 'unknown' 
+            process.env.FUNCTIONAL_ENVIRONMENT = 'unknown'
             await invoker({}, {
                 send: () => { expect(false).to.equal(true, 'error required') }
             }, (e) => {
@@ -224,6 +224,145 @@ describe('invoke', () => {
             })
 
             expect(counter).to.equal(2)
+        })
+
+        describe('addParameterDecoratorImplementation', () => {
+            describe('inheritance', () => {
+                it("get not defined", () => {
+                    class A extends LocalProvider { }
+                    class B extends A { }
+
+                    expect(LocalProvider.getParameterDecoratorImplementation('aa')).is.undefined
+                    expect(A.getParameterDecoratorImplementation('aa')).is.undefined
+                    expect(B.getParameterDecoratorImplementation('aa')).is.undefined
+                })
+                it("get defined", () => {
+                    class A extends LocalProvider { }
+                    class B extends A { }
+
+                    const f1 = () => { }
+                    A.addParameterDecoratorImplementation('aa', f1)
+
+                    expect(LocalProvider.getParameterDecoratorImplementation('aa')).is.undefined
+                    expect(A.getParameterDecoratorImplementation('aa')).to.equal(f1)
+                    expect(B.getParameterDecoratorImplementation('aa')).to.equal(f1)
+                })
+            })
+
+            it("add to provider", async () => {
+                let counter = 0
+
+                class TestProvider extends LocalProvider { }
+                const testProviderInstance = new TestProvider()
+                addProvider(FUNCTIONAL_ENVIRONMENT, testProviderInstance)
+                TestProvider.addParameterDecoratorImplementation('myDecorator', (parameter, context, provider) => {
+                    counter++
+
+                    expect(parameter).to.have.property("from", 'p1')
+                    expect(parameter).to.have.property("type", 'myDecorator')
+                    expect(parameter).to.have.property("parameterIndex", 0)
+
+                    expect(context).to.have.property("event")
+                    expect(context).to.have.nested.property("event.req")
+                    expect(context).to.have.nested.property("event.res")
+                    expect(context).to.have.nested.property("event.next")
+
+                    expect(provider).to.equal(testProviderInstance)
+
+                    return { instance: 1 }
+                })
+
+                const myDecorator = createParameterDecorator('myDecorator')
+
+                class A extends FunctionalService {
+                    public async handle( @myDecorator p1) {
+                        counter++
+
+                        expect(p1).to.deep.equal({ instance: 1 })
+                    }
+                }
+
+                const invoker = A.createInvoker()
+                await invoker({}, {
+                    send: () => { counter++ }
+                }, (e) => { expect(false).to.equal(true, e.message) })
+
+                expect(counter).to.equal(3)
+            })
+            it("add to provider base", async () => {
+                let counter = 0
+
+                class TestProviderBase extends LocalProvider { }
+                class TestProvider extends TestProviderBase { }
+                const testProviderInstance = new TestProvider()
+                addProvider(FUNCTIONAL_ENVIRONMENT, testProviderInstance)
+                TestProviderBase.addParameterDecoratorImplementation('myDecorator', (parameter, context, provider) => {
+                    counter++
+
+                    expect(parameter).to.have.property("from", 'p1')
+                    expect(parameter).to.have.property("type", 'myDecorator')
+                    expect(parameter).to.have.property("parameterIndex", 0)
+
+                    expect(context).to.have.property("event")
+                    expect(context).to.have.nested.property("event.req")
+                    expect(context).to.have.nested.property("event.res")
+                    expect(context).to.have.nested.property("event.next")
+
+                    expect(provider).to.equal(testProviderInstance)
+
+                    return { instance: 1 }
+                })
+
+                const myDecorator = createParameterDecorator('myDecorator')
+
+                class A extends FunctionalService {
+                    public async handle( @myDecorator p1) {
+                        counter++
+
+                        expect(p1).to.deep.equal({ instance: 1 })
+                    }
+                }
+
+                const invoker = A.createInvoker()
+                await invoker({}, {
+                    send: () => { counter++ }
+                }, (e) => {
+                    expect(false).to.equal(true, e.message)
+                })
+
+                expect(counter).to.equal(3)
+            })
+
+            it("exception in decorator", async () => {
+                let counter = 0
+
+                class TestProvider extends LocalProvider { }
+                const testProviderInstance = new TestProvider()
+                addProvider(FUNCTIONAL_ENVIRONMENT, testProviderInstance)
+                TestProvider.addParameterDecoratorImplementation('myDecorator', (parameter, context, provider) => {
+                    counter++
+
+                    throw new Error('e1')
+                })
+
+                const myDecorator = createParameterDecorator('myDecorator')
+
+                class A extends FunctionalService {
+                    public async handle( @myDecorator p1) {
+                        expect(false).to.equal(true, 'error not catched')
+                    }
+                }
+
+                const invoker = A.createInvoker()
+                await invoker({}, {
+                    send: () => { expect(false).to.equal(true, 'error not catched') }
+                }, (e) => {
+                    counter++
+                    expect(e.message).to.equal('e1')
+                })
+
+                expect(counter).to.equal(2)
+            })
         })
     })
 
