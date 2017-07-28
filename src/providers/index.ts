@@ -1,4 +1,4 @@
-import { constants, getMetadata } from '../annotations'
+import { constants, getMetadata, getOverridableMetadata } from '../annotations'
 const { PARAMETER_PARAMKEY } = constants
 import { callExtension } from '../classes'
 
@@ -74,7 +74,7 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     let currentEnvironment = invokeEnvironments[environmentMode]
 
     const availableParams = {}
-    const parameterMapping = (getMetadata(PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
+    const parameterMapping = (getOverridableMetadata(PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
     parameterMapping.forEach((target) => {
         if (params && target && target.type === 'param') {
             availableParams[target.from] = params[target.from]

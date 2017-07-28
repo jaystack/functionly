@@ -1,4 +1,5 @@
-import { constants, getMetadata } from '../../annotations'
+import { constants, getMetadata, getOverridableMetadata } from '../../annotations'
+const { PARAMETER_PARAMKEY } = constants
 import { getMiddlewares } from '../../annotations/classes/use'
 import { callExtension, PreHook, PostHook } from '../../classes'
 
@@ -73,7 +74,7 @@ export abstract class Provider {
     }
 
     protected getParameters(target, method) {
-        return (getMetadata(constants.PARAMETER_PARAMKEY, target, method) || [])
+        return (getOverridableMetadata(PARAMETER_PARAMKEY, target, method) || [])
             .filter(t => t && typeof t.parameterIndex === 'number');
     }
 

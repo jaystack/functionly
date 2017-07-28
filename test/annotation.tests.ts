@@ -9,7 +9,7 @@ import {
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
-import { getMetadata } from '../src/annotations/metadata'
+import { getMetadata, getOverridableMetadata } from '../src/annotations/metadata'
 import { expandableDecorator } from '../src/annotations/classes/expandableDecorator'
 import { apiGateway } from '../src/annotations/classes/aws/apiGateway'
 import { httpTrigger } from '../src/annotations/classes/azure/httpTrigger'
@@ -1035,7 +1035,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1053,7 +1053,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1076,7 +1076,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1141,14 +1141,73 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('bucketName', 'abucket')
             })
+
+            it("overrided class method", () => {
+                @injectable
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    method( @inject(ATestClass) a) { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
+
+            it("overrided class method no inject", () => {
+                @injectable
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    method() { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+                expect(value).to.undefined
+            })
+
+            it("not overrided class method", () => {
+                @injectable
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    method( @inject(ATestClass) a) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
         })
         describe("param", () => {
-            it("inject", () => {
+            it("param", () => {
                 class ParamClass {
                     method( @param name) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1158,12 +1217,12 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('parameterIndex', 0)
                 expect(metadata).to.have.property('type', 'param')
             })
-            it("inject custom name", () => {
+            it("custom name", () => {
                 class ParamClass {
                     method( @param('fullName') name) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1173,12 +1232,12 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('parameterIndex', 0)
                 expect(metadata).to.have.property('type', 'param')
             })
-            it("inject param index", () => {
+            it("param index", () => {
                 class ParamClass {
                     method( @param name, @param fullName) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(2);
 
@@ -1194,12 +1253,12 @@ describe('annotations', () => {
                 expect(matadata2).to.have.property('parameterIndex', 0)
                 expect(matadata2).to.have.property('type', 'param')
             })
-            it("inject with config", () => {
+            it("with config", () => {
                 class ParamClass {
                     method( @param({ name: 'fullName', p1: 1, p2: 'p2' }) name) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1211,12 +1270,12 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('p1', 1)
                 expect(metadata).to.have.property('p2', 'p2')
             })
-            it("inject with config without name", () => {
+            it("with config without name", () => {
                 class ParamClass {
                     method( @param({ p1: 1, p2: 'p2' }) shortName) { }
                 }
 
-                const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                 expect(value).to.have.lengthOf(1);
 
@@ -1238,7 +1297,7 @@ describe('annotations', () => {
                         method( @myDecorator p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1256,7 +1315,7 @@ describe('annotations', () => {
                         method( @myDecorator() p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1274,7 +1333,7 @@ describe('annotations', () => {
                         method( @myDecorator p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1293,7 +1352,7 @@ describe('annotations', () => {
                         method( @myDecorator() p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1312,7 +1371,7 @@ describe('annotations', () => {
                         method( @myDecorator({ d: 3 }) p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1331,7 +1390,7 @@ describe('annotations', () => {
                         method( @myDecorator({ c: 2 }) p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1350,7 +1409,7 @@ describe('annotations', () => {
                         method( @request p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1365,7 +1424,7 @@ describe('annotations', () => {
                         method( @request() p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1383,7 +1442,7 @@ describe('annotations', () => {
                         method( @serviceParams p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1398,7 +1457,7 @@ describe('annotations', () => {
                         method( @serviceParams() p1) { }
                     }
 
-                    const value = getMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                    const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
 
                     expect(value).to.have.lengthOf(1);
 
@@ -1408,6 +1467,62 @@ describe('annotations', () => {
                     expect(metadata).to.have.property('parameterIndex', 0)
                     expect(metadata).to.have.property('type', 'serviceParams')
                 })
+            })
+
+            it("overrided class method", () => {
+
+                class BaseParamClass {
+                    method( @param p1, @param p2) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+                    method( @param name) { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+            })
+
+            it("overrided class method no param", () => {
+
+                class BaseParamClass {
+                    method( @param p1, @param p2) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+                    method() { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+                expect(value).to.undefined
+            })
+
+            it("not overrided class method", () => {
+
+                class BaseParamClass {
+                    method( @param name) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
             })
         })
     })

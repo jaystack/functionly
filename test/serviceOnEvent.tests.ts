@@ -6,7 +6,7 @@ import { addProvider, removeProvider } from '../src/providers'
 import { LocalProvider } from '../src/providers/local'
 
 import { PARAMETER_PARAMKEY } from '../src/annotations/constants'
-import { getMetadata } from '../src/annotations/metadata'
+import { getOverridableMetadata } from '../src/annotations/metadata'
 
 describe('service events', () => {
     afterEach(() => {
@@ -25,7 +25,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -60,7 +60,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -98,7 +98,7 @@ describe('service events', () => {
                     public async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -133,7 +133,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -142,7 +142,7 @@ describe('service events', () => {
                     public async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -177,7 +177,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -295,7 +295,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -328,7 +328,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -364,7 +364,7 @@ describe('service events', () => {
                     public async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -397,7 +397,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -406,7 +406,7 @@ describe('service events', () => {
                     public async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -439,7 +439,7 @@ describe('service events', () => {
                     public static async onInject({ parameter }) {
                         counter++
 
-                        const value = getMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
+                        const value = getOverridableMetadata(PARAMETER_PARAMKEY, MockService, 'handle')
                         expect(value).to.have.lengthOf(1);
                         const metadata = value[0]
 
@@ -605,6 +605,7 @@ describe('service events', () => {
                         expect(parameterMapping[0]).to.deep.equal({
                             from: 'p1',
                             parameterIndex: 0,
+                            targetKey: "handle",
                             type: 'param'
                         })
                         expect(currentEnvironment).to.instanceof(MockProvider)

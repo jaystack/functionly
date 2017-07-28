@@ -32,4 +32,4 @@ export { inject } from './parameters/inject'
 import * as _constants from './constants'
 export const constants = _constants
 
-export { defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata } from './metadata'
+export { defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata } from './metadata'

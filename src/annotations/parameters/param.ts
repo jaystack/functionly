@@ -1,5 +1,5 @@
 import { PARAMETER_PARAMKEY } from '../constants'
-import { getMetadata, defineMetadata } from '../metadata'
+import { getOverridableMetadata, defineMetadata, getMetadata } from '../metadata'
 import { getFunctionParameters } from '../utils'
 
 export const param = (target: any, targetKey?: string, parameterIndex?: number): any => {
@@ -8,13 +8,14 @@ export const param = (target: any, targetKey?: string, parameterIndex?: number):
     let decorator = function (target, targetKey, parameterIndex: number) {
         let parameterNames = getFunctionParameters(target, targetKey);
 
-        let existingParameters: any[] = getMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+        let existingParameters: any[] = getOverridableMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
         let paramName = parameterNames[parameterIndex];
 
         existingParameters.push({
             ...config,
             from: name || paramName,
             parameterIndex,
+            targetKey,
             type: 'param'
         });
 
@@ -39,7 +40,7 @@ export const createParameterDecorator = (type: string, defaultConfig?: any) => (
     const decorator = function (target, targetKey, parameterIndex: number) {
         const parameterNames = getFunctionParameters(target, targetKey);
 
-        const existingParameters: any[] = getMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+        const existingParameters: any[] = getOverridableMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
         const paramName = parameterNames[parameterIndex];
         existingParameters.push({
             from: paramName,

@@ -15,3 +15,11 @@ export const getMetadataKeys = (target) => {
 export const getOwnMetadata = (metadataKey, target, propertyKey?) => {
     return Reflect.getOwnMetadata(metadataKey, target.prototype ? target.prototype : target, propertyKey)
 }
+
+export const getOverridableMetadata = (metadataKey, target, propertyKey) => {
+    if (!target.prototype || target.prototype.hasOwnProperty(propertyKey)) {
+        return getOwnMetadata(metadataKey, target, propertyKey)
+    } else {
+        return getMetadata(metadataKey, target, propertyKey)
+    }
+}
