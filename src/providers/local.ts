@@ -11,14 +11,42 @@ export class LocalProvider extends Provider {
 
         const invoker = async (req, res, next) => {
             try {
-                const r = await callContext({ event: { req, res, next } })
-                res.send(r)
-                return r
+                const eventContext = { req, res, next }
+
+                let result
+                let error
+                try {
+                    result = await callContext({ event: eventContext })
+                } catch (err) {
+                    error = err
+                }
+                const response = await this.resultTransform(error, result, eventContext)
+
+                res.send(response)
+                return response
             } catch (e) {
                 next(e)
             }
         }
         return invoker
+    }
+
+    protected resultTransform(error, result, eventContext) {
+        if (error) throw error
+
+        if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
+            const { res } = eventContext
+
+            res.status(result.status)
+
+            if (typeof result.headers === 'object' && result.headers) {
+                res.set(result.headers)
+            }
+
+            return result.data
+        }
+
+        return result
     }
 
     public async invoke(serviceInstance, params, invokeConfig?) {

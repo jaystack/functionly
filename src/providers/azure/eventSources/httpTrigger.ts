@@ -39,7 +39,15 @@ export class HttpTrigger extends EventSource {
             }
         }
 
-        if (result && typeof result.status === 'number' && typeof result.body === 'string') {
+        if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
+            return {
+                status: result.status,
+                headers: result.headers,
+                body: result.data
+            }
+        }
+
+        if (result && typeof result.status === 'number' && result.hasOwnProperty && result.hasOwnProperty('body')) {
             return result
         }
 

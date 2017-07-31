@@ -11,6 +11,11 @@ export abstract class EventSource {
 
     public async resultTransform(err, result, event: any) {
         if (err) throw err
+
+        if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
+            return result.data
+        }
+
         return result
     }
 }

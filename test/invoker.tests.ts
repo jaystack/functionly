@@ -476,6 +476,58 @@ describe('invoker', () => {
             const invoker = MockService.createInvoker()
             invoker(req, res, next)
         })
+
+        it("generic result format", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const req = {
+            }
+            const res = {
+                send: (data) => {
+                    counter++
+                    expect(data).to.deep.equal({
+                        ok: 1
+                    })
+                },
+                status: (code) => {
+                    counter++
+                    expect(code).to.equal(201)
+                },
+                set: (headers) => {
+                    counter++
+                    expect(headers).to.deep.equal({
+                        'content-type': 'application/json'
+                    })
+                }
+            }
+            const next = (e) => { expect(true).to.equal(false, e.message) }
+
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+
+                    return {
+                        status: 201,
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        data: {
+                            ok: 1
+                        }
+                    }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(req, res, next)
+
+            expect(counter).to.equal(4)
+        })
     })
 
     describe("aws", () => {
@@ -992,6 +1044,57 @@ describe('invoker', () => {
                     done(e)
                 })
             })
+
+            it("api gateway generic result format", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+                @injectable
+                class MockInjectable extends Service { }
+
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                }
+                const awsContext = {}
+                const cb = (e, result) => {
+                    counter++
+
+                    console.log(e && e.message)
+                    expect(e).is.null
+
+                    expect(result).to.deep.equal({
+                        statusCode: 201,
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        data: JSON.stringify({
+                            ok: 1
+                        })
+                    })
+                }
+
+                class MockService extends FunctionalService {
+                    handle() {
+                        counter++
+
+                        return {
+                            status: 201,
+                            headers: {
+                                'content-type': 'application/json'
+                            },
+                            data: {
+                                ok: 1
+                            }
+                        }
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker(awsEvent, awsContext, cb)
+
+                expect(counter).to.equal(2)
+            })
         })
 
         it("inject param", (done) => {
@@ -1095,6 +1198,50 @@ describe('invoker', () => {
 
             const invoker = MockService.createInvoker()
             invoker(awsEvent, awsContext, cb)
+        })
+
+        it("generic result format", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const awsEvent = {
+            }
+            const awsContext = {}
+            const cb = (e, result) => {
+                counter++
+
+                console.log(e && e.message)
+                expect(e).is.null
+
+                expect(result).to.deep.equal({
+                    ok: 1
+                })
+            }
+
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+
+                    return {
+                        status: 201,
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        data: {
+                            ok: 1
+                        }
+                    }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(awsEvent, awsContext, cb)
+
+            expect(counter).to.equal(2)
         })
     })
 
@@ -1328,7 +1475,7 @@ describe('invoker', () => {
                 expect(context).to.have.nested.property('res.status', 200)
                 expect(counter).to.equal(1)
             })
-            
+
             it("httpTrigger params resolve hint", async () => {
                 let counter = 0
 
@@ -1574,6 +1721,48 @@ describe('invoker', () => {
             await invoker(context, req)
 
             expect(context).to.have.nested.property('res.status', 200)
+            expect(counter).to.equal(1)
+        })
+
+        it("generic result format", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            @injectable
+            class MockInjectable extends Service { }
+
+            const context = {}
+            const req = {
+            }
+
+            class MockService extends FunctionalService {
+                handle() {
+                    counter++
+
+                    return {
+                        status: 201,
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        data: {
+                            ok: 1
+                        }
+                    }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(context).to.have.nested.property('res.status', 201)
+            expect(context).to.have.nested.property('res.headers').that.deep.equal({
+                'content-type': 'application/json'
+            })
+            expect(context).to.have.nested.property('res.body').that.deep.equal({
+                ok: 1
+            })
             expect(counter).to.equal(1)
         })
     })

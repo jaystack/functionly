@@ -44,6 +44,14 @@ export class ApiGateway extends EventSource {
             }
         }
 
+        if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
+            return {
+                statusCode: result.status,
+                headers: result.headers,
+                data: JSON.stringify(result.data)
+            }
+        }
+
         if (result && typeof result.statusCode === 'number' && typeof result.body === 'string') {
             return result
         }
