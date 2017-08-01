@@ -1060,7 +1060,6 @@ describe('invoker', () => {
                 const cb = (e, result) => {
                     counter++
 
-                    console.log(e && e.message)
                     expect(e).is.null
 
                     expect(result).to.deep.equal({
@@ -1214,7 +1213,6 @@ describe('invoker', () => {
             const cb = (e, result) => {
                 counter++
 
-                console.log(e && e.message)
                 expect(e).is.null
 
                 expect(result).to.deep.equal({
