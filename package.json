@@ -9,7 +9,8 @@
     "build:watch": "node_modules/.bin/tsc -w",
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
     "test:fast": "mocha --recursive lib/test/**/*.tests.js",
-    "metadata": "node ./lib/src/cli/cli.js metadata aws --"
+    "metadata": "node ./lib/src/cli/cli.js metadata aws --",
+    "coverage": "node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec lib/test/**/*.tests.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "@types/node": "^6.0.46",
     "@types/winston": "0.0.30",
     "chai": "^4.0.2",
+    "istanbul": "^0.4.5",
     "mocha": "^3.4.2",
     "typescript": "^2.3.0"
   },
