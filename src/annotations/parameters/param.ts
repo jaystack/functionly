@@ -47,7 +47,8 @@ export const createParameterDecorator = (type: string, defaultConfig?: any) => (
             parameterIndex,
             targetKey,
             type,
-            config
+            config,
+            target
         });
         defineMetadata(PARAMETER_PARAMKEY, existingParameters, target, targetKey);
     }
@@ -66,3 +67,4 @@ export const serviceParams = createParameterDecorator('serviceParams')
 export const request = createParameterDecorator('request')
 export const context = createParameterDecorator('context')
 export const error = createParameterDecorator('error')
+export const functionalServiceName = createParameterDecorator('functionalServiceName')

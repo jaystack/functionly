@@ -25,7 +25,7 @@ export class AzureProvider extends Provider {
                 let result
                 let error
                 try {
-                    result = await callContext({ eventSourceHandler, event: eventContext })
+                    result = await callContext({ eventSourceHandler, event: eventContext, serviceInstance })
                 } catch (err) {
                     error = err
                 }

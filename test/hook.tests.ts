@@ -3,7 +3,7 @@ import { FunctionalService, PreHook, PostHook, Service, DynamoDB, SimpleNotifica
 import { getOverridableMetadata, constants, getMetadata, getFunctionName } from '../src/annotations'
 const { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY,
     CLASS_MIDDLEWAREKEY } = constants
-import { use, context, error, param, inject, injectable, environment, dynamoTable, sns, s3Storage } from '../src/annotations'
+import { use, context, error, param, inject, injectable, environment, dynamoTable, sns, s3Storage, functionalServiceName, functionName } from '../src/annotations'
 
 
 describe('hooks', () => {
@@ -1210,6 +1210,65 @@ describe('hooks', () => {
             const invoker = TestFunctionalService.createInvoker()
             await invoker({}, {
                 send: (result) => {
+                    counter++
+                    expect(counter).to.equal(3)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(3)
+        })
+
+        it("@functionalServiceName", async () => {
+            let counter = 0
+            class TestHook extends PreHook {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+                    expect(serviceName).to.equal('TestFunctionalService')
+                }
+            }
+
+            @use(TestHook)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1 })
+                    counter++
+                    expect(counter).to.equal(3)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(3)
+        })
+
+        it("@functionalServiceName with functionName decorator", async () => {
+            let counter = 0
+            class TestHook extends PreHook {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+                    expect(serviceName).to.equal('MyTestFunctionalService')
+                }
+            }
+
+            @use(TestHook)
+            @functionName('MyTestFunctionalService')
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1 })
                     counter++
                     expect(counter).to.equal(3)
                 }

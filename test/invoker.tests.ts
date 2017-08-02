@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
 import { FunctionalService, Service } from '../src/classes'
-import { param, inject, injectable, serviceParams, request } from '../src/annotations'
+import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName } from '../src/annotations'
 import { parse } from 'url'
 
 
@@ -527,6 +527,67 @@ describe('invoker', () => {
             await invoker(req, res, next)
 
             expect(counter).to.equal(4)
+        })
+
+        it("functionalServiceName", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            const req = {
+            }
+            const res = {
+                send: (data) => {
+                    counter++
+                }
+            }
+            const next = (e) => { expect(true).to.equal(false, e.message) }
+
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(req, res, next)
+
+            expect(counter).to.equal(2)
+        })
+
+        it("functionalServiceName with functionName decorator", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            const req = {
+            }
+            const res = {
+                send: (data) => {
+                    counter++
+                }
+            }
+            const next = (e) => { expect(true).to.equal(false, e.message) }
+
+            @functionName('MyMockService')
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MyMockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(req, res, next)
+
+            expect(counter).to.equal(2)
         })
     })
 
@@ -1241,6 +1302,65 @@ describe('invoker', () => {
 
             expect(counter).to.equal(2)
         })
+
+        it("functionalServiceName", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            const awsEvent = {}
+            const awsContext = {}
+            const cb = (e, result) => {
+                counter++
+
+                expect(result).to.deep.equal({ ok: 1 })
+            }
+
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(awsEvent, awsContext, cb)
+
+            expect(counter).to.equal(2)
+        })
+
+        it("functionalServiceName with functionName decorator", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            const awsEvent = {}
+            const awsContext = {}
+            const cb = (e, result) => {
+                counter++
+
+                expect(result).to.deep.equal({ ok: 1 })
+            }
+
+            @functionName('MyMockService')
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MyMockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(awsEvent, awsContext, cb)
+
+            expect(counter).to.equal(2)
+        })
     })
 
     describe("azure", () => {
@@ -1761,6 +1881,61 @@ describe('invoker', () => {
             expect(context).to.have.nested.property('res.body').that.deep.equal({
                 ok: 1
             })
+            expect(counter).to.equal(1)
+        })
+
+        it("functionalServiceName", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            const context = {}
+            const req = {}
+
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(context).to.have.nested.property('res.status', 200)
+            expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
+            expect(counter).to.equal(1)
+        })
+
+        it("functionalServiceName with functionName decorator", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            const context = {}
+            const req = {}
+
+            @functionName('MyMockService')
+            class MockService extends FunctionalService {
+                handle( @functionalServiceName serviceName) {
+                    counter++
+
+                    expect(serviceName).to.equal('MyMockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(context).to.have.nested.property('res.status', 200)
+            expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
             expect(counter).to.equal(1)
         })
     })

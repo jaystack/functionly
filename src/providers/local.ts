@@ -16,7 +16,7 @@ export class LocalProvider extends Provider {
                 let result
                 let error
                 try {
-                    result = await callContext({ event: eventContext })
+                    result = await callContext({ event: eventContext, serviceInstance })
                 } catch (err) {
                     error = err
                 }

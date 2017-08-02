@@ -1,4 +1,4 @@
-import { constants, getMetadata, getOverridableMetadata } from '../../annotations'
+import { constants, getMetadata, getOverridableMetadata, getFunctionName } from '../../annotations'
 const { PARAMETER_PARAMKEY } = constants
 import { getMiddlewares } from '../../annotations/classes/use'
 import { callExtension, PreHook, PostHook } from '../../classes'
@@ -118,4 +118,7 @@ Provider.addParameterDecoratorImplementation("context", async (parameter, contex
 })
 Provider.addParameterDecoratorImplementation("error", async (parameter, context, provider) => {
     return parameter.targetKey === 'catch' ? (context.context && context.context.error) : undefined
+})
+Provider.addParameterDecoratorImplementation("functionalServiceName", async (parameter, context, provider) => {
+    return context.serviceInstance && getFunctionName(context.serviceInstance)
 })
