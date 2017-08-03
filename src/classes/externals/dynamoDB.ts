@@ -118,8 +118,10 @@ export class DynamoDB extends InjectService {
     protected setDefaultValues(params, command) {
         const tableConfig = (getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
         const tableName = ({ TableName: tableConfig && tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
+
+        const calcTableName = process.env[`${this.constructor.name}${DYNAMO_TABLE_NAME_SUFFIX}`] + `-${process.env.FUNCTIONAL_STAGE}`
         const initParams = {
-            TableName: process.env[`${this.constructor.name}${DYNAMO_TABLE_NAME_SUFFIX}`] || tableName
+            TableName: calcTableName || tableName
         }
 
         return { ...initParams, ...params }

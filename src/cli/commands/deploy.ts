@@ -16,6 +16,7 @@ export default ({ createContext, executor, ExecuteStep, projectConfig, requireVa
                         const stage = command.stage || projectConfig.stage || 'dev'
 
                         process.env.FUNCTIONAL_ENVIRONMENT = deployTarget
+                        process.env.FUNCTIONAL_STAGE = stage
 
                         const context = await createContext(entryPoint, {
                             deployTarget,

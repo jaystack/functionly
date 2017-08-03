@@ -23,7 +23,7 @@ export {
     role,
     aws,
     azure,
-    param, serviceParams, createParameterDecorator, request, context, error, functionalServiceName,
+    param, serviceParams, createParameterDecorator, request, context, error, functionalServiceName, provider, stage,
     inject,
     constants,
     defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata

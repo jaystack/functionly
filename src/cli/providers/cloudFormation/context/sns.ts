@@ -139,7 +139,7 @@ const updateSNSEnvironmentVariables = async (context) => {
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
-        environmentVariables[serviceConfig.environmentKey] = `${snsConfig.advTopicName}-${context.stage}`
+        environmentVariables[serviceConfig.environmentKey] = `${snsConfig.advTopicName}`
 
         await setStackParameter({
             ...context,

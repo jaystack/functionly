@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
 import { FunctionalService, Service } from '../src/classes'
-import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName } from '../src/annotations'
+import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName, provider, stage } from '../src/annotations'
 import { parse } from 'url'
 
 
@@ -31,6 +31,7 @@ describe('invoker', () => {
 
         afterEach(() => {
             delete process.env.FUNCTIONAL_ENVIRONMENT
+            delete process.env.FUNCTIONAL_STAGE
         })
 
         it("invoke", (done) => {
@@ -589,12 +590,74 @@ describe('invoker', () => {
 
             expect(counter).to.equal(2)
         })
+
+        it("provider", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            const req = {
+            }
+            const res = {
+                send: (data) => {
+                    counter++
+                }
+            }
+            const next = (e) => { expect(true).to.equal(false, e.message) }
+
+            class MockService extends FunctionalService {
+                handle( @provider provider) {
+                    counter++
+
+                    expect(provider).to.equal('local')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(req, res, next)
+
+            expect(counter).to.equal(2)
+        })
+
+        it("stage", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'dev'
+
+            const req = {
+            }
+            const res = {
+                send: (data) => {
+                    counter++
+                }
+            }
+            const next = (e) => { expect(true).to.equal(false, e.message) }
+
+            class MockService extends FunctionalService {
+                handle( @stage stage) {
+                    counter++
+
+                    expect(stage).to.equal('dev')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(req, res, next)
+
+            expect(counter).to.equal(2)
+        })
     })
 
     describe("aws", () => {
 
         afterEach(() => {
             delete process.env.FUNCTIONAL_ENVIRONMENT
+            delete process.env.FUNCTIONAL_STAGE
         })
 
         it("invoke", (done) => {
@@ -1361,12 +1424,72 @@ describe('invoker', () => {
 
             expect(counter).to.equal(2)
         })
+
+        it("provider", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            const awsEvent = {}
+            const awsContext = {}
+            const cb = (e, result) => {
+                counter++
+
+                expect(result).to.deep.equal({ ok: 1 })
+            }
+
+            class MockService extends FunctionalService {
+                handle( @provider provider) {
+                    counter++
+
+                    expect(provider).to.equal('aws')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(awsEvent, awsContext, cb)
+
+            expect(counter).to.equal(2)
+        })
+
+        it("stage", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+            process.env.FUNCTIONAL_STAGE = 'dev'
+
+            const awsEvent = {}
+            const awsContext = {}
+            const cb = (e, result) => {
+                counter++
+
+                expect(result).to.deep.equal({ ok: 1 })
+            }
+
+            class MockService extends FunctionalService {
+                handle( @stage stage) {
+                    counter++
+
+                    expect(stage).to.equal('dev')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            await invoker(awsEvent, awsContext, cb)
+
+            expect(counter).to.equal(2)
+        })
     })
 
     describe("azure", () => {
 
         afterEach(() => {
             delete process.env.FUNCTIONAL_ENVIRONMENT
+            delete process.env.FUNCTIONAL_STAGE
         })
 
         it("invoke", async () => {
@@ -1925,6 +2048,61 @@ describe('invoker', () => {
                     counter++
 
                     expect(serviceName).to.equal('MyMockService')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(context).to.have.nested.property('res.status', 200)
+            expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
+            expect(counter).to.equal(1)
+        })
+
+        it("provider", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+
+            const context = {}
+            const req = {}
+
+            class MockService extends FunctionalService {
+                handle( @provider provider) {
+                    counter++
+
+                    expect(provider).to.equal('azure')
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            await invoker(context, req)
+
+            expect(context).to.have.nested.property('res.status', 200)
+            expect(context).to.have.nested.property('res.body').that.deep.equal({ ok: 1 })
+            expect(counter).to.equal(1)
+        })
+
+        it("stage", async () => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
+            process.env.FUNCTIONAL_STAGE = 'dev'
+
+            const context = {}
+            const req = {}
+
+            class MockService extends FunctionalService {
+                handle( @stage stage) {
+                    counter++
+
+                    expect(stage).to.equal('dev')
 
                     return { ok: 1 }
                 }

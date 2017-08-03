@@ -47,7 +47,7 @@ export const createTable = (context) => {
 
         let params = {
             ...__dynamoDBDefaults,
-            TableName: tableConfig.tableName,
+            TableName: tableConfig.tableName + `-${process.env.FUNCTIONAL_STAGE}`,
             ...tableConfig.nativeConfig
         };
 

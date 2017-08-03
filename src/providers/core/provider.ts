@@ -122,3 +122,9 @@ Provider.addParameterDecoratorImplementation("error", async (parameter, context,
 Provider.addParameterDecoratorImplementation("functionalServiceName", async (parameter, context, provider) => {
     return context.serviceInstance && getFunctionName(context.serviceInstance)
 })
+Provider.addParameterDecoratorImplementation("provider", async (parameter, context, provider) => {
+    return process.env.FUNCTIONAL_ENVIRONMENT
+})
+Provider.addParameterDecoratorImplementation("stage", async (parameter, context, provider) => {
+    return process.env.FUNCTIONAL_STAGE
+})

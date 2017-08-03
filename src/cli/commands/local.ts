@@ -108,16 +108,21 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
             commander
                 .command('local [port] [path]')
                 .description('run functional service local')
+                .option('--stage <stage>', 'stage')
                 .action(async (port, path, command) => {
                     process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                     try {
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const localPort = requireValue(port || projectConfig.localPort, 'localPort')
+                        const stage = command.stage || projectConfig.stage || 'dev'
+                        
+                        process.env.FUNCTIONAL_STAGE = stage
 
                         const context = await createContext(entryPoint, {
                             deployTarget: 'local',
-                            localPort
+                            localPort,
+                            stage
                         })
 
                         await executor(context, { name: 'startLocal', method: startLocal })

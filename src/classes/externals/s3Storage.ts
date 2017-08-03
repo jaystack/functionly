@@ -62,7 +62,7 @@ export class S3Storage extends InjectService {
 
     protected setDefaultValues(params, command) {
         const initParams = {
-            Bucket: process.env[`${this.constructor.name}${S3_BUCKET_SUFFIX}`]
+            Bucket: process.env[`${this.constructor.name}${S3_BUCKET_SUFFIX}`] + `-${process.env.FUNCTIONAL_STAGE}`
         }
 
         return { ...initParams, ...params }

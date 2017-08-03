@@ -336,7 +336,7 @@ export const lambdaLogResource = async (context) => {
     serviceDefinition.logGroupResourceName = name
 }
 
-const UPDATEABLE_ENVIRONMENT_REGEXP = /^FUNCTIONAL_SERVICE_|_TABLE_NAME$|_S3_BUCKET$|_SNS_TOPICNAME$/
+const UPDATEABLE_ENVIRONMENT_REGEXP = /^FUNCTIONAL_SERVICE_/
 const updateEnvironmentVariable = async ({ environments, stage }) => {
     if (environments) {
         for (const key in environments) {

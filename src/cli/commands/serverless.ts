@@ -202,6 +202,7 @@ export default (api) => {
                         const stage = command.stage || projectConfig.stage || 'dev'
 
                         process.env.FUNCTIONAL_ENVIRONMENT = FUNCTIONAL_ENVIRONMENT
+                        process.env.FUNCTIONAL_STAGE = stage
 
                         const context = await createContext(entryPoint, {
                             deployTarget: FUNCTIONAL_ENVIRONMENT,
