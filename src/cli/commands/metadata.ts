@@ -1,4 +1,4 @@
-export default ({ createContext, executor, ExecuteStep, annotations: { getMetadata, getMetadataKeys }, projectConfig, requireValue }) => {
+export default ({ createContext, executor, ExecuteStep, annotations: { getMetadata, getMetadataKeys, Metadata }, projectConfig, requireValue }) => {
 
     return {
         commands({ commander }) {
@@ -20,9 +20,17 @@ export default ({ createContext, executor, ExecuteStep, annotations: { getMetada
                             deployTarget
                         })
 
-                        await executor(context, ExecuteStep.get('ServiceMetadata'))
+                        const m = new Metadata()
+                        for (const service of context.publishedFunctions) {
+                            m.addService(service)
+                        }
 
-                        console.log(JSON.stringify(context.serviceMetadata, null, 4))
+                        console.log(JSON.stringify(m.toJson().services.pop(), null, 4))
+
+
+                        // await executor(context, ExecuteStep.get('ServiceMetadata'))
+
+                        // console.log(JSON.stringify(context.serviceMetadata, null, 4))
 
                         console.log(`done`)
                     } catch (e) {

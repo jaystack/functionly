@@ -12,15 +12,12 @@ export { sns } from './classes/sns'
 export { s3Storage } from './classes/s3Storage'
 export { eventSource } from './classes/eventSource'
 export { classConfig, getClassConfigValue } from './classes/classConfig'
-export { simpleClassAnnotation } from './classes/simpleAnnotation'
 export { expandableDecorator } from './classes/expandableDecorator'
 export { use } from './classes/use'
-
-import { simpleClassAnnotation } from './classes/simpleAnnotation'
+export { role } from './classes/role'
+export { description } from './classes/description'
 
 import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY } from './constants'
-export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
-export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
 
 export { aws } from './classes/aws/aws'
 
@@ -33,3 +30,5 @@ import * as _constants from './constants'
 export const constants = _constants
 
 export { defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata } from './metadata'
+
+export { createClassDecorator, createExpandableClassDecorator, Metadata, ObjectDecorator, ArrayDecorator, PrimitiveDecorator } from './decorators'

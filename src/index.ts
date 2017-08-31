@@ -16,7 +16,6 @@ export {
     s3Storage,
     eventSource,
     classConfig, getClassConfigValue,
-    simpleClassAnnotation,
     expandableDecorator,
     use,
     description,
@@ -26,5 +25,6 @@ export {
     param, serviceParams, createParameterDecorator, request, context, error, functionalServiceName, provider, stage,
     inject,
     constants,
-    defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata
+    defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata,
+    createClassDecorator, createExpandableClassDecorator, Metadata, ObjectDecorator, ArrayDecorator, PrimitiveDecorator
 } from './annotations'
