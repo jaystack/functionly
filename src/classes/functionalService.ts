@@ -1,11 +1,11 @@
-import { Service } from './service'
+import { Resource } from './resource'
 import { getInvoker, invoke } from '../providers'
 import { defineMetadata, getMetadata, constants, getFunctionName } from '../annotations'
 const { CLASS_ENVIRONMENTKEY } = constants
 
 export const FUNCTIONAL_SERVICE_PREFIX = 'FUNCTIONAL_SERVICE_'
 
-export class FunctionalService extends Service {
+export class FunctionalService extends Resource {
     public handle(...params) {
 
     }

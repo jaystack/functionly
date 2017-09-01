@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk'
-import { InjectService } from '../injectService'
+import { Api } from '../api'
 import { constants, getMetadata, classConfig } from '../../annotations'
 import { S3_BUCKET_SUFFIX } from '../../annotations/classes/s3Storage'
 const { CLASS_S3CONFIGURATIONKEY } = constants
@@ -32,7 +32,7 @@ const initAWSSDK = () => {
     injectServiceCopyMetadataKey: CLASS_S3CONFIGURATIONKEY,
     injectServiceEventSourceKey: CLASS_S3CONFIGURATIONKEY
 })
-export class S3Storage extends InjectService {
+export class S3Storage extends Api {
     private _s3Client: S3
     public constructor() {
         initAWSSDK()

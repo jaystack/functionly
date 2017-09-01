@@ -1,9 +1,9 @@
-import { Service } from './service'
+import { Resource } from './resource'
 import { getFunctionName } from '../annotations/classes/functionName'
 import { defineMetadata, getMetadata, constants, getClassConfigValue } from '../annotations'
 const { CLASS_ENVIRONMENTKEY, CLASS_CLASSCONFIGKEY } = constants
 
-export class InjectService extends Service {
+export class Api extends Resource {
     public static ConfigEnvironmentKey: string
 
     public static onDefineInjectTo(target, targetKey, parameterIndex: number) {

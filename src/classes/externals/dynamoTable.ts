@@ -1,7 +1,7 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
-import { InjectService } from '../injectService'
+import { Api } from '../api'
 import { constants, getMetadata, classConfig } from '../../annotations'
 import { DYNAMO_TABLE_NAME_SUFFIX } from '../../annotations/classes/dynamoTable'
 
@@ -33,7 +33,7 @@ const initAWSSDK = () => {
     injectServiceCopyMetadataKey: CLASS_DYNAMOTABLECONFIGURATIONKEY,
     injectServiceEventSourceKey: CLASS_DYNAMOTABLECONFIGURATIONKEY
 })
-export class DynamoDB extends InjectService {
+export class DynamoTable extends Api {
     private _documentClient: DocumentClient
     public constructor() {
         initAWSSDK()

@@ -32,7 +32,7 @@ import { azure } from '../src/annotations/classes/azure/azure'
 
 import { inject } from '../src/annotations/parameters/inject'
 import { param, request, serviceParams, createParameterDecorator } from '../src/annotations/parameters/param'
-import { FunctionalService, Service, DynamoDB, SimpleNotificationService, S3Storage, InjectService } from '../src/classes'
+import { FunctionalService, Resource, DynamoTable, SimpleNotificationService, S3Storage, Api, Service } from '../src/classes'
 
 
 
@@ -949,7 +949,7 @@ describe('annotations', () => {
             it("eventSource inject service", () => {
                 @dynamoTable({ tableName: 't1' })
                 @classConfig({ injectServiceEventSourceKey: CLASS_DYNAMOTABLECONFIGURATIONKEY })
-                class ATestClass extends InjectService { }
+                class ATestClass extends Api { }
 
                 @eventSource(ATestClass)
                 class BTestClass extends FunctionalService { }
@@ -1068,10 +1068,10 @@ describe('annotations', () => {
                     .property(`FUNCTIONAL_SERVICE_${ATestClass.name.toUpperCase()}`, getFunctionName(ATestClass))
             })
 
-            it("service inject", () => {
+            it("resource inject", () => {
                 @injectable
                 @environment('%ClassName%_defined_environment', 'value')
-                class ATestClass extends Service { }
+                class ATestClass extends Resource { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
                 }
@@ -1089,12 +1089,12 @@ describe('annotations', () => {
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
                 expect(environmentMetadata).to.have
                     .property(`ATestClass_defined_environment`, 'value')
-            });
+            })
 
-            it("injected DynamoDB", () => {
+            it("injected DynamoTable", () => {
                 @injectable
                 @dynamoTable({ tableName: 'ATable' })
-                class ATestClass extends DynamoDB { }
+                class ATestClass extends DynamoTable { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
                 }
@@ -1187,7 +1187,7 @@ describe('annotations', () => {
                     method( @inject(ATestClass) a) { }
                 }
                 class BTestClass extends BaseBTestClass {
-                    
+
                 }
 
                 const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
@@ -1199,6 +1199,29 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('serviceType', ATestClass)
                 expect(metadata).to.have.property('parameterIndex', 0)
                 expect(metadata).to.have.property('type', 'inject')
+            })
+
+            it("service inject", () => {
+                @injectable
+                @environment('%ClassName%_defined_environment', 'value')
+                class ATestClass extends Service { }
+                class BTestClass {
+                    method( @inject(ATestClass) a) { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+
+                const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
+                expect(environmentMetadata).to.have
+                    .property(`ATestClass_defined_environment`, 'value')
             })
         })
         describe("param", () => {

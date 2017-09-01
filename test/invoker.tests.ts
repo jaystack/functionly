@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
-import { FunctionalService, Service } from '../src/classes'
+import { FunctionalService, Resource, Service } from '../src/classes'
 import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName, provider, stage } from '../src/annotations'
 import { parse } from 'url'
 
@@ -326,13 +326,13 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
                 handle( @param p1, @inject(MockInjectable) p2) {
                     counter++
                     expect(p1).to.undefined
-                    expect(p2).to.instanceof(Service)
+                    expect(p2).to.instanceof(Resource)
                     expect(p2).to.instanceof(MockInjectable)
                 }
             }
@@ -346,13 +346,47 @@ describe('invoker', () => {
             }, (e) => { e && done(e) })
         })
 
+        it("inject service", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+            @injectable
+            class CustomService extends Service {
+                handle( @param p1, @param p2) {
+                    counter++
+                    expect(p1).to.equal('p1')
+                    expect(p2).to.equal('p2')
+                }
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @inject(CustomService) p2) {
+                    counter++
+                    expect(p1).to.undefined
+                    expect(p2).to.instanceof(Function)
+
+                    p2({ p1: 'p1', p2: 'p2' })
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker({}, {
+                send: () => {
+                    expect(counter).to.equal(2)
+                    done()
+                }
+            }, (e) => { e && done(e) })
+        })
+
+
         it("serviceParams param", (done) => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const req = {}
             const res = {
@@ -383,7 +417,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const req = {
                 originalUrl: '/a/b',
@@ -433,7 +467,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const req = {
                 originalUrl: '/a/b?a=b',
@@ -484,7 +518,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const req = {
             }
@@ -1175,7 +1209,7 @@ describe('invoker', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service { }
+                class MockInjectable extends Resource { }
 
                 const awsEvent = {
                     requestContext: { apiId: 'apiId' },
@@ -1226,13 +1260,13 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
                 handle( @param p1, @inject(MockInjectable) p2) {
                     counter++
                     expect(p1).to.undefined
-                    expect(p2).to.instanceof(Service)
+                    expect(p2).to.instanceof(Resource)
                     expect(p2).to.instanceof(MockInjectable)
                 }
             }
@@ -1245,13 +1279,45 @@ describe('invoker', () => {
             })
         })
 
+        it("service param", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            @injectable
+            class CustomService extends Service {
+                handle( @param p1, @param p2) {
+                    counter++
+                    expect(p1).to.equal('p1')
+                    expect(p2).to.equal('p2')
+                }
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @inject(CustomService) p2) {
+                    counter++
+                    expect(p1).to.undefined
+                    expect(p2).to.instanceof(Function)
+
+                    p2({ p1: 'p1', p2: 'p2' })
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+
+            invoker({}, {}, (e) => {
+                expect(counter).to.equal(2)
+                done(e)
+            })
+        })
+
         it("serviceParams param", (done) => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const awsEvent = {}
             const awsContext = {}
@@ -1280,7 +1346,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const awsEvent = {
                 path: '/a/b',
@@ -1329,7 +1395,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const awsEvent = {
             }
@@ -1862,20 +1928,27 @@ describe('invoker', () => {
             })
         })
 
-        it("inject param", async () => {
+        it("inject service", async () => {
             let counter = 0
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
             @injectable
-            class MockInjectable extends Service { }
+            class CustomService extends Service {
+                handle( @param p1, @param p2) {
+                    counter++
+                    expect(p1).to.equal('p1')
+                    expect(p2).to.equal('p2')
+                }
+            }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(MockInjectable) p2) {
+                handle( @param p1, @inject(CustomService) p2) {
                     counter++
                     expect(p1).to.undefined
-                    expect(p2).to.instanceof(Service)
-                    expect(p2).to.instanceof(MockInjectable)
+                    expect(p2).to.instanceof(Function)
+
+                    p2({ p1: 'p1', p2: 'p2' })
                 }
             }
 
@@ -1887,7 +1960,7 @@ describe('invoker', () => {
             await invoker(context, req)
 
             expect(context).to.have.nested.property('res.status', 200)
-            expect(counter).to.equal(1)
+            expect(counter).to.equal(2)
         })
 
         it("serviceParams param", async () => {
@@ -1896,7 +1969,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const context = {}
             const req = {}
@@ -1924,7 +1997,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const context = {}
             const req = {
@@ -1971,7 +2044,7 @@ describe('invoker', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
             @injectable
-            class MockInjectable extends Service { }
+            class MockInjectable extends Resource { }
 
             const context = {}
             const req = {

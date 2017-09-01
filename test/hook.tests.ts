@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { FunctionalService, PreHook, PostHook, Service, DynamoDB, SimpleNotificationService, S3Storage } from '../src/classes'
+import { FunctionalService, PreHook, PostHook, Resource, DynamoTable, SimpleNotificationService, S3Storage } from '../src/classes'
 import { getOverridableMetadata, constants, getMetadata, getFunctionName } from '../src/annotations'
 const { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY,
     CLASS_MIDDLEWAREKEY } = constants
@@ -147,7 +147,7 @@ describe('hooks', () => {
             it("service inject", () => {
                 @injectable
                 @environment('%ClassName%_defined_environment', 'value')
-                class ATestClass extends Service { }
+                class ATestClass extends Resource { }
 
                 class TestHook extends PreHook {
                     public async handle( @inject(ATestClass) a) { }
@@ -163,10 +163,10 @@ describe('hooks', () => {
                     .property(`ATestClass_defined_environment`, 'value')
             });
 
-            it("injected DynamoDB", () => {
+            it("injected DynamoTable", () => {
                 @injectable
                 @dynamoTable({ tableName: 'ATable' })
-                class ATestClass extends DynamoDB { }
+                class ATestClass extends DynamoTable { }
 
                 class TestHook extends PreHook {
                     public async handle( @inject(ATestClass) a) { }
@@ -261,7 +261,7 @@ describe('hooks', () => {
             it("service inject", () => {
                 @injectable
                 @environment('%ClassName%_defined_environment', 'value')
-                class ATestClass extends Service { }
+                class ATestClass extends Resource { }
 
                 class TestHookLevel2 extends PreHook {
                     public async handle( @inject(ATestClass) a) { }
@@ -282,10 +282,10 @@ describe('hooks', () => {
                     .property(`ATestClass_defined_environment`, 'value')
             });
 
-            it("injected DynamoDB", () => {
+            it("injected DynamoTable", () => {
                 @injectable
                 @dynamoTable({ tableName: 'ATable' })
-                class ATestClass extends DynamoDB { }
+                class ATestClass extends DynamoTable { }
 
                 class TestHookLevel2 extends PreHook {
                     public async handle( @inject(ATestClass) a) { }

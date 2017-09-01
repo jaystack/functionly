@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { FunctionalService, Service } from '../src/classes'
+import { FunctionalService, Resource } from '../src/classes'
 import { param, inject, injectable } from '../src/annotations'
 import { addProvider, removeProvider } from '../src/providers'
 import { LocalProvider } from '../src/providers/local'
@@ -21,7 +21,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -36,7 +36,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -56,7 +56,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -73,7 +73,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.not.instanceof(Service)
+                        expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
                         expect(p1).to.deep.equal({ mockRetrurn: 1 })
                     }
@@ -94,7 +94,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public async onInject({ parameter }) {
                         counter++
 
@@ -109,7 +109,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -129,7 +129,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -153,7 +153,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -173,7 +173,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -194,7 +194,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.not.instanceof(Service)
+                        expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
                         expect(p1).to.deep.equal({ mockRetrurn: 1 })
                     }
@@ -291,7 +291,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -306,7 +306,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -324,7 +324,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -341,7 +341,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.not.instanceof(Service)
+                        expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
                         expect(p1).to.deep.equal({ mockRetrurn: 1 })
                     }
@@ -360,7 +360,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public async onInject({ parameter }) {
                         counter++
 
@@ -375,7 +375,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -393,7 +393,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -417,7 +417,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
                     }
                 }
@@ -435,7 +435,7 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 @injectable
-                class MockInjectable extends Service {
+                class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
 
@@ -456,7 +456,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.not.instanceof(Service)
+                        expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
                         expect(p1).to.deep.equal({ mockRetrurn: 1 })
                     }
@@ -573,7 +573,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
 
                         await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })
@@ -616,7 +616,7 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Service)
+                        expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
 
                         await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })

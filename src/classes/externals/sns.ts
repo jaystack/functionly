@@ -1,7 +1,7 @@
 import { SNS } from 'aws-sdk'
 export { SNS } from 'aws-sdk'
 
-import { InjectService } from '../injectService'
+import { Api } from '../api'
 import { constants, getMetadata, classConfig } from '../../annotations'
 const { CLASS_SNSCONFIGURATIONKEY } = constants
 
@@ -31,7 +31,7 @@ const initAWSSDK = () => {
     injectServiceCopyMetadataKey: CLASS_SNSCONFIGURATIONKEY,
     injectServiceEventSourceKey: CLASS_SNSCONFIGURATIONKEY
 })
-export class SimpleNotificationService extends InjectService {
+export class SimpleNotificationService extends Api {
     private _snsClient: SNS
     public constructor() {
         initAWSSDK()
