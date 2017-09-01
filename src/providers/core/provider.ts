@@ -17,6 +17,23 @@ export abstract class Provider {
 
     }
 
+    public async createInstance(type, context) {
+        const parameters = this.getParameters(type, undefined)
+
+        const params = []
+        for (const parameter of parameters) {
+            params[parameter.parameterIndex] = await this.parameterResolver(parameter, context)
+        }
+
+        const instance = new type(...params)
+
+        if (typeof instance.init === 'function') {
+            await instance.init()
+        }
+
+        return instance
+    }
+
     protected async parameterResolver(parameter, context): Promise<any> {
         const implementation = this.getParameterDecoratorImplementation(parameter.type) || (() => { })
         return implementation(parameter, context, this)
@@ -96,7 +113,6 @@ export abstract class Provider {
 }
 
 Provider.addParameterDecoratorImplementation("inject", async (parameter, context, provider) => {
-    const event = context.event
     const serviceType = parameter.serviceType
 
     const staticInstance = await callExtension(serviceType, 'onInject', { parameter })
@@ -104,7 +120,9 @@ Provider.addParameterDecoratorImplementation("inject", async (parameter, context
         return staticInstance
     }
 
-    const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
+    // const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
+    const instance = await provider.createInstance(serviceType, context)
+
     await callExtension(instance, 'onInject', { parameter })
     return instance
 })

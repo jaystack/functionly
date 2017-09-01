@@ -4,6 +4,13 @@ import { defineMetadata, getMetadata, constants, getClassConfigValue } from '../
 const { CLASS_ENVIRONMENTKEY, CLASS_CLASSCONFIGKEY } = constants
 
 export class Api extends Resource {
+    constructor(...params) {
+        super();
+    }
+    public async init(): Promise<any> {
+        
+    }
+
     public static ConfigEnvironmentKey: string
 
     public static onDefineInjectTo(target, targetKey, parameterIndex: number) {

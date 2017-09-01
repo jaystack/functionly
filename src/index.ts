@@ -1,4 +1,4 @@
-export { Resource, FunctionalApi, FunctionalService, DynamoTable, SimpleNotificationService, S3Storage, ApiGateway, callExtension, PreHook, PostHook, Service } from './classes'
+export { Resource, FunctionalApi, FunctionalService, DynamoTable, SimpleNotificationService, S3Storage, ApiGateway, callExtension, PreHook, PostHook, Service, Api } from './classes'
 export { addProvider, removeProvider, Provider, AWSProvider, LocalProvider } from './providers'
 
 export {
