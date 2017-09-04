@@ -26,7 +26,7 @@ export { aws } from './classes/aws/aws'
 
 export { azure } from './classes/azure/azure'
 
-export { param, serviceParams, createParameterDecorator, request, context, error, functionalServiceName, provider, stage } from './parameters/param'
+export { param, serviceParams, createParameterDecorator, request, error, result, functionalServiceName, provider, stage } from './parameters/param'
 export { inject } from './parameters/inject'
 
 import * as _constants from './constants'

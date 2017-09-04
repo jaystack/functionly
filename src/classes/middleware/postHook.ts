@@ -1,10 +1,10 @@
 import { Hook } from './hook'
-import { param, getMetadata, constants } from '../../annotations'
+import { error, getMetadata, constants } from '../../annotations'
 const { PARAMETER_PARAMKEY } = constants
 
 export class PostHook extends Hook {
     public catch(...params);
-    public catch( @param error) {
+    public catch( @error error) {
         throw error
     }
 

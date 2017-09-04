@@ -20,7 +20,6 @@ export class DynamoTable extends EventSource {
                 } else {
                     let value
                     if (typeof (value = get(context.event.event.Records[0], parameter.from)) !== 'undefined') return value
-                    if (typeof (value = get(context, parameter.from)) !== 'undefined') return value
                     return value;
                 }
                 return undefined

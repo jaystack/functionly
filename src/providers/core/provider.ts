@@ -44,18 +44,21 @@ export abstract class Provider {
         const parameters = this.getParameters(target.constructor, method)
 
         const preHooks = hooks.filter(h => h instanceof PreHook)
-            .map(h => this.createCallContext(h, 'handle'))
+            .map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'handle') }))
         const postHookInstances = hooks.filter(h => h instanceof PostHook)
-        const postHooks = postHookInstances.map(h => this.createCallContext(h, 'handle'))
-        const catchHooks = postHookInstances.map(h => this.createCallContext(h, 'catch'))
+        const postHooks = postHookInstances.map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'handle') }))
+        const catchHooks = postHookInstances.map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'catch') }))
 
         return async (context) => {
             const preic: any = {}
             const preContext = { context: preic, ...context }
 
             try {
-                for (const hook of preHooks) {
-                    await hook(preContext)
+                for (const { hookKey, hook } of preHooks) {
+                    const result = await hook(preContext)
+                    if (hookKey) {
+                        preic[hookKey] = result
+                    }
                 }
 
                 const params = []
@@ -75,9 +78,9 @@ export abstract class Provider {
             for (let hookIndex = 0; hookIndex < postHookInstances.length; hookIndex++) {
                 try {
                     if (ic.error) {
-                        ic.result = await catchHooks[hookIndex](postContext)
+                        ic.result = await catchHooks[hookIndex].hook(postContext)
                     } else {
-                        ic.result = await postHooks[hookIndex](postContext)
+                        ic.result = await postHooks[hookIndex].hook(postContext)
                     }
                     ic.error = undefined
                 } catch (e) {
@@ -115,7 +118,7 @@ export abstract class Provider {
 Provider.addParameterDecoratorImplementation("inject", async (parameter, context, provider) => {
     const serviceType = parameter.serviceType
 
-    const staticInstance = await callExtension(serviceType, 'onInject', { parameter })
+    const staticInstance = await callExtension(serviceType, 'onInject', { parameter, context, provider })
     if (typeof staticInstance !== 'undefined') {
         return staticInstance
     }
@@ -123,7 +126,7 @@ Provider.addParameterDecoratorImplementation("inject", async (parameter, context
     // const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
     const instance = await provider.createInstance(serviceType, context)
 
-    await callExtension(instance, 'onInject', { parameter })
+    await callExtension(instance, 'onInject', { parameter, context, provider })
     return instance
 })
 
@@ -131,11 +134,11 @@ Provider.addParameterDecoratorImplementation("serviceParams", async (parameter, 
     return context.event
 })
 
-Provider.addParameterDecoratorImplementation("context", async (parameter, context, provider) => {
-    return context.context
-})
 Provider.addParameterDecoratorImplementation("error", async (parameter, context, provider) => {
     return parameter.targetKey === 'catch' ? (context.context && context.context.error) : undefined
+})
+Provider.addParameterDecoratorImplementation("result", async (parameter, context, provider) => {
+    return context.context && context.context.result
 })
 Provider.addParameterDecoratorImplementation("functionalServiceName", async (parameter, context, provider) => {
     return context.serviceInstance && getFunctionName(context.serviceInstance)

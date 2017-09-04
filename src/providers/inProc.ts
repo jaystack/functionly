@@ -55,15 +55,4 @@ InProcProvider.addParameterDecoratorImplementation("param", async (parameter, co
     return undefined
 })
 
-/*InProcProvider.addParameterDecoratorImplementation("request", async (parameter, context, provider) => {
-    return {
-        url: context.event.req._parsedUrl || parse(context.event.req.originalUrl),
-        method: context.event.req.method,
-        body: context.event.req.body,
-        query: context.event.req.query,
-        params: context.event.req.params,
-        headers: context.event.req.headers
-    }
-})*/
-
 export const provider = new InProcProvider()

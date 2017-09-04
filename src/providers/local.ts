@@ -115,7 +115,6 @@ LocalProvider.addParameterDecoratorImplementation("param", async (parameter, con
         if (typeof (value = get(req.query, parameter.from)) !== 'undefined') return value
         if (typeof (value = get(req.params, parameter.from)) !== 'undefined') return value
         if (typeof (value = get(req.headers, parameter.from)) !== 'undefined') return value
-        if (typeof (value = get(context.context, parameter.from)) !== 'undefined') return value
         return value
     }
     return undefined

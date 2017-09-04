@@ -3,7 +3,7 @@ import { FunctionalService, PreHook, PostHook, Resource, DynamoTable, SimpleNoti
 import { getOverridableMetadata, constants, getMetadata, getFunctionName } from '../src/annotations'
 const { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_S3CONFIGURATIONKEY,
     CLASS_MIDDLEWAREKEY } = constants
-import { use, context, error, param, inject, injectable, environment, dynamoTable, sns, s3Storage, functionalServiceName, functionName } from '../src/annotations'
+import { use, error, result, param, inject, injectable, environment, dynamoTable, sns, s3Storage, functionalServiceName, functionName } from '../src/annotations'
 
 
 describe('hooks', () => {
@@ -429,21 +429,21 @@ describe('hooks', () => {
         it('posthook result chain', async () => {
             let counter = 0
             class TestPostHook1 extends PostHook {
-                handle( @param result) {
+                async handle( @result result) {
                     counter++
 
                     return result + 1
                 }
             }
             class TestPostHook2 extends PostHook {
-                handle( @param result) {
+                async handle( @result result) {
                     counter++
 
                     return result + 1
                 }
             }
             class TestPostHook3 extends PostHook {
-                handle( @param result) {
+                async handle( @result result) {
                     counter++
 
                     return result + 1
@@ -676,23 +676,24 @@ describe('hooks', () => {
 
         it('decorator resolution in hooks', async () => {
             let counter = 0
+
+            @injectable
             class AuthHook extends PreHook {
-                public async handle( @param authorization, @param Authorization, @context context) {
+                public async handle( @param authorization, @param Authorization) {
                     counter++
                     const auth = authorization || Authorization
                     if (!auth) throw new Error('auth')
-                    context.identity = 'me'
-                    context.user = null
+                    return 'me'
                 }
             }
             class PermissionHook extends PreHook {
-                public async handle( @param identity) {
+                public async handle( @inject(AuthHook) identity) {
                     counter++
                     expect(identity).to.equal('me')
                 }
             }
             class ResultHook extends PostHook {
-                public async handle( @param result) {
+                public async handle( @result result) {
                     counter++
                     expect(result).to.deep.equal([{ a: 1 }, { a: 2 }, { a: 3 }])
                     return result
@@ -873,7 +874,7 @@ describe('hooks', () => {
                 }
 
                 class TestCatchHook extends PostHook {
-                    catch( @error e) {
+                    public async catch( @error e) {
                         counter++
                         expect(counter).to.equal(2)
                         expect(e.message).to.equal('error')
@@ -1011,59 +1012,21 @@ describe('hooks', () => {
     })
 
     describe('hook decorators', () => {
-        it('prehook set property => get context', async () => {
+        it('prehook return => get value', async () => {
             let counter = 0
+
+            @injectable
             class TestHook extends PreHook {
-                handle( @context c) {
+                async handle() {
                     counter++
                     expect(counter).to.equal(1)
-
-                    expect(c).to.deep.equal({})
-
-                    c.p1 = 'v1'
+                    return 'v1'
                 }
             }
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle( @context c) {
-                    counter++
-                    expect(counter).to.equal(2)
-
-                    expect(c).to.deep.equal({ p1: 'v1' })
-
-                    return { ok: 1 }
-                }
-            }
-
-            const invoker = TestFunctionalService.createInvoker()
-            await invoker({}, {
-                send: (result) => {
-                    expect(result).to.deep.equal({ ok: 1 })
-                    counter++
-                    expect(counter).to.equal(3)
-                }
-            }, (e) => { expect(true).to.equal(false, e.message) })
-
-            expect(counter).to.equal(3)
-        })
-
-        it('prehook set property => get param', async () => {
-            let counter = 0
-            class TestHook extends PreHook {
-                handle( @context c) {
-                    counter++
-                    expect(counter).to.equal(1)
-
-                    expect(c).to.deep.equal({})
-
-                    c.p1 = 'v1'
-                }
-            }
-
-            @use(TestHook)
-            class TestFunctionalService extends FunctionalService {
-                public async handle( @param p1) {
+                public async handle( @inject(TestHook) p1) {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -1085,39 +1048,24 @@ describe('hooks', () => {
             expect(counter).to.equal(3)
         })
 
-        it('multiple prehook set property => get context', async () => {
+        it('prehook no return => get value', async () => {
             let counter = 0
-            class TestHook1 extends PreHook {
-                handle( @context c) {
-                    expect(c).to.deep.equal({})
 
-                    c.p1 = 'v1'
-                }
-            }
-
-            class TestHook2 extends PreHook {
-                handle( @context c) {
-                    expect(c).to.deep.equal({ p1: 'v1' })
-
-                    c.p2 = 'v2'
-                }
-            }
-            class TestHook3 extends PreHook {
-                handle( @context c) {
-                    expect(c).to.deep.equal({ p1: 'v1', p2: 'v2' })
-
-                    c.p3 = 'v3'
-                }
-            }
-
-            @use(TestHook1)
-            @use(TestHook2)
-            @use(TestHook3)
-            class TestFunctionalService extends FunctionalService {
-                public async handle( @context c) {
+            @injectable
+            class TestHook extends PreHook {
+                async handle() {
                     counter++
+                    expect(counter).to.equal(1)
+                }
+            }
 
-                    expect(c).to.deep.equal({ p1: 'v1', p2: 'v2', p3: 'v3' })
+            @use(TestHook)
+            class TestFunctionalService extends FunctionalService {
+                public async handle( @inject(TestHook) p1) {
+                    counter++
+                    expect(counter).to.equal(2)
+
+                    expect(p1).to.null
 
                     return { ok: 1 }
                 }
@@ -1128,37 +1076,233 @@ describe('hooks', () => {
                 send: (result) => {
                     expect(result).to.deep.equal({ ok: 1 })
                     counter++
+                    expect(counter).to.equal(3)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(3)
+        })
+
+        it('posthook result decorator', async () => {
+            let counter = 0
+
+            class TestHook extends PostHook {
+                async handle( @result res) {
+                    counter++
+                    expect(counter).to.equal(2)
+                    return { ...res, p1: 'p1' }
+                }
+            }
+
+            @use(TestHook)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    expect(counter).to.equal(1)
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1, p1: 'p1' })
+                    counter++
+                    expect(counter).to.equal(3)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(3)
+        })
+
+        it('posthook result decorator return result', async () => {
+            let counter = 0
+
+            class TestHook extends PostHook {
+                async handle( @result res) {
+                    counter++
+                    expect(counter).to.equal(2)
+                    return res
+                }
+            }
+
+            class TestHook2 extends PostHook {
+                async catch( @error e) {
+                    throw e
+                }
+            }
+
+            @use(TestHook)
+            @use(TestHook2)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    expect(counter).to.equal(1)
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1 })
+                    counter++
+                    expect(counter).to.equal(3)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(3)
+        })
+
+        it('posthook result decorator no handle', async () => {
+            let counter = 0
+
+            class TestHook extends PostHook {
+            }
+
+            class TestHook2 extends PostHook {
+                async catch( @error e) {
+                    throw e
+                }
+            }
+
+            @use(TestHook)
+            @use(TestHook2)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    expect(counter).to.equal(1)
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1 })
+                    counter++
+                    expect(counter).to.equal(2)
                 }
             }, (e) => { expect(true).to.equal(false, e.message) })
 
             expect(counter).to.equal(2)
         })
 
+        it('prehook inject in posthook handle', async () => {
+            let counter = 0
+
+            @injectable
+            class TestPreHook extends PreHook {
+                async handle() {
+                    counter++
+                    expect(counter).to.equal(1)
+                    return 'p1'
+                }
+            }
+
+            class TestPostHook extends PostHook {
+                async handle( @result res, @inject(TestPreHook) p1) {
+                    counter++
+                    expect(counter).to.equal(3)
+                    return { ...res, p1 }
+                }
+            }
+
+            @use(TestPreHook)
+            @use(TestPostHook)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    expect(counter).to.equal(2)
+
+                    return { ok: 1 }
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1, p1: 'p1' })
+                    counter++
+                    expect(counter).to.equal(4)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(4)
+        })
+
+        it('prehook inject in posthook catch', async () => {
+            let counter = 0
+
+            @injectable
+            class TestPreHook extends PreHook {
+                async handle() {
+                    counter++
+                    expect(counter).to.equal(1)
+                    return 'p1'
+                }
+            }
+
+            class TestPostHook extends PostHook {
+                async catch( @result res, @inject(TestPreHook) p1) {
+                    counter++
+                    expect(counter).to.equal(3)
+                    return { ok: 1, p1 }
+                }
+            }
+
+            @use(TestPreHook)
+            @use(TestPostHook)
+            class TestFunctionalService extends FunctionalService {
+                public async handle() {
+                    counter++
+                    expect(counter).to.equal(2)
+
+                    throw new Error('error')
+                }
+            }
+
+            const invoker = TestFunctionalService.createInvoker()
+            await invoker({}, {
+                send: (result) => {
+                    expect(result).to.deep.equal({ ok: 1, p1: 'p1' })
+                    counter++
+                    expect(counter).to.equal(4)
+                }
+            }, (e) => { expect(true).to.equal(false, e.message) })
+
+            expect(counter).to.equal(4)
+        })
+
         it('multiple prehook set property => get param', async () => {
             let counter = 0
-            class TestHook1 extends PreHook {
-                handle( @context c) {
-                    expect(c).to.deep.equal({})
 
-                    c.p1 = 'v1'
+            @injectable
+            class TestHook1 extends PreHook {
+                async handle() {
+                    return 'v1'
                 }
             }
 
+            @injectable
             class TestHook2 extends PreHook {
-                handle( @context c, @param p1) {
-                    expect(c).to.deep.equal({ p1: 'v1' })
+                async handle( @inject(TestHook1) p1) {
                     expect(p1).to.equal('v1')
 
-                    c.p2 = 'v2'
+                    return 'v2'
                 }
             }
+
+            @injectable
             class TestHook3 extends PreHook {
-                handle( @context c, @param p1, @param p2) {
-                    expect(c).to.deep.equal({ p1: 'v1', p2: 'v2' })
+                async handle( @inject(TestHook1) p1, @inject(TestHook2) p2) {
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
 
-                    c.p3 = 'v3'
+                    return 'v3'
                 }
             }
 
@@ -1166,7 +1310,7 @@ describe('hooks', () => {
             @use(TestHook2)
             @use(TestHook3)
             class TestFunctionalService extends FunctionalService {
-                public async handle( @param p1, @param p2, @param p3) {
+                public async handle( @inject(TestHook1) p1, @inject(TestHook2) p2, @inject(TestHook3) p3) {
                     counter++
 
                     expect(p1).to.equal('v1')
@@ -1221,7 +1365,7 @@ describe('hooks', () => {
         it("@functionalServiceName", async () => {
             let counter = 0
             class TestHook extends PreHook {
-                handle( @functionalServiceName serviceName) {
+                async handle( @functionalServiceName serviceName) {
                     counter++
                     expect(serviceName).to.equal('TestFunctionalService')
                 }
@@ -1250,7 +1394,7 @@ describe('hooks', () => {
         it("@functionalServiceName with functionName decorator", async () => {
             let counter = 0
             class TestHook extends PreHook {
-                handle( @functionalServiceName serviceName) {
+                async handle( @functionalServiceName serviceName) {
                     counter++
                     expect(serviceName).to.equal('MyTestFunctionalService')
                 }

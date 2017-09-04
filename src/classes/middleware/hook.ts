@@ -1,11 +1,11 @@
-import { getMetadata, defineMetadata, constants, context } from '../../annotations'
+import { getMetadata, defineMetadata, constants, result } from '../../annotations'
 import { getMiddlewares } from '../../annotations/classes/use'
 const { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY } = constants
 
 export class Hook {
     public handle(...params);
-    public handle( @context context) {
-        return context.result
+    public handle( @result res) {
+        return res
     }
 
     public static onDefineMiddlewareTo(target) {
@@ -35,5 +35,13 @@ export class Hook {
             })
             defineMetadata(CLASS_ENVIRONMENTKEY, { ...metadata }, target);
         }
+    }
+
+    public static onInject({ parameter, context }) {
+        const key = parameter.serviceType && parameter.serviceType.name
+        if (key && context.context && typeof context.context[key] !== 'undefined') {
+            return context.context[key]
+        }
+        return null
     }
 }

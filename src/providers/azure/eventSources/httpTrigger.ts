@@ -22,7 +22,6 @@ export class HttpTrigger extends EventSource {
                     if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value
-                    if (typeof (value = get(context, parameter.from)) !== 'undefined') return value
                     return value;
                 }
                 return undefined

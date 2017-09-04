@@ -65,8 +65,8 @@ export const createParameterDecorator = (type: string, defaultConfig?: any) => (
 
 export const serviceParams = createParameterDecorator('serviceParams')
 export const request = createParameterDecorator('request')
-export const context = createParameterDecorator('context')
 export const error = createParameterDecorator('error')
+export const result = createParameterDecorator('result')
 export const functionalServiceName = createParameterDecorator('functionalServiceName')
 export const provider = createParameterDecorator('provider')
 export const stage = createParameterDecorator('stage')
