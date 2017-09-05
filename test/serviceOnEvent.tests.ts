@@ -20,7 +20,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -55,7 +55,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -93,7 +93,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public async onInject({ parameter }) {
                         counter++
@@ -128,7 +128,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -172,7 +172,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -290,7 +290,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -323,7 +323,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -359,7 +359,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public async onInject({ parameter }) {
                         counter++
@@ -392,7 +392,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -434,7 +434,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource {
                     public static async onInject({ parameter }) {
                         counter++
@@ -560,7 +560,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'mock'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends FunctionalService {
                     onInvoke({ params, invokeConfig }) {
                         counter++
@@ -593,7 +593,7 @@ describe('service events', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'mock'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends FunctionalService {
                     handle( @param p1) { }
                     onInvoke_mock({ invokeParams, params, invokeConfig, parameterMapping, currentEnvironment, environmentMode }) {

@@ -1,6 +1,13 @@
 import { CLASS_INJECTABLEKEY } from '../constants'
 import { defineMetadata } from '../metadata'
 
-export const injectable = (target: Function) => {
-    defineMetadata(CLASS_INJECTABLEKEY, true, target);
+export enum InjectionScope {
+    Transient = 1,
+    Singleton = 2
+}
+
+export const injectable = (scope: InjectionScope = InjectionScope.Transient) => {
+    return (target) => {
+        defineMetadata(CLASS_INJECTABLEKEY, scope, target);
+    }
 }

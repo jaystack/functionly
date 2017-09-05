@@ -3,6 +3,7 @@ import { Provider } from './core/provider'
 import { constants, getMetadata, getFunctionName, rest } from '../annotations'
 const { CLASS_LOGKEY } = constants
 import { get } from '../helpers/property'
+import { container } from '../helpers/ioc'
 import { parse } from 'url'
 
 export class InProcProvider extends Provider {
@@ -55,4 +56,4 @@ InProcProvider.addParameterDecoratorImplementation("param", async (parameter, co
     return undefined
 })
 
-export const provider = new InProcProvider()
+export const provider = container.resolve(InProcProvider)

@@ -2,11 +2,12 @@ import { Provider } from '../core/provider'
 import { getFunctionName, constants, getMetadata } from '../../annotations'
 const { CLASS_HTTPTRIGGER } = constants
 import { HttpTrigger } from './eventSources/httpTrigger'
+import { container } from '../../helpers/ioc'
 import * as request from 'request'
 import { parse } from 'url'
 
 const eventSourceHandlers = [
-    new HttpTrigger()
+    container.resolve(HttpTrigger)
 ]
 
 export const FUNCTIONLY_FUNCTION_KEY = 'FUNCTIONLY_FUNCTION_KEY'
@@ -115,4 +116,4 @@ AzureProvider.addParameterDecoratorImplementation("request", async (parameter, c
     }
 })
 
-export const provider = new AzureProvider()
+export const provider = container.resolve(AzureProvider)

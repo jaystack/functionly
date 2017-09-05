@@ -1,6 +1,7 @@
 import { constants, getMetadata, getOverridableMetadata } from '../annotations'
 const { PARAMETER_PARAMKEY } = constants
 import { callExtension } from '../classes'
+import { container } from '../helpers/ioc'
 
 export { Provider } from './core/provider'
 export { AWSProvider } from './aws'
@@ -38,7 +39,7 @@ export const getInvoker = (serviceType, params) => {
 
     const currentEnvironment = environments[environment]
 
-    const serviceInstance = new serviceType(...params)
+    const serviceInstance = container.resolve(serviceType, ...params)
     const invoker = currentEnvironment.getInvoker(serviceInstance, params)
 
     const invokeHandler = async (...params) => {

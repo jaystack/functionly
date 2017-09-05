@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import { getInvoker } from '../src/providers'
 import { FunctionalService, Resource, Service, Api } from '../src/classes'
-import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName, provider, stage } from '../src/annotations'
+import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName, provider, stage, InjectionScope } from '../src/annotations'
 import { parse } from 'url'
 
 
@@ -31,7 +31,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 public async handle( @param p1, @param p2) {
                     counter++
@@ -68,7 +68,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 public async handle( @param p1, @param p2) {
                     counter++
@@ -77,7 +77,7 @@ describe('invoker', () => {
                 }
             }
 
-            @injectable
+            @injectable()
             class CustomApi extends Api {
                 private _myService
                 public constructor( @inject(CustomService) myService) {
@@ -121,7 +121,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 public async handle( @param p1, @param p2) {
                     counter++
@@ -130,7 +130,7 @@ describe('invoker', () => {
                 }
             }
 
-            @injectable
+            @injectable()
             class CustomApi extends Api {
                 private _myService
                 public constructor( @inject(CustomService) myService) {
@@ -182,6 +182,252 @@ describe('invoker', () => {
             })
 
             expect(counter).to.equal(5)
+        })
+        
+        describe("injection modes", () => {
+            it("multiple inject transient api with transient service", async () => {
+                let counter = 0
+                let instanceCreation = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+                @injectable(InjectionScope.Transient)
+                class CustomService extends Service {
+                    public constructor() {
+                        super()
+                        instanceCreation++
+                    }
+                    public async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomService')
+                        expect(p2).to.equal('p2', 'CustomService')
+                    }
+                }
+
+                @injectable(InjectionScope.Transient)
+                class CustomApi extends Api {
+                    private _myService
+                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
+                        super()
+                        instanceCreation++
+                        this._myService = myService
+                    }
+                    public async myMethod(p1, p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomApi')
+                        expect(p2).to.equal('p2', 'CustomApi')
+
+                        await this._myService({ p1, p2 })
+                    }
+                }
+
+                class MockService extends FunctionalService {
+                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                        counter++
+                        expect(p1).to.undefined
+                        expect(api).to.instanceof(CustomApi)
+
+                        await api.myMethod('p1', 'p2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker({}, {
+                    send: () => {
+                        expect(counter).to.equal(3)
+                        expect(instanceCreation).to.equal(6)
+                    }
+                }, (e) => {
+                    expect(null).to.equal(e)
+                    throw e
+                })
+
+                expect(counter).to.equal(3)
+                expect(instanceCreation).to.equal(6)
+            })
+
+            it("multiple inject transient api with singleton service", async () => {
+                let counter = 0
+                let instanceCreation = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+                @injectable(InjectionScope.Singleton)
+                class CustomService extends Service {
+                    public constructor() {
+                        super()
+                        instanceCreation++
+                    }
+                    public async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomService')
+                        expect(p2).to.equal('p2', 'CustomService')
+                    }
+                }
+
+                @injectable(InjectionScope.Transient)
+                class CustomApi extends Api {
+                    private _myService
+                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
+                        super()
+                        instanceCreation++
+                        this._myService = myService
+                    }
+                    public async myMethod(p1, p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomApi')
+                        expect(p2).to.equal('p2', 'CustomApi')
+
+                        await this._myService({ p1, p2 })
+                    }
+                }
+
+                class MockService extends FunctionalService {
+                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                        counter++
+                        expect(p1).to.undefined
+                        expect(api).to.instanceof(CustomApi)
+
+                        await api.myMethod('p1', 'p2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker({}, {
+                    send: () => {
+                        expect(counter).to.equal(3)
+                        expect(instanceCreation).to.equal(3)
+                    }
+                }, (e) => {
+                    expect(null).to.equal(e)
+                    throw e
+                })
+
+                expect(counter).to.equal(3)
+                expect(instanceCreation).to.equal(3)
+            })
+
+            it("multiple inject singleton api with transient service", async () => {
+                let counter = 0
+                let instanceCreation = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+                @injectable(InjectionScope.Transient)
+                class CustomService extends Service {
+                    public constructor() {
+                        super()
+                        instanceCreation++
+                    }
+                    public async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomService')
+                        expect(p2).to.equal('p2', 'CustomService')
+                    }
+                }
+
+                @injectable(InjectionScope.Singleton)
+                class CustomApi extends Api {
+                    private _myService
+                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
+                        super()
+                        instanceCreation++
+                        this._myService = myService
+                    }
+                    public async myMethod(p1, p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomApi')
+                        expect(p2).to.equal('p2', 'CustomApi')
+
+                        await this._myService({ p1, p2 })
+                    }
+                }
+
+                class MockService extends FunctionalService {
+                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                        counter++
+                        expect(p1).to.undefined
+                        expect(api).to.instanceof(CustomApi)
+
+                        await api.myMethod('p1', 'p2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker({}, {
+                    send: () => {
+                        expect(counter).to.equal(3)
+                        expect(instanceCreation).to.equal(3)
+                    }
+                }, (e) => {
+                    expect(null).to.equal(e)
+                    throw e
+                })
+
+                expect(counter).to.equal(3)
+                expect(instanceCreation).to.equal(3)
+            })
+
+            it("multiple inject singleton api with singleton service", async () => {
+                let counter = 0
+                let instanceCreation = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+                @injectable(InjectionScope.Singleton)
+                class CustomService extends Service {
+                    public constructor() {
+                        super()
+                        instanceCreation++
+                    }
+                    public async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomService')
+                        expect(p2).to.equal('p2', 'CustomService')
+                    }
+                }
+
+                @injectable(InjectionScope.Singleton)
+                class CustomApi extends Api {
+                    private _myService
+                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
+                        super()
+                        instanceCreation++
+                        this._myService = myService
+                    }
+                    public async myMethod(p1, p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomApi')
+                        expect(p2).to.equal('p2', 'CustomApi')
+
+                        await this._myService({ p1, p2 })
+                    }
+                }
+
+                class MockService extends FunctionalService {
+                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                        counter++
+                        expect(p1).to.undefined
+                        expect(api).to.instanceof(CustomApi)
+
+                        await api.myMethod('p1', 'p2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker({}, {
+                    send: () => {
+                        expect(counter).to.equal(3)
+                        expect(instanceCreation).to.equal(2)
+                    }
+                }, (e) => {
+                    expect(null).to.equal(e)
+                    throw e
+                })
+
+                expect(counter).to.equal(3)
+                expect(instanceCreation).to.equal(2)
+            })
         })
     })
 
@@ -483,7 +729,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
@@ -509,7 +755,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 handle( @param p1, @param p2) {
                     counter++
@@ -543,7 +789,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const req = {}
@@ -574,7 +820,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const req = {
@@ -624,7 +870,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const req = {
@@ -675,7 +921,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const req = {
@@ -1366,7 +1612,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-                @injectable
+                @injectable()
                 class MockInjectable extends Resource { }
 
                 const awsEvent = {
@@ -1417,7 +1663,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
@@ -1442,7 +1688,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 handle( @param p1, @param p2) {
                     counter++
@@ -1474,7 +1720,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const awsEvent = {}
@@ -1503,7 +1749,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const awsEvent = {
@@ -1552,7 +1798,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const awsEvent = {
@@ -2091,7 +2337,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
-            @injectable
+            @injectable()
             class CustomService extends Service {
                 handle( @param p1, @param p2) {
                     counter++
@@ -2126,7 +2372,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const context = {}
@@ -2154,7 +2400,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const context = {}
@@ -2201,7 +2447,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
 
-            @injectable
+            @injectable()
             class MockInjectable extends Resource { }
 
             const context = {}

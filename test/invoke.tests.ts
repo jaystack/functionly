@@ -33,7 +33,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle() { }
             }
@@ -67,7 +67,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -101,7 +101,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -135,7 +135,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle() { }
             }
@@ -167,7 +167,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle() { }
             }
@@ -203,7 +203,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle() { }
             }
@@ -397,7 +397,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -435,7 +435,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', methods: ['post'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -470,7 +470,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', methods: ['get', 'post'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -508,7 +508,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', methods: ['post', 'get'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -543,7 +543,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', authLevel: 'anonymous' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -581,7 +581,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', methods: ['post'], authLevel: 'anonymous' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -617,7 +617,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -654,7 +654,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @httpTrigger({ route: '/v1/a1', authLevel: 'anonymous' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -705,7 +705,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @rest({ path: '/v1/a1' })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -743,7 +743,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @rest({ path: '/v1/a1', methods: ['post'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -778,7 +778,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @rest({ path: '/v1/a1', methods: ['get', 'post'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -816,7 +816,7 @@ describe('invoke', () => {
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
             @rest({ path: '/v1/a1', methods: ['post', 'get'] })
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }
@@ -859,7 +859,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @injectable
+            @injectable()
             class A extends FunctionalService {
                 public async handle( @param p1) { }
             }

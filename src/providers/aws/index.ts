@@ -7,6 +7,7 @@ import { SNS } from './eventSources/sns'
 import { S3 } from './eventSources/s3'
 import { DynamoTable } from './eventSources/dynamoTable'
 import { parse } from 'url'
+import { container } from '../../helpers/ioc'
 
 let lambda = null;
 const initAWSSDK = () => {
@@ -18,11 +19,11 @@ const initAWSSDK = () => {
 
 
 const eventSourceHandlers = [
-    new ApiGateway(),
-    new SNS(),
-    new S3(),
-    new DynamoTable(),
-    new LambdaCall()
+    container.resolve(ApiGateway),
+    container.resolve(SNS),
+    container.resolve(S3),
+    container.resolve(DynamoTable),
+    container.resolve(LambdaCall)
 ]
 
 
@@ -94,4 +95,4 @@ AWSProvider.addParameterDecoratorImplementation("request", async (parameter, con
     }
 })
 
-export const provider = new AWSProvider()
+export const provider = container.resolve(AWSProvider)

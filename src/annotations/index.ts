@@ -1,5 +1,5 @@
 export { templates, applyTemplates } from './templates'
-export { injectable } from './classes/injectable'
+export { injectable, InjectionScope } from './classes/injectable'
 export { apiGateway } from './classes/aws/apiGateway'
 export { httpTrigger } from './classes/azure/httpTrigger'
 export { rest, httpGet, httpPost, httpPut, httpPatch, httpDelete, IHttpMethod } from './classes/rest'

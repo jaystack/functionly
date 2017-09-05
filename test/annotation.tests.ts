@@ -17,7 +17,7 @@ import { rest, httpGet, httpPost, httpPut, httpPatch, httpDelete } from '../src/
 import { dynamoTable, __dynamoDBDefaults } from '../src/annotations/classes/dynamoTable'
 import { environment } from '../src/annotations/classes/environment'
 import { functionName, getFunctionName } from '../src/annotations/classes/functionName'
-import { injectable } from '../src/annotations/classes/injectable'
+import { injectable, InjectionScope } from '../src/annotations/classes/injectable'
 import { log } from '../src/annotations/classes/log'
 import { s3Storage } from '../src/annotations/classes/s3Storage'
 import { sns } from '../src/annotations/classes/sns'
@@ -673,12 +673,28 @@ describe('annotations', () => {
         })
         describe("injectable", () => {
             it("injectable", () => {
-                @injectable
+                @injectable()
                 class InjectableTestClass { }
 
                 const value = getMetadata(CLASS_INJECTABLEKEY, InjectableTestClass)
 
-                expect(value).to.equal(true)
+                expect(value).to.equal(1)
+            })
+            it("injectable", () => {
+                @injectable(InjectionScope.Transient)
+                class InjectableTestClass { }
+
+                const value = getMetadata(CLASS_INJECTABLEKEY, InjectableTestClass)
+
+                expect(value).to.equal(1)
+            })
+            it("injectable", () => {
+                @injectable(InjectionScope.Singleton)
+                class InjectableTestClass { }
+
+                const value = getMetadata(CLASS_INJECTABLEKEY, InjectableTestClass)
+
+                expect(value).to.equal(2)
             })
             it("non injectable", () => {
                 class InjectableTestClass { }
@@ -1029,7 +1045,7 @@ describe('annotations', () => {
     describe("parameters", () => {
         describe("inject", () => {
             it("inject", () => {
-                @injectable
+                @injectable()
                 class ATestClass { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
@@ -1047,7 +1063,7 @@ describe('annotations', () => {
             })
 
             it("functional service inject", () => {
-                @injectable
+                @injectable()
                 class ATestClass extends FunctionalService { }
                 class BTestClass {
                     method( @inject(ATestClass) a) { }
@@ -1069,7 +1085,7 @@ describe('annotations', () => {
             })
 
             it("resource inject", () => {
-                @injectable
+                @injectable()
                 @environment('%ClassName%_defined_environment', 'value')
                 class ATestClass extends Resource { }
                 class BTestClass {
@@ -1092,7 +1108,7 @@ describe('annotations', () => {
             })
 
             it("injected DynamoTable", () => {
-                @injectable
+                @injectable()
                 @dynamoTable({ tableName: 'ATable' })
                 class ATestClass extends DynamoTable { }
                 class BTestClass {
@@ -1109,7 +1125,7 @@ describe('annotations', () => {
             })
 
             it("injected SimpleNotificationService", () => {
-                @injectable
+                @injectable()
                 @sns({ topicName: 'ATopic' })
                 class ATestClass extends SimpleNotificationService { }
                 class BTestClass {
@@ -1126,7 +1142,7 @@ describe('annotations', () => {
             })
 
             it("injected S3Storage", () => {
-                @injectable
+                @injectable()
                 @s3Storage({ bucketName: 'ABucket' })
                 class ATestClass extends S3Storage { }
                 class BTestClass {
@@ -1143,7 +1159,7 @@ describe('annotations', () => {
             })
 
             it("overrided class method", () => {
-                @injectable
+                @injectable()
                 class ATestClass { }
 
                 class BaseBTestClass {
@@ -1165,7 +1181,7 @@ describe('annotations', () => {
             })
 
             it("overrided class method no inject", () => {
-                @injectable
+                @injectable()
                 class ATestClass { }
 
                 class BaseBTestClass {
@@ -1180,7 +1196,7 @@ describe('annotations', () => {
             })
 
             it("not overrided class method", () => {
-                @injectable
+                @injectable()
                 class ATestClass { }
 
                 class BaseBTestClass {
@@ -1202,7 +1218,7 @@ describe('annotations', () => {
             })
 
             it("service inject", () => {
-                @injectable
+                @injectable()
                 @environment('%ClassName%_defined_environment', 'value')
                 class ATestClass extends Service { }
                 class BTestClass {

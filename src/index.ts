@@ -16,6 +16,9 @@ export {
     param, serviceParams, request, error, result, functionalServiceName, provider, stage, inject
 } from './annotations'
 
+/* Enums */
+export { InjectionScope } from './annotations'
+
 /* Helpers */
 export { callExtension } from './classes'
 export {

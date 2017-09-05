@@ -4,7 +4,9 @@ import { constants, getMetadata, getOverridableMetadata } from '../annotations'
 const { PARAMETER_PARAMKEY } = constants
 
 import { InProcProvider } from '../providers/inProc'
-const provider = new InProcProvider()
+import { container } from '../helpers/ioc'
+
+const provider = container.resolve(InProcProvider)
 
 export class Service extends Resource {
     public handle(...params) {
@@ -33,7 +35,7 @@ export class Service extends Resource {
     }
 
     public static async onInject({ parameter }): Promise<any> {
-        const service = new this()
+        const service = container.resolve(this)
         return (...params) => service.invoke(...params)
     }
 }

@@ -2,6 +2,7 @@ import { constants, getMetadata, getOverridableMetadata, getFunctionName } from 
 const { PARAMETER_PARAMKEY } = constants
 import { getMiddlewares } from '../../annotations/classes/use'
 import { callExtension, PreHook, PostHook } from '../../classes'
+import { container } from '../../helpers/ioc'
 
 export abstract class Provider {
     public getInvoker(serviceInstance, params): Function {
@@ -18,6 +19,10 @@ export abstract class Provider {
     }
 
     public async createInstance(type, context) {
+        if (container.contains(type)) {
+            return container.resolve<any>(type)
+        }
+
         const parameters = this.getParameters(type, undefined)
 
         const params = []
@@ -25,7 +30,7 @@ export abstract class Provider {
             params[parameter.parameterIndex] = await this.parameterResolver(parameter, context)
         }
 
-        const instance = new type(...params)
+        const instance = container.resolve<any>(type, ...params)
 
         if (typeof instance.init === 'function') {
             await instance.init()
@@ -40,7 +45,7 @@ export abstract class Provider {
     }
 
     protected createCallContext(target, method) {
-        const hooks = getMiddlewares(target).map(m => new m())
+        const hooks = getMiddlewares(target).map(m => container.resolve(m))
         const parameters = this.getParameters(target.constructor, method)
 
         const preHooks = hooks.filter(h => h instanceof PreHook)
@@ -118,12 +123,11 @@ export abstract class Provider {
 Provider.addParameterDecoratorImplementation("inject", async (parameter, context, provider) => {
     const serviceType = parameter.serviceType
 
-    const staticInstance = await callExtension(serviceType, 'onInject', { parameter, context, provider })
-    if (typeof staticInstance !== 'undefined') {
-        return staticInstance
+    const staticInjectValue = await callExtension(serviceType, 'onInject', { parameter, context, provider })
+    if (typeof staticInjectValue !== 'undefined') {
+        return staticInjectValue
     }
 
-    // const instance = new serviceType(...parameter.params.map((p) => typeof p === 'function' ? p() : p))
     const instance = await provider.createInstance(serviceType, context)
 
     await callExtension(instance, 'onInject', { parameter, context, provider })

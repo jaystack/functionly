@@ -127,7 +127,7 @@ describe('hooks', () => {
         describe('inject on hooks', () => {
 
             it("functional service inject", () => {
-                @injectable
+                @injectable()
                 class ATestClass extends FunctionalService { }
 
                 class TestHook extends PreHook {
@@ -145,7 +145,7 @@ describe('hooks', () => {
             })
 
             it("service inject", () => {
-                @injectable
+                @injectable()
                 @environment('%ClassName%_defined_environment', 'value')
                 class ATestClass extends Resource { }
 
@@ -164,7 +164,7 @@ describe('hooks', () => {
             });
 
             it("injected DynamoTable", () => {
-                @injectable
+                @injectable()
                 @dynamoTable({ tableName: 'ATable' })
                 class ATestClass extends DynamoTable { }
 
@@ -187,7 +187,7 @@ describe('hooks', () => {
             })
 
             it("injected SimpleNotificationService", () => {
-                @injectable
+                @injectable()
                 @sns({ topicName: 'ATopic' })
                 class ATestClass extends SimpleNotificationService { }
 
@@ -210,7 +210,7 @@ describe('hooks', () => {
             })
 
             it("injected S3Storage", () => {
-                @injectable
+                @injectable()
                 @s3Storage({ bucketName: 'ABucket' })
                 class ATestClass extends S3Storage { }
 
@@ -236,7 +236,7 @@ describe('hooks', () => {
         describe('inject on level2 hooks', () => {
 
             it("functional service inject", () => {
-                @injectable
+                @injectable()
                 class ATestClass extends FunctionalService { }
 
                 class TestHookLevel2 extends PreHook {
@@ -259,7 +259,7 @@ describe('hooks', () => {
             })
 
             it("service inject", () => {
-                @injectable
+                @injectable()
                 @environment('%ClassName%_defined_environment', 'value')
                 class ATestClass extends Resource { }
 
@@ -283,7 +283,7 @@ describe('hooks', () => {
             });
 
             it("injected DynamoTable", () => {
-                @injectable
+                @injectable()
                 @dynamoTable({ tableName: 'ATable' })
                 class ATestClass extends DynamoTable { }
 
@@ -311,7 +311,7 @@ describe('hooks', () => {
             })
 
             it("injected SimpleNotificationService", () => {
-                @injectable
+                @injectable()
                 @sns({ topicName: 'ATopic' })
                 class ATestClass extends SimpleNotificationService { }
 
@@ -339,7 +339,7 @@ describe('hooks', () => {
             })
 
             it("injected S3Storage", () => {
-                @injectable
+                @injectable()
                 @s3Storage({ bucketName: 'ABucket' })
                 class ATestClass extends S3Storage { }
 
@@ -677,7 +677,7 @@ describe('hooks', () => {
         it('decorator resolution in hooks', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class AuthHook extends PreHook {
                 public async handle( @param authorization, @param Authorization) {
                     counter++
@@ -1015,7 +1015,7 @@ describe('hooks', () => {
         it('prehook return => get value', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class TestHook extends PreHook {
                 async handle() {
                     counter++
@@ -1051,7 +1051,7 @@ describe('hooks', () => {
         it('prehook no return => get value', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class TestHook extends PreHook {
                 async handle() {
                     counter++
@@ -1194,7 +1194,7 @@ describe('hooks', () => {
         it('prehook inject in posthook handle', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class TestPreHook extends PreHook {
                 async handle() {
                     counter++
@@ -1237,7 +1237,7 @@ describe('hooks', () => {
         it('prehook inject in posthook catch', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class TestPreHook extends PreHook {
                 async handle() {
                     counter++
@@ -1280,14 +1280,14 @@ describe('hooks', () => {
         it('multiple prehook set property => get param', async () => {
             let counter = 0
 
-            @injectable
+            @injectable()
             class TestHook1 extends PreHook {
                 async handle() {
                     return 'v1'
                 }
             }
 
-            @injectable
+            @injectable()
             class TestHook2 extends PreHook {
                 async handle( @inject(TestHook1) p1) {
                     expect(p1).to.equal('v1')
@@ -1296,7 +1296,7 @@ describe('hooks', () => {
                 }
             }
 
-            @injectable
+            @injectable()
             class TestHook3 extends PreHook {
                 async handle( @inject(TestHook1) p1, @inject(TestHook2) p2) {
                     expect(p1).to.equal('v1')

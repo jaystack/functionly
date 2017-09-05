@@ -3,6 +3,7 @@ import { Provider } from './core/provider'
 import { constants, getMetadata, getFunctionName, rest } from '../annotations'
 const { CLASS_LOGKEY } = constants
 import { get } from '../helpers/property'
+import { container } from '../helpers/ioc'
 import { parse } from 'url'
 
 export class LocalProvider extends Provider {
@@ -131,4 +132,4 @@ LocalProvider.addParameterDecoratorImplementation("request", async (parameter, c
     }
 })
 
-export const provider = new LocalProvider()
+export const provider = container.resolve(LocalProvider)
