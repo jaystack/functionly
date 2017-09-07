@@ -38,7 +38,7 @@ export const setResource = (context: any, name: string, resource: any, stackName
 
     context.usedAwsResources = context.usedAwsResources || [];
     if (context.usedAwsResources.indexOf(resource.Type) < 0) {
-        context.usedAwsResources.push(resource.type)
+        context.usedAwsResources.push(resource.Type)
     }
 
     resources[resourceName] = resource
