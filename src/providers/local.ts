@@ -21,7 +21,7 @@ export class LocalProvider extends Provider {
                 } catch (err) {
                     error = err
                 }
-                const response = await this.resultTransform(error, result, eventContext)
+                const response = await this.resultTransform(error, result, eventContext, serviceInstance)
 
                 res.send(response)
                 return response
@@ -32,7 +32,7 @@ export class LocalProvider extends Provider {
         return invoker
     }
 
-    protected resultTransform(error, result, eventContext) {
+    protected resultTransform(error, result, eventContext, serviceInstance) {
         if (error) throw error
 
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {

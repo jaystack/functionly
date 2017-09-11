@@ -20,14 +20,14 @@ export class InProcProvider extends Provider {
             } catch (err) {
                 error = err
             }
-            const response = await this.resultTransform(error, result, eventContext)
+            const response = await this.resultTransform(error, result, eventContext, serviceInstance)
 
             return response
         }
         return invoker
     }
 
-    protected resultTransform(error, result, eventContext) {
+    protected resultTransform(error, result, eventContext, serviceInstance) {
         if (error) throw error
 
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {

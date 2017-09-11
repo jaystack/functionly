@@ -30,7 +30,7 @@ export class HttpTrigger extends EventSource {
         }
     }
 
-    public async resultTransform(error, result, eventContext) {
+    public async resultTransform(error, result, eventContext, serviceInstance) {
         if (error) {
             return {
                 status: 500,

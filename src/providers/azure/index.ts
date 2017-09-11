@@ -30,7 +30,7 @@ export class AzureProvider extends Provider {
                 } catch (err) {
                     error = err
                 }
-                const response = await eventSourceHandler.resultTransform(error, result, eventContext)
+                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceInstance)
 
                 context.res = response
                 return response

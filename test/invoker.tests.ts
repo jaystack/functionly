@@ -1491,6 +1491,7 @@ describe('invoker', () => {
                 expect(r.statusCode).to.equal(200, r.body)
                 expect(r).to.deep.equal({
                     statusCode: 200,
+                    headers: {},
                     body: '{"ok":1}'
                 })
             })
@@ -1587,6 +1588,7 @@ describe('invoker', () => {
                 expect(r.statusCode).to.equal(500, r.body)
                 expect(r).to.deep.equal({
                     statusCode: 500,
+                    headers: {},
                     body: JSON.stringify(new MyError('error in handle'))
                 })
             })

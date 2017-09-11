@@ -44,7 +44,7 @@ export class AWSProvider extends Provider {
                 } catch (err) {
                     error = err
                 }
-                const response = await eventSourceHandler.resultTransform(error, result, eventContext)
+                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceInstance)
 
                 cb(null, response)
                 return response

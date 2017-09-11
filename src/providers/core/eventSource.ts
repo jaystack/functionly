@@ -9,7 +9,7 @@ export abstract class EventSource {
         return undefined
     }
 
-    public async resultTransform(err, result, event: any) {
+    public async resultTransform(err, result, event: any, serviceInstance) {
         if (err) throw err
 
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {

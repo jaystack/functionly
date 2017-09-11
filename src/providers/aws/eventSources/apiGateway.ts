@@ -1,5 +1,7 @@
 import { EventSource } from '../../core/eventSource'
 import { get } from '../../../helpers/property'
+import { CLASS_APIGATEWAYKEY } from '../../../annotations/constants'
+import { getMetadata, defineMetadata } from '../../../annotations/metadata'
 
 export class ApiGateway extends EventSource {
     public available(eventContext: any): boolean {
@@ -43,10 +45,21 @@ export class ApiGateway extends EventSource {
         }
     }
 
-    public async resultTransform(err, result, event) {
+    public async resultTransform(err, result, event, serviceInstance) {
+        let headers = {}
+        const metadata = getMetadata(CLASS_APIGATEWAYKEY, serviceInstance) || []
+        if (serviceInstance && metadata.find(m => m.cors === true)) {
+            headers = {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Requested-With',
+                'Access-Control-Allow-Credentials': 'true'
+            }
+        }
+
         if (err) {
             return {
                 statusCode: 500,
+                headers,
                 body: JSON.stringify(err)
             }
         }
@@ -54,7 +67,7 @@ export class ApiGateway extends EventSource {
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
             return {
                 statusCode: result.status,
-                headers: result.headers,
+                headers: { ...headers, ...result.headers },
                 data: JSON.stringify(result.data)
             }
         }
@@ -65,6 +78,7 @@ export class ApiGateway extends EventSource {
 
         return {
             statusCode: 200,
+            headers,
             body: JSON.stringify(result)
         }
     }
