@@ -23,7 +23,15 @@ export class ApiGateway extends EventSource {
                     }
                 } else {
                     let value
-                    if (typeof (value = get(body, parameter.from)) !== 'undefined') return value
+                    if (typeof body === 'string') {
+                        try {
+                            const parsedBody = JSON.parse(body)
+                            if (typeof (value = get(parsedBody, parameter.from)) !== 'undefined') return value
+                            // fallback to other options
+                        } catch(e) {
+                            // fallback to other options
+                        }
+                    } else if (typeof (value = get(body, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(query, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(params, parameter.from)) !== 'undefined') return value
                     if (typeof (value = get(headers, parameter.from)) !== 'undefined') return value

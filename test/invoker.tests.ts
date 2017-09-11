@@ -1147,13 +1147,40 @@ describe('invoker', () => {
 
             const invoker = MockService.createInvoker()
             invoker({}, {}, (e, result) => {
-                expect(counter).to.equal(1)
+                counter++
+                expect(counter).to.equal(2)
                 expect(e.message).to.equal('error in handle')
                 done()
             })
         })
 
         describe("eventSources", () => {
+            
+            it("lambda param error", (done) => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    p1: undefined,
+                    p2: 'v2'
+                }
+                invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                    expect(e).is.instanceof(Error)
+                    done()
+                })
+            })
+
             it("lambda param", (done) => {
                 let counter = 0
 
@@ -1176,13 +1203,41 @@ describe('invoker', () => {
                     done(e)
                 })
             })
-
-            it("api gateway body param", (done) => {
+            
+            it("api gateway error", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                    body: {
+                        p2: 'v2'
+                    }
+                }
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(500)
+            })
+
+            it("api gateway body param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1197,18 +1252,50 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
-
-            it("api gateway query param", (done) => {
+            
+            it("api gateway string body param", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('v1')
+                        expect(p2).to.equal('v2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                const awsEvent = {
+                    requestContext: { apiId: 'apiId' },
+                    body: JSON.stringify({
+                        p1: 'v1',
+                        p2: 'v2'
+                    })
+                }
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
+            })
+
+            it("api gateway query param", async () => {
+                let counter = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+                class MockService extends FunctionalService {
+                    async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1223,18 +1310,21 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
 
-            it("api gateway pathParameters param", (done) => {
+            it("api gateway pathParameters param", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1249,18 +1339,21 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
 
-            it("api gateway header param", (done) => {
+            it("api gateway header param", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1275,18 +1368,21 @@ describe('invoker', () => {
                         p2: 'v2'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
 
-            it("api gateway params resolve order", (done) => {
+            it("api gateway params resolve order", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2, @param p3, @param p4) {
+                    async handle( @param p1, @param p2, @param p3, @param p4) {
                         counter++
                         expect(p1).to.equal('body')
                         expect(p2).to.equal('queryStringParameters')
@@ -1317,18 +1413,21 @@ describe('invoker', () => {
                         p4: 'headers'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
 
-            it("api gateway params resolve hint", (done) => {
+            it("api gateway params resolve hint", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param({ source: 'event.event.queryStringParameters' }) p1, @param({ source: 'event.event.pathParameters' }) p2, @param({ source: 'event.event.headers' }) p3, @param p4) {
+                    async handle( @param({ source: 'event.event.queryStringParameters' }) p1, @param({ source: 'event.event.pathParameters' }) p2, @param({ source: 'event.event.headers' }) p3, @param p4) {
                         counter++
                         expect(p1).to.equal('queryStringParameters')
                         expect(p2).to.equal('pathParameters')
@@ -1359,18 +1458,21 @@ describe('invoker', () => {
                         p4: 'headers'
                     }
                 }
-                invoker(awsEvent, {}, (e) => {
-                    expect(counter).to.equal(1)
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
                 })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
             })
 
-            it("api gateway return value", (done) => {
+            it("api gateway return value", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle() {
+                    async handle() {
                         counter++
                         return { ok: 1 }
                     }
@@ -1380,22 +1482,25 @@ describe('invoker', () => {
                 const awsEvent = {
                     requestContext: { apiId: 'apiId' },
                 }
-                invoker(awsEvent, {}, (e, result) => {
-                    expect(counter).to.equal(1)
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: '{"ok":1}'
-                    })
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
+                expect(r).to.deep.equal({
+                    statusCode: 200,
+                    body: '{"ok":1}'
                 })
             })
 
-            it("api gateway return value advanced", (done) => {
+            it("api gateway return value advanced", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle() {
+                    async handle() {
                         counter++
                         return {
                             statusCode: 200,
@@ -1408,22 +1513,25 @@ describe('invoker', () => {
                 const awsEvent = {
                     requestContext: { apiId: 'apiId' },
                 }
-                invoker(awsEvent, {}, (e, result) => {
-                    expect(counter).to.equal(1)
-                    expect(result).to.deep.equal({
-                        statusCode: 200,
-                        body: 'myresult'
-                    })
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(200, r.body)
+                expect(r).to.deep.equal({
+                    statusCode: 200,
+                    body: 'myresult'
                 })
             })
 
-            it("api gateway return value advanced - error", (done) => {
+            it("api gateway return value advanced - error", async () => {
                 let counter = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle() {
+                    async handle() {
                         counter++
                         return {
                             statusCode: 500,
@@ -1436,24 +1544,33 @@ describe('invoker', () => {
                 const awsEvent = {
                     requestContext: { apiId: 'apiId' },
                 }
-                invoker(awsEvent, {}, (e, result) => {
-                    expect(counter).to.equal(1)
-                    expect(result).to.deep.equal({
-                        statusCode: 500,
-                        body: 'myerror'
-                    })
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(500, r.body)
+                expect(r).to.deep.equal({
+                    statusCode: 500,
+                    body: 'myerror'
                 })
             })
 
-            it("api gateway return value advanced - throw error", (done) => {
+            it("api gateway return value advanced - throw error", async () => {
                 let counter = 0
+
+                class MyError extends Error{
+                    constructor(public name, ...params) {
+                        super(...params);
+                    }
+                }
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle() {
+                    async handle() {
                         counter++
-                        throw new Error('error in handle')
+                        throw new MyError('error in handle')
                     }
                 }
 
@@ -1461,13 +1578,16 @@ describe('invoker', () => {
                 const awsEvent = {
                     requestContext: { apiId: 'apiId' },
                 }
-                invoker(awsEvent, {}, (e, result) => {
-                    expect(counter).to.equal(1)
-                    expect(result).to.deep.equal({
-                        statusCode: 500,
-                        body: JSON.stringify(new Error('error in handle'))
-                    })
-                    done(e)
+                const r = await invoker(awsEvent, {}, (e) => {
+                    counter++
+                    expect(counter).to.equal(2)
+                })
+                
+                expect(counter).to.equal(2)
+                expect(r.statusCode).to.equal(500, r.body)
+                expect(r).to.deep.equal({
+                    statusCode: 500,
+                    body: JSON.stringify(new MyError('error in handle'))
                 })
             })
 
