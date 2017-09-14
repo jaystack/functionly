@@ -4,6 +4,7 @@ export { FunctionalService, Api, Service, PreHook, PostHook, Resource } from './
 
 /* Apis */
 export { DynamoTable, SimpleNotificationService, S3Storage, ApiGateway } from './classes'
+export { MongoCollection, MongoConnection } from './plugins/mongo'
 
 /* Providers */
 export { Provider, AWSProvider, LocalProvider } from './providers'
@@ -15,6 +16,7 @@ export {
     tag, log, functionName, dynamoTable, sns, s3Storage, eventSource, classConfig, use, description, role, aws, azure,
     param, serviceParams, request, error, result, functionalServiceName, provider, stage, inject
 } from './annotations'
+export { mongoCollection, mongoConnection } from './plugins/mongo'
 
 /* Enums */
 export { InjectionScope } from './annotations'
