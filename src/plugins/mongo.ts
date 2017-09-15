@@ -1,7 +1,5 @@
 import * as MongoDB from 'mongodb';
 
-import { Service } from '../classes/service';
-import { Api } from '../classes/api';
 import {
   getMetadata,
   defineMetadata,
@@ -13,8 +11,13 @@ import {
   InjectionScope,
   inject,
   simpleClassAnnotation,
-  classConfig
+  classConfig,
+  serviceParams,
+  provider
 } from '../annotations';
+
+import { Service, Api, PreHook } from '../classes';
+
 
 export const CLASS_MONGODB_TABLECONFIGURATIONKEY = 'functionly:class:mongoTableConfiguration';
 export const MONGO_TABLE_NAME_SUFFIX = '_TABLE_NAME';
@@ -46,6 +49,14 @@ export const mongoCollection = (tableConfig: { collectionName: string; url?: str
   environmentSetter(target);
 };
 
+export class NoCallbackWaitsForEmptyEventLoop extends PreHook {
+  public async handle(@serviceParams p, @provider prov) {
+    if (prov === 'aws') {
+      p.context.callbackWaitsForEmptyEventLoop = false;
+    }
+  }
+}
+
 @injectable(InjectionScope.Singleton)
 export class MongoConnection extends Api {
   private _connections: Map<string, any>;
@@ -61,7 +72,15 @@ export class MongoConnection extends Api {
     const connectionUrl = url || process.env.MONGO_CONNECTION_URL || 'mongodb://localhost:27017/test';
 
     if (this._connections.has(connectionUrl)) {
-      return this._connections.get(connectionUrl);
+      const connection = this._connections.get(connectionUrl);
+      if (!connection.serverConfig.isConnected()) {
+        this._connections.delete(connectionUrl);
+        if (this._connectionPromises.has(connectionUrl)) {
+          this._connectionPromises.delete(connectionUrl);
+        }
+      } else {
+        return connection;
+      }
     }
 
     if (this._connectionPromises.has(connectionUrl)) {
@@ -69,7 +88,7 @@ export class MongoConnection extends Api {
     }
 
     const connectionPromise = MongoDB.MongoClient.connect(connectionUrl);
-    this._connections.set(connectionUrl, connectionPromise);
+    this._connectionPromises.set(connectionUrl, connectionPromise);
 
     const connection = await connectionPromise;
     this._connections.set(connectionUrl, connection);

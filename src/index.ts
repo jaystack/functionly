@@ -6,6 +6,9 @@ export { FunctionalService, Api, Service, PreHook, PostHook, Resource } from './
 export { DynamoTable, SimpleNotificationService, S3Storage, ApiGateway } from './classes'
 export { MongoCollection, MongoConnection } from './plugins/mongo'
 
+/* Hooks */
+export { NoCallbackWaitsForEmptyEventLoop } from './plugins/mongo'
+
 /* Providers */
 export { Provider, AWSProvider, LocalProvider } from './providers'
 export { addProvider, removeProvider } from './providers'
