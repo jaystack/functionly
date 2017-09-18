@@ -6,9 +6,10 @@ const { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_AWSMEMORYSIZEKEY, CLASS_AWSRU
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
-import { getBucketReference } from './s3Storage'
+import { getBucketReference } from './s3StorageDeployment'
 
-export { s3DeploymentBucket, s3DeploymentBucketParameter, s3, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3Storage'
+export { s3DeploymentBucket, s3DeploymentBucketParameter, s3 } from './s3Storage'
+export { S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3StorageDeployment'
 export { apiGateway } from './apiGateway'
 export { sns } from './sns'
 export { tableResources, tableSubscribers } from './dynamoTable'

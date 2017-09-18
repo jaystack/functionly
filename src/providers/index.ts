@@ -1,6 +1,6 @@
 import { constants, getMetadata, getOverridableMetadata } from '../annotations'
 const { PARAMETER_PARAMKEY } = constants
-import { callExtension } from '../classes'
+import { callExtension } from '../classes/core/callExtension'
 import { container } from '../helpers/ioc'
 
 export { Provider } from './core/provider'

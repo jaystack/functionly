@@ -4,16 +4,9 @@ import { ExecuteStep, executor } from '../../../context'
 import { collectMetadata } from '../../../utilities/collectMetadata'
 import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
+import { S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3StorageDeployment'
 
 export const S3_STORAGE_STACK = 'S3Stack'
-export const S3_DEPLOYMENT_BUCKET_RESOURCE_NAME = 'FunctionlyDeploymentBucket'
-
-
-export const getBucketReference = async (context) => {
-    return context.__userAWSBucket ? context.awsBucket : {
-        "Ref": S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
-    }
-}
 
 export const s3DeploymentBucket = ExecuteStep.register('S3-Deployment-Bucket', async (context) => {
     if (context.awsBucket) {

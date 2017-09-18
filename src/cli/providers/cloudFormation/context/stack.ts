@@ -1,7 +1,7 @@
 import { ExecuteStep, executor } from '../../../context'
 import { setResource, getResourceName } from '../utils'
 import { getFunctionName } from '../../../../annotations'
-import { getBucketReference } from './s3Storage'
+import { getBucketReference } from './s3StorageDeployment'
 
 import { defaultsDeep } from 'lodash'
 export const __createdStackNames = []

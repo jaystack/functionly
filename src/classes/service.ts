@@ -1,5 +1,5 @@
 import { Resource } from './resource'
-import { callExtension } from '../classes'
+import { callExtension } from '../classes/core/callExtension'
 import { constants, getMetadata, getOverridableMetadata } from '../annotations'
 const { PARAMETER_PARAMKEY } = constants
 

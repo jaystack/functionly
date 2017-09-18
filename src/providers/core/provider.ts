@@ -1,7 +1,9 @@
 import { constants, getMetadata, getOverridableMetadata, getFunctionName } from '../../annotations'
 const { PARAMETER_PARAMKEY } = constants
 import { getMiddlewares } from '../../annotations/classes/use'
-import { callExtension, PreHook, PostHook } from '../../classes'
+import { callExtension } from '../../classes/core/callExtension'
+import { PreHook } from '../../classes/middleware/preHook'
+import { PostHook } from '../../classes/middleware/postHook'
 import { container } from '../../helpers/ioc'
 
 export abstract class Provider {
