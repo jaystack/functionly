@@ -1,5 +1,5 @@
-import { constants, getMetadata, getOverridableMetadata, getFunctionName } from '../../annotations'
-const { PARAMETER_PARAMKEY } = constants
+import { constants, getMetadata, getOverridableMetadata, getFunctionName, getOwnMetadata } from '../../annotations'
+const { PARAMETER_PARAMKEY, CLASS_INJECTABLEKEY } = constants
 import { getMiddlewares } from '../../annotations/classes/use'
 import { callExtension } from '../../classes/core/callExtension'
 import { PreHook } from '../../classes/middleware/preHook'
@@ -21,7 +21,7 @@ export abstract class Provider {
     }
 
     public async createInstance(type, context) {
-        if (container.contains(type)) {
+        if (container.containsInstance(type)) {
             return container.resolve<any>(type)
         }
 
@@ -123,7 +123,11 @@ export abstract class Provider {
 }
 
 Provider.addParameterDecoratorImplementation("inject", async (parameter, context, provider) => {
-    const serviceType = parameter.serviceType
+    const serviceType = container.resolveType(parameter.serviceType)
+
+    if (!getOwnMetadata(CLASS_INJECTABLEKEY, serviceType)) {
+        throw new Error(`type '${getFunctionName(serviceType)}' not marked as injectable`)
+    }
 
     const staticInjectValue = await callExtension(serviceType, 'onInject', { parameter, context, provider })
     if (typeof staticInjectValue !== 'undefined') {
