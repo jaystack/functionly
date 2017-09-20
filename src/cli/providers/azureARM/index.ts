@@ -13,7 +13,7 @@ import { azureFunctions, persistAzureGithubRepo } from './context/functions'
 export const azure = {
     FUNCTIONAL_ENVIRONMENT: 'azure',
     createEnvironment: async (context) => {
-        logger.info(`Functionly: Packgaging...`)
+        logger.info(`Functionly: Packaging...`)
         await executor(context, bundle)
         await executor(context, zip)
 
@@ -34,7 +34,7 @@ export const azure = {
         logger.info(`Functionly: Complete`)
     },
     package: async (context) => {
-        logger.info(`Functionly: Packgaging...`)
+        logger.info(`Functionly: Packaging...`)
         await executor(context, bundle)
         await executor(context, zip)
 

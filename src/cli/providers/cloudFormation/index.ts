@@ -17,7 +17,7 @@ import { uploadTemplate, persistCreateTemplate } from './context/uploadTemplate'
 export const cloudFormation = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
     createEnvironment: async (context) => {
-        logger.info(`Functionly: Packgaging...`)
+        logger.info(`Functionly: Packaging...`)
         await executor(context, bundle)
         await executor(context, zip)
 
@@ -69,7 +69,7 @@ export const cloudFormation = {
         logger.info(`Functionly: Complete`)
     },
     package: async (context) => {
-        logger.info(`Functionly: Packgaging...`)
+        logger.info(`Functionly: Packaging...`)
         await executor(context, bundle)
         await executor(context, zip)
 
