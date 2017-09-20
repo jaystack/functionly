@@ -1,15 +1,18 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
-import { Api } from '../api'
-import { constants, getMetadata, classConfig } from '../../annotations'
-import { DYNAMO_TABLE_NAME_SUFFIX } from '../../annotations/classes/dynamoTable'
+import { Api } from '../../api'
+import { constants, getMetadata, classConfig, inject, injectable, InjectionScope } from '../../../annotations'
+import { DYNAMO_TABLE_NAME_SUFFIX } from '../../../annotations/classes/dynamoTable'
 
 const { CLASS_DYNAMOTABLECONFIGURATIONKEY } = constants
 
-let dynamoDB = null;
-const initAWSSDK = () => {
-    if (!dynamoDB) {
+@injectable(InjectionScope.Singleton)
+export class DocumentClientApi extends Api {
+    private dynamoDB = null
+    public constructor() {
+        super();
+
         let awsConfig: any = {}
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2012-08-10'
@@ -24,9 +27,12 @@ const initAWSSDK = () => {
             }, null, 2))
         }
 
-        dynamoDB = new AWS.DynamoDB(awsConfig);
+        this.dynamoDB = new AWS.DynamoDB(awsConfig);
     }
-    return dynamoDB
+
+    public getDocumentClient() {
+        return new AWS.DynamoDB.DocumentClient({ service: this.dynamoDB })
+    }
 }
 
 @classConfig({
@@ -35,11 +41,11 @@ const initAWSSDK = () => {
 })
 export class DynamoTable extends Api {
     private _documentClient: DocumentClient
-    public constructor() {
-        initAWSSDK()
-
+    public constructor(@inject(DocumentClientApi) private documentClientApi: DocumentClientApi) {
         super()
-        this._documentClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDB })
+    }
+    public async init(){
+        this._documentClient = this.documentClientApi.getDocumentClient()
     }
 
     public getDocumentClient() {

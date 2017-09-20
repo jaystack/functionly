@@ -3,7 +3,7 @@
 export { FunctionalService, Api, Service, PreHook, PostHook, Resource } from './classes'
 
 /* Apis */
-export { DynamoTable, SimpleNotificationService, S3Storage, ApiGateway } from './classes'
+export { DynamoTable, DocumentClientApi, SimpleNotificationService, SNSApi, S3Storage, S3Api, ApiGateway } from './classes'
 export { MongoCollection, MongoConnection } from './plugins/mongo'
 
 /* Hooks */

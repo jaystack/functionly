@@ -1,13 +1,16 @@
 import { SNS } from 'aws-sdk'
 export { SNS } from 'aws-sdk'
 
-import { Api } from '../api'
-import { constants, getMetadata, classConfig } from '../../annotations'
+import { Api } from '../../api'
+import { constants, getMetadata, classConfig, inject, injectable, InjectionScope } from '../../../annotations'
 const { CLASS_SNSCONFIGURATIONKEY } = constants
 
-let sns = null;
-const initAWSSDK = () => {
-    if (!sns) {
+@injectable(InjectionScope.Singleton)
+export class SNSApi extends Api {
+    private sns = null
+    public constructor() {
+        super();
+
         let awsConfig: any = {}
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2010-03-31'
@@ -22,9 +25,12 @@ const initAWSSDK = () => {
             }, null, 2))
         }
 
-        sns = new SNS(awsConfig);
+        this.sns = new SNS(awsConfig);
     }
-    return sns
+
+    public getSNS() {
+        return this.sns
+    }
 }
 
 @classConfig({
@@ -33,16 +39,16 @@ const initAWSSDK = () => {
 })
 export class SimpleNotificationService extends Api {
     private _snsClient: SNS
-    public constructor() {
-        initAWSSDK()
-
+    public constructor(@inject(SNSApi) private snsApi: SNSApi) {
         super()
-        this._snsClient = sns
     }
+    public async init(){
+        this._snsClient = this.snsApi.getSNS()
+    }
+
     public getSNS() {
         return this._snsClient
     }
-
 
     public async publish(params: SNS.PublishInput) {
         return new Promise<SNS.PublishResponse>((resolve, reject) => {

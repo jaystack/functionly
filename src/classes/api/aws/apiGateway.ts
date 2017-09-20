@@ -1,6 +1,6 @@
 
-import { Api } from '../api'
-import { constants, classConfig } from '../../annotations'
+import { Api } from '../../api'
+import { constants, classConfig } from '../../../annotations'
 const { CLASS_APIGATEWAYKEY } = constants
 
 @classConfig({
