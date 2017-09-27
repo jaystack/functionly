@@ -30,3 +30,4 @@ export {
     templates, applyTemplates, getFunctionName, __dynamoDBDefaults, getClassConfigValue, simpleClassAnnotation, expandableDecorator,
     createParameterDecorator, constants, defineMetadata, getMetadata, getMetadataKeys, getOwnMetadata, getOverridableMetadata
 } from './annotations'
+ export { container, IOC } from './helpers/ioc'
