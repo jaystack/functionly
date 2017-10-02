@@ -1751,7 +1751,7 @@ describe('invoker', () => {
                         headers: {
                             'content-type': 'application/json'
                         },
-                        data: JSON.stringify({
+                        body: JSON.stringify({
                             ok: 1
                         })
                     })
