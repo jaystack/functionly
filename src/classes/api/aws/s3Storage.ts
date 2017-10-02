@@ -66,6 +66,21 @@ export class S3Storage extends Api {
         })
     }
 
+    public async getObject(params: Partial<S3.GetObjectRequest>) {
+        return new Promise<S3.GetObjectOutput>((resolve, reject) => {
+            if (typeof params.Key === 'string') {
+                params = {
+                    ...params,
+                    Key: /^\//.test(params.Key) ? params.Key.substring(1, params.Key.length) : params.Key
+                }
+            }
+            this._s3Client.getObject(this.setDefaultValues(params, 'getObject'), (err, result) => {
+                if (err) reject(err)
+                else resolve(result)
+            })
+        })
+    }
+
     protected setDefaultValues(params, command) {
         const initParams = {
             Bucket: process.env[`${this.constructor.name}${S3_BUCKET_SUFFIX}`] + `-${process.env.FUNCTIONAL_STAGE}`

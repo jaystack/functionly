@@ -1,6 +1,6 @@
 {
   "name": "functionly",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "main": "lib/src/index",
   "types": "lib/src/index.d.ts",

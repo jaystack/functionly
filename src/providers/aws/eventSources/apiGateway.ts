@@ -68,7 +68,7 @@ export class ApiGateway extends EventSource {
             return {
                 statusCode: result.status,
                 headers: { ...headers, ...result.headers },
-                data: JSON.stringify(result.data)
+                data: typeof result.data === 'string' ? result.data : JSON.stringify(result.data)
             }
         }
 
