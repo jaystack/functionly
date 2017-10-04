@@ -11,7 +11,9 @@ export class S3Api extends Api {
     private s3 = null
     public constructor() {
         super();
+    }
 
+    public async init() {
         let awsConfig: any = {}
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2006-03-01'

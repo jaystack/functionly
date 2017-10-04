@@ -12,7 +12,9 @@ export class DocumentClientApi extends Api {
     private dynamoDB = null
     public constructor() {
         super();
+    }
 
+    public async init() {
         let awsConfig: any = {}
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2012-08-10'
