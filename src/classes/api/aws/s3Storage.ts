@@ -16,7 +16,7 @@ export class S3Api extends Api {
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2006-03-01'
             awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
-            awsConfig.endpoint = process.env.S3_LOCAL_ENDPOINT || 'http://localhost:4572'
+            awsConfig.endpoint = 'S3_LOCAL_ENDPOINT' in process.env ? process.env.S3_LOCAL_ENDPOINT : 'http://localhost:4572'
 
             console.log('Local S3 configuration')
             console.log(JSON.stringify({
