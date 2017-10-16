@@ -65,8 +65,13 @@ export const cloudFormation = {
         logger.info(`Functionly: Uploading template...`)
         await executor(context, uploadTemplate)
         logger.info(`Functionly: Updating stack...`)
-        await executor(context, updateStack)
+        const stackData = await executor(context, updateStack)
         logger.info(`Functionly: Complete`)
+
+        logger.info('')
+        for (const {OutputKey, OutputValue} of stackData.Outputs) {
+            logger.info(`${OutputKey}: ${OutputValue}`)
+        }
     },
     package: async (context) => {
         logger.info(`Functionly: Packaging...`)
