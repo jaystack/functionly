@@ -38,4 +38,18 @@ export class Service extends Resource {
         const service = container.resolve(this)
         return (...params) => service.invoke(...params)
     }
+
+    public static onDefineInjectTo(target, targetKey, parameterIndex: number) {
+        super.onDefineInjectTo(target, targetKey, parameterIndex)
+
+        const targetTkey = 'handle'
+        const injectedDefinitions: any[] = (getMetadata(PARAMETER_PARAMKEY, this, targetTkey) || [])
+            .filter(p => p.type === 'inject')
+
+        for (const { serviceType, targetKey, parameterIndex } of injectedDefinitions) {
+            if (typeof serviceType.onDefineInjectTo === 'function') {
+                serviceType.onDefineInjectTo(target, targetTkey, parameterIndex)
+            }
+        }
+    }
 }

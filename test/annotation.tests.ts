@@ -1565,4 +1565,227 @@ describe('annotations', () => {
             })
         })
     })
+
+    describe("service inject", () => {
+        it("environment param", () => {
+
+            @environment('p1', 'v1')
+            @injectable()
+            class Service1 extends Service {
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, FSTest1)
+
+            expect(environmentMetadata).to.have.property('p1', 'v1')
+        })
+
+        it("dynamo param", () => {
+            @dynamoTable({ tableName: 't1', nativeConfig: { any: 'value' } })
+            @injectable()
+            class DTable1 extends DynamoTable { }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(DTable1) table1) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(1);
+
+            const metadata = value[0]
+
+            expect(metadata).to.have.property('tableName', 't1')
+            expect(metadata).to.have.property('nativeConfig').to.have.property('any', 'value')
+        })
+
+        it("s3 param", () => {
+            @s3Storage({ bucketName: 's3-bucket' })
+            @injectable()
+            class S3Storage1 extends S3Storage { }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(S3Storage1) s1) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_S3CONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(1);
+
+            const metadata = value[0]
+
+            expect(metadata).to.have.property('bucketName', 's3-bucket')
+        })
+
+        it("dynamo param from api", () => {
+            @dynamoTable({ tableName: 't1', nativeConfig: { any: 'value' } })
+            @injectable()
+            class DTable1 extends DynamoTable { }
+
+            @injectable()
+            class Api1 extends Api {
+                public constructor( @inject(DTable1) private table1) { super() }
+            }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(Api1) a1) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(1);
+
+            const metadata = value[0]
+
+            expect(metadata).to.have.property('tableName', 't1')
+            expect(metadata).to.have.property('nativeConfig').to.have.property('any', 'value')
+        })
+
+        it("dynamo param from api and service", () => {
+            @dynamoTable({ tableName: 't1', nativeConfig: { any: 'value' } })
+            @injectable()
+            class DTable1 extends DynamoTable { }
+
+            @injectable()
+            class Api1 extends Api {
+                public constructor( @inject(DTable1) private table1) { super() }
+            }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(Api1) a1, @inject(DTable1) table1) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(2);
+
+            const metadata1 = value[0]
+
+            expect(metadata1).to.have.property('tableName', 't1')
+            expect(metadata1).to.have.property('nativeConfig').to.have.property('any', 'value')
+
+            const metadata2 = value[1]
+
+            expect(metadata2).to.have.property('tableName', 't1')
+            expect(metadata2).to.have.property('nativeConfig').to.have.property('any', 'value')
+        })
+
+        it("dynamo param from api and service different", () => {
+            @dynamoTable({ tableName: 't1', nativeConfig: { any: 'value1' } })
+            @injectable()
+            class DTable1 extends DynamoTable { }
+
+            @dynamoTable({ tableName: 't2', nativeConfig: { any: 'value2' } })
+            @injectable()
+            class DTable2 extends DynamoTable { }
+
+            @injectable()
+            class Api1 extends Api {
+                public constructor( @inject(DTable1) private table1) { super() }
+            }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(Api1) a1, @inject(DTable2) table2) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(2);
+
+            const metadata1 = value[0]
+            expect(metadata1).to.have.property('tableName', 't2')
+            expect(metadata1).to.have.property('nativeConfig').to.have.property('any', 'value2')
+
+            const metadata2 = value[1]
+            expect(metadata2).to.have.property('tableName', 't1')
+            expect(metadata2).to.have.property('nativeConfig').to.have.property('any', 'value1')
+        })
+
+        it("environment variable chain", () => {
+            @environment('p1', 'v1')
+            @injectable()
+            class Api2 extends Api { }
+
+            @injectable()
+            @environment('p2', 'v2')
+            class Api1 extends Api {
+                public constructor( @inject(Api2) private a2) { super() }
+            }
+
+            @injectable()
+            @environment('p3', 'v3')
+            class Service1 extends Service {
+                public async handle( @inject(Api1) a1) { }
+            }
+
+            @environment('p4', 'v4')
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+
+            const api2Env = getMetadata(CLASS_ENVIRONMENTKEY, Api2)
+            expect(api2Env).to.have.all.keys('p1');
+            expect(api2Env).to.deep.equal({
+                p1: 'v1',
+            })
+
+            const api1Env = getMetadata(CLASS_ENVIRONMENTKEY, Api1)
+            expect(api1Env).to.have.all.keys('p1', 'p2');
+            expect(api1Env).to.deep.equal({
+                p1: 'v1',
+                p2: 'v2',
+            })
+
+            const service1Env = getMetadata(CLASS_ENVIRONMENTKEY, Service1)
+            expect(service1Env).to.have.all.keys('p1', 'p2', 'p3');
+            expect(service1Env).to.deep.equal({
+                p1: 'v1',
+                p2: 'v2',
+                p3: 'v3',
+            })
+
+            const fsTest1Env = getMetadata(CLASS_ENVIRONMENTKEY, FSTest1)
+            expect(fsTest1Env).to.have.all.keys('p1', 'p2', 'p3', 'p4');
+            expect(fsTest1Env).to.deep.equal({
+                p1: 'v1',
+                p2: 'v2',
+                p3: 'v3',
+                p4: 'v4',
+            })
+        })
+    })
 })

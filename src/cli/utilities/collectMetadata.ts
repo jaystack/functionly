@@ -3,11 +3,7 @@ const { CLASS_ENVIRONMENTKEY } = constants
 
 export const collectMetadata = (context, config: {
     metadataKey?: string,
-    selector?: (c) => string,
-    environmentRegexp?: RegExp,
-    keyProperty?: string,
-    valueProperty?: string,
-    defaultServiceConfig?: { [key: string]: any }
+    selector?: (c) => string
 }) => {
     const result = new Map()
     for (const serviceDefinition of context.publishedFunctions) {
@@ -27,35 +23,6 @@ export const collectMetadata = (context, config: {
                     hash,
                     services: [{ serviceDefinition, serviceConfig }]
                 })
-            }
-        }
-
-        if (config.environmentRegexp && config.keyProperty && config.valueProperty) {
-            let metadata = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
-            if (metadata) {
-                let keys = Object.keys(metadata)
-                for (const key of keys) {
-                    const hash = metadata[key]
-                    if (config.environmentRegexp.test(key)) {
-                        const serviceConfig = {
-                            ...(config.defaultServiceConfig || {}),
-                            [config.keyProperty]: key,
-                            [config.valueProperty]: hash
-                        }
-
-                        if (result.has(hash)) {
-                            const item = result.get(hash)
-                            item.services.push({ serviceDefinition, serviceConfig })
-                            continue
-                        }
-
-                        result.set(hash, {
-                            ...serviceConfig,
-                            hash,
-                            services: [{ serviceDefinition, serviceConfig }]
-                        })
-                    }
-                }
             }
         }
     }
