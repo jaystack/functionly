@@ -90,10 +90,15 @@ export class MongoConnection extends Api {
     const connectionPromise = MongoDB.MongoClient.connect(connectionUrl);
     this._connectionPromises.set(connectionUrl, connectionPromise);
 
-    const connection = await connectionPromise;
-    this._connections.set(connectionUrl, connection);
-
-    return connection;
+    try {
+      const connection = await connectionPromise;
+      this._connections.set(connectionUrl, connection);
+      
+      return connection;
+    } catch (e) {
+      this._connectionPromises.delete(connectionUrl);
+      throw e
+    }
   }
 }
 
