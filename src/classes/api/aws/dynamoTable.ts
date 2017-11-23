@@ -25,7 +25,7 @@ export class DocumentClientApi extends Api {
             console.log(JSON.stringify({
                 apiVersion: awsConfig.apiVersion,
                 'region (process.env.AWS_REGION)': awsConfig.region,
-                'endpoint (process.env.SNS_LOCAL_ENDPOINT)': awsConfig.endpoint,
+                'endpoint (process.env.DYNAMODB_LOCAL_ENDPOINT)': awsConfig.endpoint,
             }, null, 2))
         }
 
