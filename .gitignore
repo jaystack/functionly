@@ -46,3 +46,6 @@ __test/**/*
 typings
 
 .vscode
+
+test-results.xml
+version.txt
