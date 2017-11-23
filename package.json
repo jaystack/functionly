@@ -10,7 +10,7 @@
     "test": "npm run build && mocha --recursive lib/test/**/*.tests.js",
     "test:fast": "mocha --recursive lib/test/**/*.tests.js",
     "metadata": "node ./lib/src/cli/cli.js metadata aws --",
-    "coverage": "node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec lib/test/**/*.tests.js"
+    "coverage": "node_modules/.bin/istanbul cover --report cobertura ./node_modules/mocha/bin/_mocha -- -R spec lib/test/**/*.tests.js"
   },
   "repository": {
     "type": "git",
