@@ -2,14 +2,14 @@ import { CLASS_MIDDLEWAREKEY } from '../constants'
 import { getMetadata, defineMetadata } from '../metadata'
 import { applyTemplates } from '../templates'
 
-export const use = (...middlewares) => {
+export const use = (...middleware) => {
     return (target: Function) => {
         const metadata = getMiddlewares(target)
-        defineMetadata(CLASS_MIDDLEWAREKEY, [...middlewares, ...metadata], target);
+        defineMetadata(CLASS_MIDDLEWAREKEY, [...middleware, ...metadata], target);
 
-        for (const middleware of middlewares) {
-            if (typeof middleware.onDefineMiddlewareTo === 'function') {
-                middleware.onDefineMiddlewareTo(target)
+        for (const mw of middleware) {
+            if (typeof mw.onDefineMiddlewareTo === 'function') {
+                mw.onDefineMiddlewareTo(target)
             }
         }
     }

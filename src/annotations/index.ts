@@ -18,9 +18,10 @@ export { use } from './classes/use'
 
 import { simpleClassAnnotation } from './classes/simpleAnnotation'
 
-import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY } from './constants'
+import { CLASS_DESCRIPTIONKEY, CLASS_ROLEKEY, CLASS_GROUP } from './constants'
 export const description = simpleClassAnnotation<string>(CLASS_DESCRIPTIONKEY)
 export const role = simpleClassAnnotation<string>(CLASS_ROLEKEY)
+export const group = simpleClassAnnotation<string>(CLASS_GROUP)
 
 export { aws } from './classes/aws/aws'
 

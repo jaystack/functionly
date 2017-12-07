@@ -1,13 +1,16 @@
 import { ExecuteStep, executor } from '../../../context'
 import { setResource, getResourceName } from '../utils'
-import { getFunctionName } from '../../../../annotations'
+import { getFunctionName, getMetadata, constants } from '../../../../annotations'
 import { getBucketReference } from './s3StorageDeployment'
+const { CLASS_GROUP } = constants
 
 import { defaultsDeep } from 'lodash'
 export const __createdStackNames = []
 
 export const createStack = async (context) => {
     const { stackName } = context
+
+    if (__createdStackNames.indexOf(stackName) >= 0) return
 
     __createdStackNames.push(stackName)
     context.CloudFormationStacks[stackName] = defaultsDeep({
@@ -109,6 +112,6 @@ export const setStackParameter = (context) => {
 }
 
 export const getStackName = (serviceDefinition) => {
-    const resourceName = getFunctionName(serviceDefinition.service)
-    return getResourceName(`Stack${resourceName}`)
+    const groupName = getMetadata(CLASS_GROUP, serviceDefinition.service) || getFunctionName(serviceDefinition.service)
+    return getResourceName(`Stack${groupName}`)
 }

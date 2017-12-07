@@ -16,7 +16,7 @@ export { addProvider, removeProvider } from './providers'
 /* Decorators */
 export {
     injectable, apiGateway, httpTrigger, rest, httpGet, httpPost, httpPut, httpPatch, httpDelete, IHttpMethod, environment,
-    tag, log, functionName, dynamoTable, sns, s3Storage, eventSource, classConfig, use, description, role, aws, azure,
+    tag, log, functionName, dynamoTable, sns, s3Storage, eventSource, classConfig, use, description, role, group, aws, azure,
     param, serviceParams, request, error, result, functionalServiceName, provider, stage, inject
 } from './annotations'
 export { mongoCollection, mongoConnection } from './plugins/mongo'
