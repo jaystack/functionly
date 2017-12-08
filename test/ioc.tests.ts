@@ -25,9 +25,38 @@ describe('IOC', () => {
 
     it("interface", () => {
         expect(mycontainer).has.property('registerType').that.to.be.a('function')
+        expect(mycontainer).has.property('clearType').that.to.be.a('function')
+        expect(mycontainer).has.property('resolveType').that.to.be.a('function')
         expect(mycontainer).has.property('registerInstance').that.to.be.a('function')
         expect(mycontainer).has.property('resolve').that.to.be.a('function')
         expect(mycontainer).has.property('containsInstance').that.to.be.a('function')
+    })
+
+    it("resolveType", () => {
+        class MyType { }
+        const a = mycontainer.resolveType(MyType)
+        expect(a).to.equal(MyType)
+    })
+
+    it("registerType", () => {
+        class MyType1 { }
+        class MyType2 { }
+        mycontainer.registerType(MyType1, MyType2)
+        const a = mycontainer.resolveType(MyType1)
+        expect(a).to.equal(MyType2)
+    })
+
+    it("clearType", () => {
+        class MyType1 { }
+        class MyType2 { }
+        mycontainer.registerType(MyType1, MyType2)
+        const a = mycontainer.resolveType(MyType1)
+        expect(a).to.equal(MyType2)
+
+        mycontainer.clearType(MyType1)
+
+        const b = mycontainer.resolveType(MyType1)
+        expect(b).to.equal(MyType1)
     })
 
     it("InjectionScope: not marked as injectable", () => {
@@ -265,12 +294,12 @@ describe('IOC', () => {
             public async handle() {
                 counter++
                 expect(false).to.equal(true, 'remap required')
-             }
+            }
         }
 
         @injectable()
         class AOtherService extends Service {
-            public async handle() { 
+            public async handle() {
                 counter++
             }
         }

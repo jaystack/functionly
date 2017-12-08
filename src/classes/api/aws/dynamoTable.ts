@@ -3,7 +3,6 @@ import { DocumentClient } from 'aws-sdk/lib/dynamodb/document_client'
 
 import { Api } from '../../api'
 import { constants, getMetadata, classConfig, inject, injectable, InjectionScope } from '../../../annotations'
-import { DYNAMO_TABLE_NAME_SUFFIX } from '../../../annotations/classes/dynamoTable'
 
 const { CLASS_DYNAMOTABLECONFIGURATIONKEY } = constants
 
@@ -43,10 +42,10 @@ export class DocumentClientApi extends Api {
 })
 export class DynamoTable extends Api {
     private _documentClient: DocumentClient
-    public constructor(@inject(DocumentClientApi) private documentClientApi: DocumentClientApi) {
+    public constructor( @inject(DocumentClientApi) private documentClientApi: DocumentClientApi) {
         super()
     }
-    public async init(){
+    public async init() {
         this._documentClient = this.documentClientApi.getDocumentClient()
     }
 
@@ -124,12 +123,12 @@ export class DynamoTable extends Api {
     }
 
     protected setDefaultValues(params, command) {
-        const tableConfig = (getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0]
-        const tableName = ({ TableName: tableConfig && tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
+        const tableConfig = (getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, this) || [])[0] || {}
+        const tableName = ({ TableName: tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
 
-        const calcTableName = process.env[`${this.constructor.name}${DYNAMO_TABLE_NAME_SUFFIX}`] + `-${process.env.FUNCTIONAL_STAGE}`
+        const calcTableName = tableConfig.environmentKey && process.env[tableConfig.environmentKey] ? process.env[tableConfig.environmentKey] : ''
         const initParams = {
-            TableName: calcTableName || tableName
+            TableName: (calcTableName || tableName) + `-${process.env.FUNCTIONAL_STAGE}`
         }
 
         return { ...initParams, ...params }

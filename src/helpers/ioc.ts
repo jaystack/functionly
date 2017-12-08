@@ -19,6 +19,11 @@ export class IOC {
         this.classes.set(from, to)
     }
 
+    public clearType<F>(type: ClassFunction<F>) {
+        if (this.classes.has(type))
+            this.classes.delete(type)
+    }
+
     public registerInstance<T>(type: ClassFunction<T>, instance) {
         this.instances.set(type, instance)
     }

@@ -6,8 +6,8 @@ import { environment } from './environment'
 export const S3_BUCKET_SUFFIX = '_S3_BUCKET'
 export const S3_BUCKET_NAME_REGEXP = /^[a-z0-9][a-z0-9-.]{1,61}[a-z0-9]$/
 
-export const s3Storage = (s3Config: {
-    bucketName: string,
+export const s3Storage = (s3Config?: {
+    bucketName?: string,
     environmentKey?: string,
     eventSourceConfiguration?: {
         Event?: any,
@@ -16,6 +16,8 @@ export const s3Storage = (s3Config: {
 }) => (target: Function) => {
     let s3Definitions = getMetadata(CLASS_S3CONFIGURATIONKEY, target) || [];
 
+    s3Config = s3Config || {}
+    s3Config.bucketName = s3Config.bucketName || `%ClassName%-bucket`
     s3Config.environmentKey = s3Config.environmentKey || `%ClassName%${S3_BUCKET_SUFFIX}`
 
     const { templatedKey, templatedValue } = applyTemplates(s3Config.environmentKey, s3Config.bucketName, target)

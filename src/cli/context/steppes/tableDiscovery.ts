@@ -1,5 +1,4 @@
 import { getMetadata, constants } from '../../../annotations'
-import { DYNAMO_TABLE_NAME_SUFFIX } from '../../../annotations/classes/dynamoTable'
 import { ExecuteStep } from '../core/executeStep'
 import { collectMetadata } from '../../utilities/collectMetadata'
 const { CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_ENVIRONMENTKEY } = constants

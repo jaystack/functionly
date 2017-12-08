@@ -84,8 +84,12 @@ export class S3Storage extends Api {
     }
 
     protected setDefaultValues(params, command) {
+        const bucketConfig = (getMetadata(CLASS_S3CONFIGURATIONKEY, this) || [])[0] || {}
+        const bucketName = bucketConfig.bucketName
+
+        const calcBucketName = bucketConfig.environmentKey && process.env[bucketConfig.environmentKey] ? process.env[bucketConfig.environmentKey] : ''
         const initParams = {
-            Bucket: process.env[`${this.constructor.name}${S3_BUCKET_SUFFIX}`] + `-${process.env.FUNCTIONAL_STAGE}`
+            Bucket: (calcBucketName || bucketName) + `-${process.env.FUNCTIONAL_STAGE}`
         }
 
         return { ...initParams, ...params }

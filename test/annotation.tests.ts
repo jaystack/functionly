@@ -545,6 +545,36 @@ describe('annotations', () => {
             })
         })
         describe("dynamoTable", () => {
+            it("no param", () => {
+                @dynamoTable()
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
+            it("empty", () => {
+                @dynamoTable({})
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
             it("tableName", () => {
                 @dynamoTable({ tableName: 'mytablename' })
                 class DynamoTableTestClass { }
@@ -722,6 +752,36 @@ describe('annotations', () => {
             })
         })
         describe("s3Storage", () => {
+            it("no param", () => {
+                @s3Storage()
+                class S3StorageTestClass { }
+
+                const value = getMetadata(CLASS_S3CONFIGURATIONKEY, S3StorageTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('bucketName', 's3storagetestclass-bucket')
+                expect(metadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.not.have.property('eventSourceConfiguration')
+            })
+            it("empty", () => {
+                @s3Storage({})
+                class S3StorageTestClass { }
+
+                const value = getMetadata(CLASS_S3CONFIGURATIONKEY, S3StorageTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('bucketName', 's3storagetestclass-bucket')
+                expect(metadata).to.have.property('environmentKey', 'S3StorageTestClass_S3_BUCKET')
+                expect(metadata).to.have.property('definedBy', S3StorageTestClass.name)
+                expect(metadata).to.not.have.property('eventSourceConfiguration')
+            })
             it("bucketName", () => {
                 @s3Storage({ bucketName: 'mybucketname' })
                 class S3StorageTestClass { }
@@ -794,6 +854,34 @@ describe('annotations', () => {
             })
         })
         describe("sns", () => {
+            it("no parm", () => {
+                @sns()
+                class SNSTestClass { }
+
+                const value = getMetadata(CLASS_SNSCONFIGURATIONKEY, SNSTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('topicName', 'SNSTestClass-topic')
+                expect(metadata).to.have.property('environmentKey', 'SNSTestClass_SNS_TOPICNAME')
+                expect(metadata).to.have.property('definedBy', SNSTestClass.name)
+            })
+            it("topicName", () => {
+                @sns({})
+                class SNSTestClass { }
+
+                const value = getMetadata(CLASS_SNSCONFIGURATIONKEY, SNSTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('topicName', 'SNSTestClass-topic')
+                expect(metadata).to.have.property('environmentKey', 'SNSTestClass_SNS_TOPICNAME')
+                expect(metadata).to.have.property('definedBy', SNSTestClass.name)
+            })
             it("topicName", () => {
                 @sns({ topicName: 'myTopicName' })
                 class SNSTestClass { }
