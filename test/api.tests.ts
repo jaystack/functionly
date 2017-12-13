@@ -291,6 +291,62 @@ describe('api', () => {
             }, (e) => { e && done(e) })
                 .catch((e) => { e && done(e) })
         })
+
+        it("existing table", (done) => {
+            let counter = 0
+
+            @injectable()
+            @dynamoTable({ tableName: 'custom-table-name', exists: true })
+            class DTClass extends DynamoTable { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.DTClass_TABLE_NAME = 'custom-table-name'
+            class Home extends FunctionalService {
+                public async handle( @inject(DTClass) a: DTClass) {
+                    counter++
+
+                    await a.put({
+                        Item: { _id: 1 }
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class DCL extends DocumentClientApi {
+                public async init() { }
+                public getDocumentClient() {
+                    return <any>{
+                        put(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Item: { _id: 1 },
+                                    TableName: `custom-table-name`
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(DocumentClientApi, DCL)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
     })
 
     describe('S3Storage', () => {
@@ -558,6 +614,62 @@ describe('api', () => {
                                 expect(params).to.deep.equal({
                                     Key: 'a',
                                     Bucket: 's3storageclass-other-customstage'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(S3Api, S3A)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+
+        it("existing bucket", (done) => {
+            let counter = 0
+
+            @injectable()
+            @s3Storage({ bucketName: 'custom-bucket-name', exists: true })
+            class S3StorageClass extends S3Storage { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.S3StorageClass_S3_BUCKET = 'custom-bucket-name'
+            class Home extends FunctionalService {
+                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                    counter++
+
+                    await a.getObject({
+                        Key: 'a'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class S3A extends S3Api {
+                public async init() { }
+                public getS3() {
+                    return <any>{
+                        getObject(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Key: 'a',
+                                    Bucket: 'custom-bucket-name'
                                 })
                                 cb()
                             } catch (e) {
