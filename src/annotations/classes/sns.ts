@@ -5,7 +5,8 @@ import { environment } from './environment'
 
 export const sns = (snsConfig?: {
     topicName?: string,
-    environmentKey?: string
+    environmentKey?: string,
+    exists?: boolean
 }) => (target: Function) => {
     let snsDefinitions = getMetadata(CLASS_SNSCONFIGURATIONKEY, target) || [];
 

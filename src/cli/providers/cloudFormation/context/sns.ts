@@ -41,20 +41,27 @@ export const snsTopics = ExecuteStep.register('SNS-Topics', async (context) => {
 export const snsTopic = async (context) => {
     const { snsConfig } = context
 
-    snsConfig.advTopicName = `${snsConfig.topicName}${context.date.valueOf()}`
+    snsConfig.ADVTopicName = snsConfig.topicName
+    snsConfig.AWSTopicName = snsConfig.topicName
 
-    const snsProperties = {
-        "TopicName": `${snsConfig.advTopicName}-${context.stage}`
+    if (!snsConfig.exists) {
+
+        snsConfig.ADVTopicName = `${snsConfig.topicName}${context.date.valueOf()}`
+        snsConfig.AWSTopicName = `${snsConfig.ADVTopicName}-${context.stage}`
+
+        const snsProperties = {
+            "TopicName": snsConfig.AWSTopicName
+        }
+
+        const snsTopic = {
+            "Type": "AWS::SNS::Topic",
+            "Properties": snsProperties
+        }
+
+        const resourceName = `SNS${snsConfig.ADVTopicName}`
+        const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK)
+        snsConfig.resourceName = topicResourceName
     }
-
-    const snsTopic = {
-        "Type": "AWS::SNS::Topic",
-        "Properties": snsProperties
-    }
-
-    const resourceName = `SNS${snsConfig.advTopicName}`
-    const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK)
-    snsConfig.resourceName = topicResourceName
 
     await executor({
         context,
@@ -65,6 +72,8 @@ export const snsTopic = async (context) => {
 
 export const snsTopicSubscriptions = async (context) => {
     const { snsConfig } = context
+
+    if (snsConfig.exists) return
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         if (!serviceConfig.eventSource) continue
@@ -85,6 +94,8 @@ export const snsTopicSubscriptions = async (context) => {
 
 export const snsTopicSubscription = async (context) => {
     const { serviceDefinition, snsConfig } = context
+
+    if (snsConfig.exists) return
 
     await setStackParameter({
         ...context,
@@ -114,6 +125,9 @@ export const snsTopicSubscription = async (context) => {
 
 export const snsPermissions = (context) => {
     const { serviceDefinition, snsConfig } = context
+
+    if (snsConfig.exists) return
+
     const properties = {
         "FunctionName": {
             "Fn::GetAtt": [
@@ -139,17 +153,23 @@ const updateSNSEnvironmentVariables = async (context) => {
 
     for (const { serviceDefinition, serviceConfig } of snsConfig.services) {
         const environmentVariables = getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service) || {}
-        environmentVariables[serviceConfig.environmentKey] = `${snsConfig.advTopicName}`
+        environmentVariables[serviceConfig.environmentKey] = `${snsConfig.ADVTopicName}`
 
-        await setStackParameter({
-            ...context,
-            sourceStackName: SNS_TABLE_STACK,
-            resourceName: snsConfig.resourceName,
-            targetStackName: getStackName(serviceDefinition)
-        })
+        if (snsConfig.exists) {
+            environmentVariables[`${serviceConfig.environmentKey}_ARN`] = {
+                "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:" + snsConfig.AWSTopicName
+            }
+        } else {
+            await setStackParameter({
+                ...context,
+                sourceStackName: SNS_TABLE_STACK,
+                resourceName: snsConfig.resourceName,
+                targetStackName: getStackName(serviceDefinition)
+            })
 
-        environmentVariables[`${serviceConfig.environmentKey}_ARN`] = {
-            "Ref": snsConfig.resourceName
+            environmentVariables[`${serviceConfig.environmentKey}_ARN`] = {
+                "Ref": snsConfig.resourceName
+            }
         }
 
         defineMetadata(CLASS_ENVIRONMENTKEY, { ...environmentVariables }, serviceDefinition.service)

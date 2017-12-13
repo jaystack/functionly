@@ -997,5 +997,64 @@ describe('api', () => {
             }, (e) => { e && done(e) })
                 .catch((e) => { e && done(e) })
         })
+
+        it("existing topic", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns({ topicName: 'SNSTopicClass-topic', exists: true })
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic'
+            process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: 'arn:aws:sns:Z:1:SNSTopicClass-topic'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
     })
 })
