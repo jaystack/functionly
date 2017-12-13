@@ -12,7 +12,8 @@ export const s3Storage = (s3Config?: {
     eventSourceConfiguration?: {
         Event?: any,
         Filter?: any
-    }
+    },
+    exists?: boolean
 }) => (target: Function) => {
     let s3Definitions = getMetadata(CLASS_S3CONFIGURATIONKEY, target) || [];
 

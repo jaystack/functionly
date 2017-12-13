@@ -127,8 +127,9 @@ export class DynamoTable extends Api {
         const tableName = ({ TableName: tableConfig.tableName, ...tableConfig.nativeConfig }).TableName
 
         const calcTableName = tableConfig.environmentKey && process.env[tableConfig.environmentKey] ? process.env[tableConfig.environmentKey] : ''
+        const suffix = tableConfig.exists ? '' : `-${process.env.FUNCTIONAL_STAGE}`
         const initParams = {
-            TableName: (calcTableName || tableName) + `-${process.env.FUNCTIONAL_STAGE}`
+            TableName: (calcTableName || tableName) + suffix
         }
 
         return { ...initParams, ...params }

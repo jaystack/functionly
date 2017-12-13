@@ -25,7 +25,8 @@ export const __dynamoDBDefaults = {
 export const dynamoTable = (tableConfig?: {
     tableName?: string,
     environmentKey?: string,
-    nativeConfig?: any
+    nativeConfig?: any,
+    exists?: boolean
 }) => (target: Function) => {
     let tableDefinitions = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, target) || [];
 

@@ -227,7 +227,7 @@ export const dynamoPolicy = async (context) => {
                 ],
                 "Resource": usedTableConfigs.map(t => {
                     return {
-                        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.tableName
+                        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.AWSTableName
                     }
                 })
             }]

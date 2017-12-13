@@ -56,16 +56,10 @@ export const s3Storages = ExecuteStep.register('S3-Storages', async (context) =>
     })
 
     for (const s3Config of configs) {
-        const s3BucketDefinition = await executor({
+        await executor({
             context: { ...context, s3Config },
             name: `S3-Storage-${s3Config.bucketName}`,
             method: s3Storage
-        })
-
-        await executor({
-            context: { ...context, s3Config, s3BucketDefinition },
-            name: `S3-Storage-Subscription-${s3Config.bucketName}`,
-            method: s3StorageSubscriptions
         })
     }
 })
@@ -73,19 +67,30 @@ export const s3Storages = ExecuteStep.register('S3-Storages', async (context) =>
 export const s3Storage = async (context) => {
     const { s3Config } = context
 
-    const s3Properties = {
-        "BucketName": `${s3Config.bucketName}-${context.stage}`
+    s3Config.AWSBucketName = s3Config.bucketName
+
+    if (!s3Config.exists) {
+        s3Config.AWSBucketName = `${s3Config.bucketName}-${context.stage}`
+
+        const s3Properties = {
+            "BucketName": s3Config.AWSBucketName
+        }
+
+        const s3Bucket = {
+            "Type": "AWS::S3::Bucket",
+            "Properties": s3Properties
+        }
+
+        const resourceName = `S3${s3Config.bucketName}`
+        const bucketResourceName = setResource(context, resourceName, s3Bucket, S3_STORAGE_STACK)
+        s3Config.resourceName = bucketResourceName
+
+        await executor({
+            context: { ...context, s3BucketDefinition: s3Bucket },
+            name: `S3-Storage-Subscription-${s3Config.bucketName}`,
+            method: s3StorageSubscriptions
+        })
     }
-
-    const s3Bucket = {
-        "Type": "AWS::S3::Bucket",
-        "Properties": s3Properties
-    }
-
-    const resourceName = `S3${s3Config.bucketName}`
-    const bucketResourceName = setResource(context, resourceName, s3Bucket, S3_STORAGE_STACK)
-    s3Config.resourceName = bucketResourceName
-
 
     for (const { serviceDefinition, serviceConfig } of s3Config.services) {
         if (!serviceConfig.injected) continue
@@ -96,8 +101,6 @@ export const s3Storage = async (context) => {
             method: s3StoragePolicy
         })
     }
-
-    return s3Bucket
 }
 
 
@@ -142,7 +145,7 @@ export const s3StoragePolicy = async (context) => {
             "",
             [
                 "arn:aws:s3:::",
-                `${s3Config.bucketName}-${context.stage}`,
+                `${s3Config.AWSBucketName}`,
                 "/*"
             ]
         ]
@@ -151,6 +154,8 @@ export const s3StoragePolicy = async (context) => {
 
 export const s3StorageSubscriptions = async (context) => {
     const { s3Config } = context
+
+    if (s3Config.exists) return
 
     for (const { serviceDefinition, serviceConfig } of s3Config.services) {
         if (!serviceConfig.eventSource) continue
@@ -171,6 +176,8 @@ export const s3StorageSubscriptions = async (context) => {
 
 export const s3BucketSubscription = async (context) => {
     const { serviceDefinition, serviceConfig, s3Config, s3BucketDefinition } = context
+    
+    if (s3Config.exists) return
 
     await setStackParameter({
         ...context,
@@ -204,6 +211,9 @@ export const s3BucketSubscription = async (context) => {
 
 export const s3Permissions = (context) => {
     const { serviceDefinition, serviceConfig, s3Config, s3BucketDefinition } = context
+    
+    if (s3Config.exists) return
+
     const properties = {
         "FunctionName": {
             "Ref": serviceDefinition.resourceName

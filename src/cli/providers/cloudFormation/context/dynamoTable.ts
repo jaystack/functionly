@@ -25,9 +25,15 @@ export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (con
 export const tableResource = async (context) => {
     const { tableConfig } = context
 
+    tableConfig.AWSTableName = tableConfig.tableName
+
+    if (tableConfig.exists) return
+
+    tableConfig.AWSTableName = `${tableConfig.tableName}-${context.stage}`
+
     const properties = {
         ...__dynamoDBDefaults,
-        TableName: `${tableConfig.tableName}-${context.stage}`,
+        TableName: tableConfig.AWSTableName,
         ...tableConfig.nativeConfig
     };
 
@@ -55,7 +61,6 @@ export const tableResource = async (context) => {
         sourceStackName: DYNAMODB_TABLE_STACK
     })
 
-    tableConfig.tableName = properties.TableName
     tableConfig.resourceName = resourceName
 
 }
@@ -75,6 +80,8 @@ export const tableSubscribers = ExecuteStep.register('DynamoDB-Table-Subscriptio
 
 export const tableSubscriber = async (context) => {
     const { tableConfig, subscriber } = context
+    
+    if (tableConfig.exists) return
 
     const properties = {
         "BatchSize": 1,
@@ -115,6 +122,8 @@ export const tableSubscriber = async (context) => {
 
 export const dynamoStreamingPolicy = async (context) => {
     const { tableConfig, serviceDefinition } = context
+    
+    if (tableConfig.exists) return
 
     let policy = serviceDefinition.roleResource.Properties.Policies.find(p => p.PolicyDocument.Statement[0].Action.includes('dynamodb:GetRecords'))
     if (!policy) {
@@ -149,6 +158,6 @@ export const dynamoStreamingPolicy = async (context) => {
     }
 
     policy.PolicyDocument.Statement[0].Resource.push({
-        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + tableConfig.tableName + "/stream/*"
+        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + tableConfig.AWSTableName + "/stream/*"
     })
 }
