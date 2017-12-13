@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import { FunctionalService, DynamoTable, DocumentClientApi, S3Storage, S3Api } from '../src/classes'
-import { injectable, dynamoTable, inject, s3Storage } from '../src/annotations'
+import { FunctionalService, DynamoTable, DocumentClientApi, S3Storage, S3Api, SimpleNotificationService, SNSApi } from '../src/classes'
+import { injectable, dynamoTable, inject, s3Storage, sns } from '../src/annotations'
 import { container } from '../src//helpers/ioc'
 
 describe('api', () => {
@@ -681,6 +681,311 @@ describe('api', () => {
             }
 
             container.registerType(S3Api, S3A)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+    })
+
+    describe('SimpleNotificationService', () => {
+        afterEach(() => {
+            delete process.env.FUNCTIONAL_ENVIRONMENT
+            delete process.env.FUNCTIONAL_STAGE
+            delete process.env.SNSTopicClass_SNS_TOPICNAME
+            delete process.env.SNSTopicClass_SNS_TOPICNAME_ARN
+            delete process.env.SNSTopicClass_ENV_NAME
+            delete process.env.SNSTopicClass_ENV_NAME_ARN
+            container.clearType(SNSApi)
+        })
+
+        it("empty topic name", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns()
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic123456789-customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+
+        it("empty topic name no env", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns()
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: ''
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+
+        it("empty topic name different env", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns()
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic'
+            process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: 'arn:aws:sns:Z:1:SNSTopicClass-topic'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+
+        it("custom topic name", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns({ topicName: 'custom-name' })
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME = 'custom-name123456789-customstage'
+            process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:custom-name123456789-customstage'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: 'arn:aws:sns:Z:1:custom-name123456789-customstage'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
+
+            const invoker = Home.createInvoker()
+            invoker({}, {
+                send: (result) => {
+                    expect(counter).to.equal(2)
+                    expect(result).to.deep.equal({ ok: 1 })
+                    done()
+                }
+            }, (e) => { e && done(e) })
+                .catch((e) => { e && done(e) })
+        })
+
+        it("custom environmentKey", (done) => {
+            let counter = 0
+
+            @injectable()
+            @sns({ environmentKey: 'SNSTopicClass_ENV_NAME' })
+            class SNSTopicClass extends SimpleNotificationService { }
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+            process.env.FUNCTIONAL_STAGE = 'customstage'
+            process.env.SNSTopicClass_ENV_NAME = 'SNSTopicClass-topic123456789-customstage'
+            process.env.SNSTopicClass_ENV_NAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
+            class Home extends FunctionalService {
+                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                    counter++
+
+                    await a.publish({
+                        Message: 'message',
+                        Subject: 'subject'
+                    })
+
+                    return { ok: 1 }
+                }
+            }
+
+            @injectable()
+            class SNSA extends SNSApi {
+                public async init() { }
+                public getSNS() {
+                    return <any>{
+                        publish(params, cb) {
+                            counter++
+                            try {
+                                expect(params).to.deep.equal({
+                                    Message: 'message',
+                                    Subject: 'subject',
+                                    TopicArn: 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
+                                })
+                                cb()
+                            } catch (e) {
+                                cb(e)
+                            }
+                        }
+                    }
+                }
+            }
+
+            container.registerType(SNSApi, SNSA)
 
             const invoker = Home.createInvoker()
             invoker({}, {

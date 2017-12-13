@@ -41,10 +41,10 @@ export class SNSApi extends Api {
 })
 export class SimpleNotificationService extends Api {
     private _snsClient: SNS
-    public constructor(@inject(SNSApi) private snsApi: SNSApi) {
+    public constructor( @inject(SNSApi) private snsApi: SNSApi) {
         super()
     }
-    public async init(){
+    public async init() {
         this._snsClient = this.snsApi.getSNS()
     }
 
@@ -62,9 +62,11 @@ export class SimpleNotificationService extends Api {
     }
 
     protected setDefaultValues(params, command) {
-        const initParams = {
-            TopicArn: process.env[`${this.constructor.name}_SNS_TOPICNAME_ARN`]
-        }
+        const snsConfig = (getMetadata(CLASS_SNSCONFIGURATIONKEY, this) || [])[0] || {}
+        const envKey = snsConfig.environmentKey + '_ARN'
+        const TopicArn = process.env[envKey] ? process.env[envKey] : ''
+
+        const initParams = { TopicArn }
 
         return { ...initParams, ...params }
     }
