@@ -210,6 +210,7 @@ export default (api) => {
                             FUNCTIONAL_ENVIRONMENT,
                             stage
                         })
+                        await context.init()
 
                         await executor(context, ExecuteStep.get('SetFunctionalEnvironment'))
 

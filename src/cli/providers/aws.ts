@@ -1,5 +1,4 @@
 import { getFunctionName } from '../../annotations'
-import { bundle } from '../utilities/webpack'
 import { zip } from '../utilities/compress'
 import { uploadZipStep } from '../utilities/aws/s3Upload'
 import { createTables } from '../utilities/aws/dynamoDB'
@@ -18,7 +17,6 @@ import { projectConfig } from '../project/config'
 export const aws = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
     createEnvironment: ExecuteStep.register('CreateEnvironment_aws', async (context) => {
-        await executor(context, bundle)
         await executor(context, zip)
         const fileName = projectConfig.name ? `${projectConfig.name}.zip` : 'project.zip'
         await executor(context, uploadZipStep(fileName, context.zipData()))

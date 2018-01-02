@@ -26,6 +26,7 @@ export default ({ createContext, executor, ExecuteStep, projectConfig, requireVa
                             projectName: projectConfig.name,
                             stage
                         })
+                        await context.init()
 
                         await executor(context, ExecuteStep.get('CreateEnvironment'))
 

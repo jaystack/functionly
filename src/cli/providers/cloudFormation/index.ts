@@ -1,5 +1,4 @@
 import { getFunctionName } from '../../../annotations'
-import { bundle } from '../../utilities/webpack'
 import { logger } from '../../utilities/logger'
 import { zip } from '../../utilities/compress'
 import { uploadZipStep } from '../../utilities/aws/s3Upload'
@@ -18,7 +17,6 @@ export const cloudFormation = {
     FUNCTIONAL_ENVIRONMENT: 'aws',
     createEnvironment: async (context) => {
         logger.info(`Functionly: Packaging...`)
-        await executor(context, bundle)
         await executor(context, zip)
 
         await executor(context, cloudFormationInit)
@@ -75,7 +73,6 @@ export const cloudFormation = {
     },
     package: async (context) => {
         logger.info(`Functionly: Packaging...`)
-        await executor(context, bundle)
         await executor(context, zip)
 
         await executor(context, cloudFormationInit)

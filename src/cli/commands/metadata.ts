@@ -19,6 +19,7 @@ export default ({ createContext, executor, ExecuteStep, annotations: { getMetada
                         const context = await createContext(entryPoint, {
                             deployTarget
                         })
+                        await context.init()
 
                         await executor(context, ExecuteStep.get('ServiceMetadata'))
 

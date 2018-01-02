@@ -1,33 +1,27 @@
 import { lstat, readdirSync } from 'fs'
 import { FunctionalService } from '../../../classes/functionalService'
 import { ExecuteStep } from '../core/executeStep'
+import * as decache from 'decache'
 
 import { join, basename, extname } from 'path'
 
 export class ServiceDiscoveryStep extends ExecuteStep {
     public async method(context) {
 
-        context.files = context.files || []
         context.publishedFunctions = context.publishedFunctions || []
 
-        const path = context.serviceRoot
-
-        let isDir = await this.isDirectory(path)
-
-        let files = [path]
-        if (isDir) {
-            files = await this.getJsFiles(path)
-        }
-
-        for (let file of files) {
+        for (let file of context.files) {
             this.collectFromFile(file, context)
         }
 
         return context
     }
 
-
     private collectFromFile(file, context) {
+        if (context.clearRequireCache) {
+            decache(file);
+        }
+
         const module = require(file)
 
         const name = basename(file)
@@ -56,21 +50,6 @@ export class ServiceDiscoveryStep extends ExecuteStep {
 
         })
     }
-
-    private getJsFiles(folder) {
-        let files = readdirSync(folder);
-        let filter = /\.js$/
-        return files.filter(name => filter.test(name)).map(file => join(folder, file))
-    }
-    private isDirectory(path) {
-        return new Promise((resolve, reject) => {
-            lstat(path, (err, stats) => {
-                if (err) return reject(err);
-                return resolve(stats.isDirectory())
-            });
-        })
-    }
-
 }
 
 export const serviceDiscovery = new ServiceDiscoveryStep('ServiceDiscovery')

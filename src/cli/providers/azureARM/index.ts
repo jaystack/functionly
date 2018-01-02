@@ -1,5 +1,4 @@
 import { getFunctionName } from '../../../annotations'
-import { bundle } from '../../utilities/webpack'
 import { logger } from '../../utilities/logger'
 import { zip } from '../../utilities/compress'
 import { writeFile } from '../../utilities/local/file'
@@ -14,7 +13,6 @@ export const azure = {
     FUNCTIONAL_ENVIRONMENT: 'azure',
     createEnvironment: async (context) => {
         logger.info(`Functionly: Packaging...`)
-        await executor(context, bundle)
         await executor(context, zip)
 
         await executor(context, ARMInit)
@@ -35,7 +33,6 @@ export const azure = {
     },
     package: async (context) => {
         logger.info(`Functionly: Packaging...`)
-        await executor(context, bundle)
         await executor(context, zip)
 
         await executor(context, ARMInit)

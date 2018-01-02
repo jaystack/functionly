@@ -53,9 +53,9 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
             }
         }
 
-        app.listen(context.localPort, function () {
+        return app.listen(context.localPort, function () {
             process.env.FUNCTIONAL_LOCAL_PORT = context.localPort
-            console.log(`Example app listening on port ${process.env.FUNCTIONAL_LOCAL_PORT}!`)
+            console.log(`App listening on port ${process.env.FUNCTIONAL_LOCAL_PORT}!`)
         })
     }
 
@@ -103,6 +103,15 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
         }
     }
 
+    const startServer = async (context) => {
+        try {
+            await context.init()
+            return await executor(context, { name: 'startLocal', method: startLocal })
+        } catch (e) {
+            console.log(`error`, e)
+        }
+    }
+
     return {
         commands({ commander }) {
             commander
@@ -116,18 +125,29 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                         const entryPoint = requireValue(path || projectConfig.main, 'entry point')
                         const localPort = requireValue(port || projectConfig.localPort, 'localPort')
                         const stage = command.stage || projectConfig.stage || 'dev'
-                        
+
                         process.env.FUNCTIONAL_STAGE = stage
 
+                        let server = null
                         const context = await createContext(entryPoint, {
                             deployTarget: 'local',
                             localPort,
-                            stage
+                            stage,
+                            watchCallback: async (ctx) => {
+                                if (server) {
+                                    server.close()
+                                }
+
+                                server = await startServer(ctx)
+
+                                console.log(`Compilation complete. Watching for file changes.`)
+                                
+                            }
                         })
 
-                        await executor(context, { name: 'startLocal', method: startLocal })
-
-                        console.log(`done`)
+                        await startServer(context)
+                        
+                        console.log(`Compilation complete.`)
                     } catch (e) {
                         console.log(`error`, e)
                     }
