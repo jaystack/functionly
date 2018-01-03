@@ -42,7 +42,8 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                 }
 
                 for (const method of event.methods) {
-                    app[method](
+                    const expressMethod = method.toLowerCase() === 'any' ? 'use' : method.toLowerCase()
+                    app[expressMethod](
                         path,
                         logMiddleware(isLoggingEnabled, serviceDefinition.service),
                         environmentConfigMiddleware(serviceDefinition.service),

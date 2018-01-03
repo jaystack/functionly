@@ -835,6 +835,44 @@ describe('invoke', () => {
 
             expect(counter).to.equal(3)
         })
+
+        it("method any", async () => {
+            let counter = 0
+
+            class TestProvider extends LocalProvider {
+                public async invokeExec(config: any): Promise<any> {
+                    counter++
+
+                    expect(config).to.have.property('method', 'post')
+                    expect(config).to.have.property('url', `${APP_BASE_URL}/v1/a1`)
+                    expect(config).to.have.not.property('qs')
+                    expect(config).to.have.property('body').that.deep.equal({ p1: 'p1' })
+                    expect(config).to.have.property('json', true)
+
+                }
+            }
+            addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
+
+            @rest({ path: '/v1/a1', methods: ['any'] })
+            @injectable()
+            class A extends FunctionalService {
+                public async handle( @param p1) { }
+            }
+
+            class B extends FunctionalService {
+                public async handle( @inject(A) a: A) {
+                    counter++
+                    const aResult = await a.invoke({ p1: 'p1' })
+                }
+            }
+
+            const invoker = B.createInvoker()
+            await invoker({}, {
+                send: () => { counter++ }
+            }, (e) => { expect(false).to.equal(true, e.message) })
+
+            expect(counter).to.equal(3)
+        })
     })
 
     describe('aws', () => {

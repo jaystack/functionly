@@ -57,13 +57,14 @@ export class LocalProvider extends Provider {
             throw new Error('missing http configuration')
         }
 
-        const method = httpAttr.methods[0] || 'GET'
+        let method = (httpAttr.methods[0] || 'GET').toString().toLowerCase()
+        method = method === 'any' ? 'post' : method
         const invokeParams: any = {
             method,
             url: `http://localhost:${process.env.FUNCTIONAL_LOCAL_PORT}${httpAttr.path}`,
         };
 
-        if (method.toLowerCase() === 'get') {
+        if (method === 'get') {
             invokeParams.qs = params
         } else {
             invokeParams.body = params
