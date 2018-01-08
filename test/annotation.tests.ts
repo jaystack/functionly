@@ -243,6 +243,22 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('cors', true)
                 expect(metadata).to.have.property('authorization', 'AWS_IAM')
             })
+            it("corsConfig", () => {
+                @apiGateway({ path: '/v1/test', cors: true, corsConfig: { headers: ['X-test'] } })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(CLASS_APIGATEWAYKEY, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.property('method', 'get')
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
+                expect(metadata).to.have.property('authorization', 'AWS_IAM')
+            })
             it("authorization", () => {
                 @apiGateway({ path: '/v1/test', authorization: 'NONE' })
                 class ApiGatewayTestClass { }
@@ -303,6 +319,23 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('route', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.property('authLevel', 'function')
+            })
+
+            it("corsConfig", () => {
+                @httpTrigger({ route: '/v1/test', cors: true, corsConfig: { headers: ['X-test'] } })
+                class HttpTriggerTestClass { }
+
+                const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('route', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
                 expect(metadata).to.have.property('authLevel', 'function')
             })
             it("authorization", () => {
@@ -366,6 +399,23 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.property('anonymous', false)
+            })
+
+            it("corsConfig", () => {
+                @rest({ path: '/v1/test', cors: true, corsConfig: { headers: ['X-test'] } })
+                class ApiGatewayTestClass { }
+
+                const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('path', '/v1/test')
+                expect(metadata).to.have.deep.property('methods', ['get'])
+                expect(metadata).to.have.property('cors', true)
+                expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
                 expect(metadata).to.have.property('anonymous', false)
             })
             it("authorization", () => {

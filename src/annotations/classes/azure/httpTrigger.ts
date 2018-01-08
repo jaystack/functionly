@@ -12,6 +12,7 @@ export const httpTrigger = (endpoint: {
     route: string,
     methods?: string[],
     cors?: boolean,
+    corsConfig?: { headers: string[] },
     authLevel?: 'anonymous' | 'function' | 'admin'
 }) => {
     return (target: Function) => {
@@ -26,6 +27,7 @@ rest.extension('azure', (target, config) => {
         route: config.path,
         methods: config.methods,
         cors: config.cors,
+        corsConfig: config.corsConfig,
         authLevel: config.anonymous ? 'anonymous' : 'function'
     })
     decorator(target)

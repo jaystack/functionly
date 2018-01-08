@@ -64,9 +64,9 @@ export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', asy
         })
     }
 
-    for (const [endpointResourceName, { serviceDefinition, methods }] of endpointsCors) {
+    for (const [endpointResourceName, { serviceDefinition, methods, headers }] of endpointsCors) {
         await executor({
-            context: { ...context, endpointResourceName, serviceDefinition, methods },
+            context: { ...context, endpointResourceName, serviceDefinition, methods, headers },
             name: `ApiGateway-Method-Options-${endpointResourceName}`,
             method: setOptionsMethodResource
         })
@@ -87,7 +87,7 @@ export const apiGatewayMethods = async (context) => {
 }
 
 export const apiGatewayMethod = async (context) => {
-    const { path, cors, authorization, endpoints, endpointsCors, serviceDefinition } = context
+    const { path, cors, corsConfig, authorization, endpoints, endpointsCors, serviceDefinition } = context
     const method = context.method.toUpperCase()
 
     const pathParts = path.split('/')
@@ -127,7 +127,8 @@ export const apiGatewayMethod = async (context) => {
     if (cors) {
         let value = {
             serviceDefinition,
-            methods: ['OPTIONS']
+            methods: ['OPTIONS'],
+            headers: ['Content-Type', 'Authorization', 'X-Requested-With', ...((corsConfig || {}).headers || [])]
         }
         if (endpointsCors.has(endpoint.endpointResourceName)) {
             value = endpointsCors.get(endpoint.endpointResourceName)
@@ -257,7 +258,7 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
 })
 
 export const setOptionsMethodResource = async (context) => {
-    const { endpointResourceName, serviceDefinition, methods } = context
+    const { endpointResourceName, serviceDefinition, methods, headers } = context
     const properties = {
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
@@ -284,7 +285,7 @@ export const setOptionsMethodResource = async (context) => {
                     "StatusCode": "200",
                     "ResponseParameters": {
                         "method.response.header.Access-Control-Allow-Origin": "'*'",
-                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Requested-With'",
+                        "method.response.header.Access-Control-Allow-Headers": `'${headers.join(',')}'`,
                         "method.response.header.Access-Control-Allow-Methods": `'${methods.join(',')}'`,
                         "method.response.header.Access-Control-Allow-Credentials": "'true'"
                     },

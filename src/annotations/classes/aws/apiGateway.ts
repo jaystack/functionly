@@ -9,7 +9,7 @@ export const defaultEndpoint = {
 }
 
 export const apiGateway = (endpoint: {
-    path: string, method?: string, cors?: boolean,
+    path: string, method?: string, cors?: boolean, corsConfig?: { headers: string[] },
     authorization?: 'AWS_IAM' | 'NONE' | 'CUSTOM' | 'COGNITO_USER_POOLS'
 }) => {
     return (target: Function) => {
@@ -25,6 +25,7 @@ rest.extension('aws', (target, config) => {
             path: config.path,
             method,
             cors: config.cors,
+            corsConfig: config.corsConfig,
             authorization: config.anonymous ? 'NONE' : 'AWS_IAM'
          })
          decorator(target)
