@@ -42,7 +42,9 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
                     {
                         "Ref": resourceName
                     },
-                    ".execute-api.eu-central-1.amazonaws.com/",
+                    ".execute-api.",
+                    context.awsRegion,
+                    ".amazonaws.com/",
                     context.stage
                 ]
             ]

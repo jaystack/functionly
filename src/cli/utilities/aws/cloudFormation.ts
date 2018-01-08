@@ -55,7 +55,7 @@ export const updateStack = ExecuteStep.register('CloudFormation-UpdateStack', (c
         const params = {
             ...cfConfig,
             StackName: `${cfConfig.StackName}-${context.stage}`,
-            TemplateURL: `https://s3.eu-central-1.amazonaws.com/${context.awsBucket}/${context.S3CloudFormationTemplate}`,
+            TemplateURL: `https://s3.${context.awsRegion}.amazonaws.com/${context.awsBucket}/${context.S3CloudFormationTemplate}`,
             UsePreviousTemplate: false
         }
 
