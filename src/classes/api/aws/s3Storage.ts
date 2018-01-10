@@ -42,13 +42,13 @@ export class S3Api extends Api {
 })
 export class S3Storage extends Api {
     private _s3Client: S3
-    public constructor(@inject(S3Api) private s3Api: S3Api) {
+    public constructor( @inject(S3Api) private s3Api: S3Api) {
         super()
     }
-    public async init(){
+    public async init() {
         this._s3Client = this.s3Api.getS3()
     }
-    
+
     public getS3() {
         return this._s3Client
     }
@@ -81,6 +81,13 @@ export class S3Storage extends Api {
                 else resolve(result)
             })
         })
+    }
+
+    public upload(
+        params: Partial<S3.PutObjectRequest>,
+        options?: S3.ManagedUpload.ManagedUploadOptions,
+        callback?: (err: Error, data: S3.ManagedUpload.SendData) => void): S3.ManagedUpload {
+        return this._s3Client.upload(this.setDefaultValues(params, 'upload'), options, callback)
     }
 
     protected setDefaultValues(params, command) {
