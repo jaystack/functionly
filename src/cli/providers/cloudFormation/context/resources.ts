@@ -223,7 +223,8 @@ export const dynamoPolicy = async (context) => {
                     "dynamodb:Scan",
                     "dynamodb:GetItem",
                     "dynamodb:PutItem",
-                    "dynamodb:UpdateItem"
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
                 ],
                 "Resource": usedTableConfigs.map(t => {
                     return {
