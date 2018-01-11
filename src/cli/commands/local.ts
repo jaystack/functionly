@@ -28,6 +28,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
         let app = express()
         app.use(bodyParser.json({ limit: '10mb' }))
 
+        console.log("")
         for (let serviceDefinition of context.publishedFunctions) {
             let httpMetadata = getMetadata(rest.environmentKey, serviceDefinition.service) || []
 
@@ -35,13 +36,13 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                 const isLoggingEnabled = getMetadata(constants.CLASS_LOGKEY, serviceDefinition.service)
                 const transformMiddlewares = []
                 const path = pathTransform(event.path, transformMiddlewares)
-                console.log(`${new Date().toISOString()} ${getFunctionName(serviceDefinition.service)} listening { path: '${path}', methods: '${event.methods}', cors: ${event.cors ? true : false} }`)
-
                 if (event.cors) {
                     app.use(path, cors())
                 }
-
+                
                 for (const method of event.methods) {
+                    console.log(`${method.toUpperCase()}\t${event.path}\t${getFunctionName(serviceDefinition.service)}`)
+
                     const expressMethod = method.toLowerCase() === 'any' ? 'use' : method.toLowerCase()
                     app[expressMethod](
                         path,
@@ -53,6 +54,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                 }
             }
         }
+        console.log("")
 
         return app.listen(context.localPort, function () {
             process.env.FUNCTIONAL_LOCAL_PORT = context.localPort
