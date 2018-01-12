@@ -63,7 +63,7 @@ export const updateStack = ExecuteStep.register('CloudFormation-UpdateStack', (c
             if (err) return reject(err)
 
             try {
-                const result = await stackStateWaiter('UPDATE_COMPLETE', context, 100)
+                const result = await stackStateWaiter('UPDATE_COMPLETE', context, 1000)
                 resolve(result)
             } catch (e) {
                 reject(e)
