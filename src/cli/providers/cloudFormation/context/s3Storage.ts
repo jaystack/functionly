@@ -140,16 +140,10 @@ export const s3StoragePolicy = async (context) => {
         serviceDefinition.roleResource.Properties.Policies.push(policy)
     }
 
-    policy.PolicyDocument.Statement[0].Resource.push({
-        "Fn::Join": [
-            "",
-            [
-                "arn:aws:s3:::",
-                `${s3Config.AWSBucketName}`,
-                "/*"
-            ]
-        ]
-    })
+    const s3Arn = `arn:aws:s3:::${s3Config.AWSBucketName}/*`
+    if (!policy.PolicyDocument.Statement[0].Resource.includes(s3Arn)) {
+        policy.PolicyDocument.Statement[0].Resource.push(s3Arn)
+    }
 }
 
 export const s3StorageSubscriptions = async (context) => {
