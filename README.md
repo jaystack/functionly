@@ -23,3 +23,13 @@ Use the JavaScript language and the JSON syntax to describe infrastructure and e
 
 ## examples
 - https://github.com/jaystack/functionly-examples
+
+### Typescript
+- [todoDB](https://github.com/jaystack/functionly-examples/tree/master/todoDB)
+- [todoDB-mongo](https://github.com/jaystack/functionly-examples/tree/master/todoDB-mongo)
+- [todoDBAdvanced](https://github.com/jaystack/functionly-examples/tree/master/todoDBAdvanced)
+- [eventSource](https://github.com/jaystack/functionly-examples/tree/master/eventSource)
+
+### ES6
+- [greeter](https://github.com/jaystack/functionly-examples/tree/master/greeter)
+- [todoDB-es6](https://github.com/jaystack/functionly-examples/tree/master/todoDB-es6)
