@@ -5,6 +5,7 @@ export { DynamoTable, DocumentClientApi } from './api/aws/dynamoTable'
 export { SimpleNotificationService, SNSApi } from './api/aws/sns'
 export { S3Storage, S3Api } from './api/aws/s3Storage'
 export { ApiGateway } from './api/aws/apiGateway'
+export { CloudWatchEvent } from './api/aws/cloudWatchEvent'
 export { callExtension } from './core/callExtension'
 export { Service } from './service'
 

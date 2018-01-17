@@ -5,7 +5,7 @@ import {
     CLASS_APIGATEWAYKEY, CLASS_DYNAMOTABLECONFIGURATIONKEY, CLASS_ENVIRONMENTKEY, CLASS_NAMEKEY,
     CLASS_INJECTABLEKEY, CLASS_LOGKEY, CLASS_AWSRUNTIMEKEY, CLASS_AWSMEMORYSIZEKEY, CLASS_AWSTIMEOUTKEY,
     CLASS_S3CONFIGURATIONKEY, CLASS_SNSCONFIGURATIONKEY, CLASS_TAGKEY, CLASS_ROLEKEY, CLASS_DESCRIPTIONKEY,
-    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY, CLASS_HTTPTRIGGER, CLASS_AZURENODEKEY
+    PARAMETER_PARAMKEY, CLASS_CLASSCONFIGKEY, CLASS_HTTPTRIGGER, CLASS_AZURENODEKEY, CLASS_CLOUDWATCHEVENT
 } from '../src/annotations/constants'
 import { applyTemplates, templates } from '../src/annotations/templates'
 import { getFunctionParameters } from '../src/annotations/utils'
@@ -21,6 +21,7 @@ import { injectable, InjectionScope } from '../src/annotations/classes/injectabl
 import { log } from '../src/annotations/classes/log'
 import { s3Storage } from '../src/annotations/classes/s3Storage'
 import { sns } from '../src/annotations/classes/sns'
+import { cloudWatchEvent } from '../src/annotations/classes/aws/cloudWatchEvent'
 import { tag } from '../src/annotations/classes/tag'
 import { eventSource } from '../src/annotations/classes/eventSource'
 import { classConfig } from '../src/annotations/classes/classConfig'
@@ -959,6 +960,64 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('topicName', 'myTopicName')
                 expect(metadata).to.have.property('environmentKey', 'myenvkey')
                 expect(metadata).to.have.property('definedBy', SNSTestClass.name)
+            })
+        })
+        describe("scheduleEvent", () => {
+            it("missing config", () => {
+                @cloudWatchEvent({})
+                class ScheduleEventTestClass { }
+
+                const value = getMetadata(CLASS_CLOUDWATCHEVENT, ScheduleEventTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.not.have.property('scheduleExpression')
+                expect(metadata).to.not.have.property('eventPattern')
+                expect(metadata).to.have.property('definedBy', ScheduleEventTestClass.name)
+            })
+            it("scheduleExpression", () => {
+                @cloudWatchEvent({ scheduleExpression: 'rate(10 minutes)' })
+                class ScheduleEventTestClass { }
+
+                const value = getMetadata(CLASS_CLOUDWATCHEVENT, ScheduleEventTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('scheduleExpression', 'rate(10 minutes)')
+                expect(metadata).to.not.have.property('eventPattern')
+                expect(metadata).to.have.property('definedBy', ScheduleEventTestClass.name)
+            })
+            it("eventPattern", () => {
+                @cloudWatchEvent({ eventPattern: {} })
+                class ScheduleEventTestClass { }
+
+                const value = getMetadata(CLASS_CLOUDWATCHEVENT, ScheduleEventTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.not.have.property('scheduleExpression')
+                expect(metadata).to.have.deep.property('eventPattern', {})
+                expect(metadata).to.have.property('definedBy', ScheduleEventTestClass.name)
+            })
+            it("scheduleExpression and eventPattern", () => {
+                @cloudWatchEvent({ scheduleExpression: 'rate(10 minutes)', eventPattern: {} })
+                class ScheduleEventTestClass { }
+
+                const value = getMetadata(CLASS_CLOUDWATCHEVENT, ScheduleEventTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('scheduleExpression', 'rate(10 minutes)')
+                expect(metadata).to.have.deep.property('eventPattern', {})
+                expect(metadata).to.have.property('definedBy', ScheduleEventTestClass.name)
             })
         })
         describe("tag", () => {

@@ -3,7 +3,7 @@
 export { FunctionalService, Api, Service, PreHook, PostHook, Resource } from './classes'
 
 /* Apis */
-export { DynamoTable, DocumentClientApi, SimpleNotificationService, SNSApi, S3Storage, S3Api, ApiGateway } from './classes'
+export { DynamoTable, DocumentClientApi, SimpleNotificationService, SNSApi, S3Storage, S3Api, ApiGateway, CloudWatchEvent } from './classes'
 export { MongoCollection, MongoConnection } from './plugins/mongo'
 
 /* Hooks */
@@ -17,7 +17,7 @@ export { addProvider, removeProvider } from './providers'
 export {
     injectable, apiGateway, httpTrigger, rest, httpGet, httpPost, httpPut, httpPatch, httpDelete, IHttpMethod, environment,
     tag, log, functionName, dynamoTable, sns, s3Storage, eventSource, classConfig, use, description, role, group, aws, azure,
-    param, serviceParams, request, error, result, functionalServiceName, provider, stage, inject
+    param, serviceParams, request, error, result, functionalServiceName, provider, stage, inject, cloudWatchEvent
 } from './annotations'
 export { mongoCollection, mongoConnection } from './plugins/mongo'
 
