@@ -14,7 +14,7 @@ export const getResourceName = (name) => {
     return normalizeName(name)
 }
 
-export const setResource = (context: any, name: string, resource: any, stackName: string = null, allowOverride = false) => {
+export const setResource = (context: any, name: string, resource: any, stackName: string = null, output = false, allowOverride = false) => {
     const resourceName = getResourceName(name)
 
     let resources
@@ -42,7 +42,7 @@ export const setResource = (context: any, name: string, resource: any, stackName
     }
 
     resources[resourceName] = resource
-    if (outputs) {
+    if (output && outputs) {
         outputs[resourceName] = {
             "Value": {
                 "Ref": resourceName

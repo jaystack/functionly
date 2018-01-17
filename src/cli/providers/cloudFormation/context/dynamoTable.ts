@@ -53,7 +53,7 @@ export const tableResource = async (context) => {
     }
 
     const tableResourceName = `Dynamo${tableConfig.tableName}`
-    const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK)
+    const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK, true)
 
     await setStackParameter({
         ...context,

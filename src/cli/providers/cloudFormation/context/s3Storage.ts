@@ -82,7 +82,7 @@ export const s3Storage = async (context) => {
         }
 
         const resourceName = `S3${s3Config.bucketName}`
-        const bucketResourceName = setResource(context, resourceName, s3Bucket, S3_STORAGE_STACK)
+        const bucketResourceName = setResource(context, resourceName, s3Bucket, S3_STORAGE_STACK, true)
         s3Config.resourceName = bucketResourceName
 
         await executor({
@@ -177,13 +177,6 @@ export const s3BucketSubscription = async (context) => {
         ...context,
         sourceStackName: getStackName(serviceDefinition),
         resourceName: serviceDefinition.resourceName,
-        targetStackName: S3_STORAGE_STACK
-    })
-
-    await setStackParameter({
-        ...context,
-        sourceStackName: getStackName(serviceDefinition),
-        resourceName: serviceDefinition.resourceName,
         targetStackName: S3_STORAGE_STACK,
         attr: 'Arn'
     })
@@ -225,5 +218,5 @@ export const s3Permissions = (context) => {
         "Properties": properties
     }
     const resourceName = `${s3Config.resourceName}Permission`
-    const permissionResourceName = setResource(context, resourceName, s3Permission, getStackName(serviceDefinition), true)
+    const permissionResourceName = setResource(context, resourceName, s3Permission, getStackName(serviceDefinition), false, true)
 }

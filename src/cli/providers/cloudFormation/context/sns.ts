@@ -59,7 +59,7 @@ export const snsTopic = async (context) => {
         }
 
         const resourceName = `SNS${snsConfig.ADVTopicName}`
-        const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK)
+        const topicResourceName = setResource(context, resourceName, snsTopic, SNS_TABLE_STACK, true)
         snsConfig.resourceName = topicResourceName
     }
 
@@ -145,7 +145,7 @@ export const snsPermissions = (context) => {
         "Properties": properties
     }
     const resourceName = `${snsConfig.resourceName}Permission`
-    setResource(context, resourceName, snsPermission, getStackName(serviceDefinition), true)
+    setResource(context, resourceName, snsPermission, getStackName(serviceDefinition), false, true)
 }
 
 const updateSNSEnvironmentVariables = async (context) => {

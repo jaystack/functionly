@@ -349,5 +349,5 @@ export const setGatewayPermissions = (context) => {
         "Properties": properties
     }
     const resourceName = `ApiGateway${serviceDefinition.resourceName}Permission`
-    setResource(context, resourceName, methodConfig, getStackName(serviceDefinition), true)
+    setResource(context, resourceName, methodConfig, getStackName(serviceDefinition), false, true)
 }
