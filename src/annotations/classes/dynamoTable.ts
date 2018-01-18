@@ -48,3 +48,5 @@ export const dynamoTable = (tableConfig?: {
     const environmentSetter = environment(templatedKey, templatedValue)
     environmentSetter(target)
 }
+
+export const dynamo = dynamoTable

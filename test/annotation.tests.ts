@@ -14,7 +14,7 @@ import { expandableDecorator } from '../src/annotations/classes/expandableDecora
 import { apiGateway } from '../src/annotations/classes/aws/apiGateway'
 import { httpTrigger } from '../src/annotations/classes/azure/httpTrigger'
 import { rest, httpGet, httpPost, httpPut, httpPatch, httpDelete } from '../src/annotations/classes/rest'
-import { dynamoTable, __dynamoDBDefaults } from '../src/annotations/classes/dynamoTable'
+import { dynamoTable, dynamo, __dynamoDBDefaults } from '../src/annotations/classes/dynamoTable'
 import { environment } from '../src/annotations/classes/environment'
 import { functionName, getFunctionName } from '../src/annotations/classes/functionName'
 import { injectable, InjectionScope } from '../src/annotations/classes/injectable'
@@ -658,6 +658,96 @@ describe('annotations', () => {
             })
             it("nativeConfig", () => {
                 @dynamoTable({
+                    tableName: 'mytablename', nativeConfig: {
+                        ProvisionedThroughput: {
+                            ReadCapacityUnits: 4,
+                            WriteCapacityUnits: 4
+                        }
+                    }
+                })
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal({
+                    ...__dynamoDBDefaults,
+                    ProvisionedThroughput: {
+                        ReadCapacityUnits: 4,
+                        WriteCapacityUnits: 4
+                    }
+                });
+            })
+        })
+        describe("dynamo", () => {
+            it("no param", () => {
+                @dynamo()
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
+            it("empty", () => {
+                @dynamo({})
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
+            it("tableName", () => {
+                @dynamo({ tableName: 'mytablename' })
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
+            it("environmentKey", () => {
+                @dynamo({ tableName: 'mytablename', environmentKey: 'myenvkey' })
+                class DynamoTableTestClass { }
+
+                const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, DynamoTableTestClass)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('tableName', 'mytablename')
+                expect(metadata).to.have.property('environmentKey', 'myenvkey')
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
+            })
+            it("nativeConfig", () => {
+                @dynamo({
                     tableName: 'mytablename', nativeConfig: {
                         ProvisionedThroughput: {
                             ReadCapacityUnits: 4,
@@ -1778,6 +1868,31 @@ describe('annotations', () => {
             const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, FSTest1)
 
             expect(environmentMetadata).to.have.property('p1', 'v1')
+        })
+
+        it("dynamo param", () => {
+            @dynamo({ tableName: 't1', nativeConfig: { any: 'value' } })
+            @injectable()
+            class DTable1 extends DynamoTable { }
+
+            @injectable()
+            class Service1 extends Service {
+                public async handle( @inject(DTable1) table1) { }
+            }
+
+            class FSTest1 extends FunctionalService {
+                public async handle( @inject(Service1) s1) { }
+            }
+
+            const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, FSTest1)
+
+            expect(value).to.be.not.undefined;
+            expect(value).to.have.lengthOf(1);
+
+            const metadata = value[0]
+
+            expect(metadata).to.have.property('tableName', 't1')
+            expect(metadata).to.have.property('nativeConfig').to.have.property('any', 'value')
         })
 
         it("dynamo param", () => {
