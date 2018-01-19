@@ -17,7 +17,7 @@ export class DocumentClientApi extends Api {
         let awsConfig: any = {}
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2012-08-10'
-            awsConfig.region = process.env.AWS_REGION || 'eu-central-1'
+            awsConfig.region = process.env.AWS_REGION || 'us-east-1'
             awsConfig.endpoint = 'DYNAMODB_LOCAL_ENDPOINT' in process.env ? process.env.DYNAMODB_LOCAL_ENDPOINT : 'http://localhost:8000'
 
             console.log('Local DynamoDB configuration')
