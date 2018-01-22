@@ -8,7 +8,7 @@ import { join, basename, extname } from 'path'
 export class ServiceDiscoveryStep extends ExecuteStep {
     public async method(context) {
 
-        context.publishedFunctions = context.publishedFunctions || []
+        context.publishedFunctions = []
 
         for (let file of context.files) {
             this.collectFromFile(file, context)
