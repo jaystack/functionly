@@ -83,6 +83,30 @@ export class S3Storage extends Api {
         })
     }
 
+    public async listObjectsV2(params: Partial<S3.ListObjectsV2Request>) {
+        return new Promise<S3.ListObjectsV2Output>((resolve, reject) => {
+            this._s3Client.listObjectsV2(this.setDefaultValues(params, 'listObjectsV2'), (err, result) => {
+                if (err) reject(err)
+                else resolve(result)
+            })
+        })
+    }
+
+    public async getSignedUrl(operation: string, params: any) {
+        return new Promise<string>((resolve, reject) => {
+            if (typeof params.Key === 'string') {
+                params = {
+                    ...params,
+                    Key: /^\//.test(params.Key) ? params.Key.substring(1, params.Key.length) : params.Key
+                }
+            }
+            this._s3Client.getSignedUrl(operation, this.setDefaultValues(params, 'getSignedUrl'), (err, result) => {
+                if (err) reject(err)
+                else resolve(result)
+            })
+        })
+    }
+
     public upload(
         params: Partial<S3.PutObjectRequest>,
         options?: S3.ManagedUpload.ManagedUploadOptions,
