@@ -130,7 +130,15 @@ export const s3StoragePolicy = async (context) => {
                         "s3:PutObjectAcl",
                         "s3:PutObjectTagging",
                         "s3:PutObjectVersionAcl",
-                        "s3:PutObjectVersionTagging"
+                        "s3:PutObjectVersionTagging",
+                        "s3:DeleteObject"
+                    ],
+                    "Resource": []
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:ListBucket"
                     ],
                     "Resource": []
                 }]
@@ -143,6 +151,7 @@ export const s3StoragePolicy = async (context) => {
     const s3Arn = `arn:aws:s3:::${s3Config.AWSBucketName}/*`
     if (!policy.PolicyDocument.Statement[0].Resource.includes(s3Arn)) {
         policy.PolicyDocument.Statement[0].Resource.push(s3Arn)
+        policy.PolicyDocument.Statement[1].Resource.push(`arn:aws:s3:::${s3Config.AWSBucketName}`)
     }
 }
 
@@ -170,7 +179,7 @@ export const s3StorageSubscriptions = async (context) => {
 
 export const s3BucketSubscription = async (context) => {
     const { serviceDefinition, serviceConfig, s3Config, s3BucketDefinition } = context
-    
+
     if (s3Config.exists) return
 
     await setStackParameter({
@@ -198,7 +207,7 @@ export const s3BucketSubscription = async (context) => {
 
 export const s3Permissions = (context) => {
     const { serviceDefinition, serviceConfig, s3Config, s3BucketDefinition } = context
-    
+
     if (s3Config.exists) return
 
     const properties = {

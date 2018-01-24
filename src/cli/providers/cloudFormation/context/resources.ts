@@ -227,11 +227,20 @@ export const dynamoPolicy = async (context) => {
                     "dynamodb:UpdateItem",
                     "dynamodb:DeleteItem"
                 ],
-                "Resource": usedTableConfigs.map(t => {
-                    return {
-                        "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.AWSTableName
-                    }
-                })
+                "Resource": [
+                    ...usedTableConfigs.map(t => {
+                        return {
+                            "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.AWSTableName
+                        }
+                    }),
+                    ...usedTableConfigs
+                        .filter(t => t.nativeConfig && (t.nativeConfig.GlobalSecondaryIndexes || t.nativeConfig.LocalSecondaryIndexes))
+                        .map(t => {
+                            return {
+                                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/" + t.AWSTableName + "/*"
+                            }
+                        })
+                ]
             }]
         }
     }
