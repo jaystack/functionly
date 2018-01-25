@@ -1,6 +1,13 @@
 import { expandableDecorator } from './expandableDecorator'
 
-export const rest = expandableDecorator<{ path: string, methods?: string[], cors?: boolean, corsConfig?: { headers: string[] }, anonymous?: boolean }>({
+export interface CorsConfig {
+    headers?: string[],
+    methods?: string[],
+    origin?: string,
+    credentials?: boolean
+}
+
+export const rest = expandableDecorator<{ path: string, methods?: string[], cors?: boolean, corsConfig?: CorsConfig, anonymous?: boolean }>({
     name: 'rest',
     defaultValues: {
         methods: ['get'],
@@ -11,7 +18,7 @@ export const rest = expandableDecorator<{ path: string, methods?: string[], cors
 
 export interface IHttpMethod {
     (path: string): Function
-    (config: { path: string, cors?: boolean, corsConfig?: { headers: string[] }, anonymous?: boolean }): Function
+    (config: { path: string, cors?: boolean, corsConfig?: CorsConfig, anonymous?: boolean }): Function
 }
 
 export const resolveParam = (p: any, defaults) => {

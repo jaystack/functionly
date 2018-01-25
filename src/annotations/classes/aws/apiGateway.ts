@@ -1,6 +1,6 @@
 import { CLASS_APIGATEWAYKEY } from '../../constants'
 import { getMetadata, defineMetadata } from '../../metadata'
-import { rest } from '../rest'
+import { rest, CorsConfig } from '../rest'
 
 export const defaultEndpoint = {
     method: 'get',
@@ -9,7 +9,7 @@ export const defaultEndpoint = {
 }
 
 export const apiGateway = (endpoint: {
-    path: string, method?: string, cors?: boolean, corsConfig?: { headers: string[] },
+    path: string, method?: string, cors?: boolean, corsConfig?: CorsConfig,
     authorization?: 'AWS_IAM' | 'NONE' | 'CUSTOM' | 'COGNITO_USER_POOLS'
 }) => {
     return (target: Function) => {
