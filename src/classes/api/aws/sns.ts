@@ -17,7 +17,9 @@ export class SNSApi extends Api {
         if (process.env.FUNCTIONAL_ENVIRONMENT === 'local') {
             awsConfig.apiVersion = '2010-03-31'
             awsConfig.region = process.env.AWS_REGION || 'us-east-1'
-            awsConfig.endpoint = 'SNS_LOCAL_ENDPOINT' in process.env ? process.env.SNS_LOCAL_ENDPOINT : 'http://localhost:4100'
+            if (process.env.SNS_LOCAL !== 'false') {
+                awsConfig.endpoint = 'SNS_LOCAL_ENDPOINT' in process.env ? process.env.SNS_LOCAL_ENDPOINT : 'http://localhost:4100'
+            }
 
             console.log('Local SNS configuration')
             console.log(JSON.stringify({
