@@ -84,10 +84,15 @@ AWSProvider.addParameterDecoratorImplementation("param", async (parameter, conte
 })
 AWSProvider.addParameterDecoratorImplementation("request", async (parameter, context, provider) => {
     if (context.eventSourceHandler.constructor.name === 'ApiGateway') {
+        let body = context.event.event.body
+        try {
+            body = JSON.parse(body)
+        } catch (e) { }
+
         return {
             url: parse(context.event.event.path),
             method: context.event.event.httpMethod,
-            body: context.event.event.body,
+            body,
             query: context.event.event.queryStringParameters,
             params: context.event.event.pathParameters,
             headers: context.event.event.headers

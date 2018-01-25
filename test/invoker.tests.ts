@@ -183,7 +183,7 @@ describe('invoker', () => {
 
             expect(counter).to.equal(5)
         })
-        
+
         describe("injection modes", () => {
             it("multiple inject transient api with transient service", async () => {
                 let counter = 0
@@ -1155,7 +1155,7 @@ describe('invoker', () => {
         })
 
         describe("eventSources", () => {
-            
+
             it("lambda param error", (done) => {
                 let counter = 0
 
@@ -1203,7 +1203,7 @@ describe('invoker', () => {
                     done(e)
                 })
             })
-            
+
             it("api gateway error", async () => {
                 let counter = 0
 
@@ -1256,11 +1256,11 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
-            
+
             it("api gateway string body param", async () => {
                 let counter = 0
 
@@ -1285,7 +1285,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1314,7 +1314,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1343,7 +1343,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1372,7 +1372,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1417,7 +1417,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1462,7 +1462,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
             })
@@ -1486,7 +1486,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
                 expect(r).to.deep.equal({
@@ -1518,7 +1518,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(200, r.body)
                 expect(r).to.deep.equal({
@@ -1549,7 +1549,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(500, r.body)
                 expect(r).to.deep.equal({
@@ -1561,7 +1561,7 @@ describe('invoker', () => {
             it("api gateway return value advanced - throw error", async () => {
                 let counter = 0
 
-                class MyError extends Error{
+                class MyError extends Error {
                     constructor(public name, ...params) {
                         super(...params);
                     }
@@ -1583,7 +1583,7 @@ describe('invoker', () => {
                     counter++
                     expect(counter).to.equal(2)
                 })
-                
+
                 expect(counter).to.equal(2)
                 expect(r.statusCode).to.equal(500, r.body)
                 expect(r).to.deep.equal({
@@ -1904,6 +1904,100 @@ describe('invoker', () => {
                     expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
                     expect(r).to.have.property('method', awsEvent.httpMethod)
                     expect(r).to.have.property('body').that.deep.equal(awsEvent.body)
+                    expect(r).to.have.property('query').that.deep.equal(awsEvent.queryStringParameters)
+                    expect(r).to.have.property('params').that.deep.equal(awsEvent.pathParameters)
+                    expect(r).to.have.property('headers').that.deep.equal(awsEvent.headers)
+                    expect(r).to.not.have.property('anyprop')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker(awsEvent, awsContext, cb)
+        })
+
+        it("request param - string body", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            @injectable()
+            class MockInjectable extends Resource { }
+
+            const awsEvent = {
+                path: '/a/b',
+                httpMethod: 'GET',
+                requestContext: { apiId: 'apiId' },
+                body: '{"p1":"body"}',
+                queryStringParameters: {
+                    p2: 'queryStringParameters'
+                },
+                pathParameters: {
+                    p3: 'pathParameters'
+                },
+                headers: {
+                    p4: 'headers'
+                },
+                anyprop: {}
+            }
+            const awsContext = {}
+            const cb = (e) => {
+                expect(counter).to.equal(1)
+                done(e)
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
+                    expect(r).to.have.property('method', awsEvent.httpMethod)
+                    expect(r).to.have.property('body').that.deep.equal({ "p1": "body" })
+                    expect(r).to.have.property('query').that.deep.equal(awsEvent.queryStringParameters)
+                    expect(r).to.have.property('params').that.deep.equal(awsEvent.pathParameters)
+                    expect(r).to.have.property('headers').that.deep.equal(awsEvent.headers)
+                    expect(r).to.not.have.property('anyprop')
+                }
+            }
+
+            const invoker = MockService.createInvoker()
+            invoker(awsEvent, awsContext, cb)
+        })
+
+        it("request param - string body not json", (done) => {
+            let counter = 0
+
+            process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
+
+            @injectable()
+            class MockInjectable extends Resource { }
+
+            const awsEvent = {
+                path: '/a/b',
+                httpMethod: 'GET',
+                requestContext: { apiId: 'apiId' },
+                body: 'request body',
+                queryStringParameters: {
+                    p2: 'queryStringParameters'
+                },
+                pathParameters: {
+                    p3: 'pathParameters'
+                },
+                headers: {
+                    p4: 'headers'
+                },
+                anyprop: {}
+            }
+            const awsContext = {}
+            const cb = (e) => {
+                expect(counter).to.equal(1)
+                done(e)
+            }
+
+            class MockService extends FunctionalService {
+                handle( @param p1, @request r) {
+                    counter++
+                    expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
+                    expect(r).to.have.property('method', awsEvent.httpMethod)
+                    expect(r).to.have.property('body').that.equal(awsEvent.body)
                     expect(r).to.have.property('query').that.deep.equal(awsEvent.queryStringParameters)
                     expect(r).to.have.property('params').that.deep.equal(awsEvent.pathParameters)
                     expect(r).to.have.property('headers').that.deep.equal(awsEvent.headers)
