@@ -68,12 +68,9 @@ npm install --save functionly
 Functionly uses webpack with babel for compile the code.
 - babel-core
 - babel-loader
-- babel-plugin-functionly-annotations
-- babel-plugin-transform-async-to-generator
-- babel-plugin-transform-decorators-legacy
-- babel-preset-es2015-node5
+- babel-preset-functionly-aws
 ```sh
-npm install --save-dev babel-core babel-loader babel-plugin-functionly-annotations babel-plugin-transform-async-to-generator babel-plugin-transform-decorators-legacy babel-preset-es2015-node5
+npm install --save-dev babel-core babel-loader babel-preset-functionly-aws
 ```
 
 ### Babel configuration
@@ -81,14 +78,7 @@ Default `.babelrc`
 
 ```js
 {
-  "plugins": [
-    "functionly-annotations",
-    "transform-decorators-legacy",
-    "transform-async-to-generator"
-  ],
-  "presets": [
-    "es2015-node5"
-  ]
+    "presets": [ "functionly-aws" ]
 }
 ```
 
