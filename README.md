@@ -115,7 +115,7 @@ export class HelloWorld extends FunctionalService {
     async handle() {}
 }
 ```
-Decorate it with the [rest]() decorator. We need a `path` and have to set the `anonymous` property to `true` because we want to call it without authentication.
+If you want your service to be accessible with a web request over a rest interface then you have to decorate  it with the [rest]() decorator. We need a `path` and have to set the `anonymous` property to `true` because we want to call it without authentication.
 If we do not set the `methods` property that means it will accept `GET` requests. (default: `methods: ['get']`)
 ```js
 @rest({ path: '/hello-world', anonymous: true })
@@ -182,7 +182,7 @@ export class GetAllTodos extends TodoService {
     async handle() {}
 }
 ```
-Decorate it with the [rest]() decorator. We need a `path` and have to set the `cors` and the `anonymous` properties to `true` because we want to call it without authentication and from another domain.
+If you want your service to be accessible with a web request over a rest interface then you have to decorate it with the [rest]() decorator. We need a `path` and have to set the `cors` and the `anonymous` properties to `true` because we want to call it without authentication and from another domain.
 If we do not set the `methods` property that means it will accept `GET` requests. (default: `methods: ['get']`)
 ```js
 @rest({ path: '/getAllTodos', cors: true, anonymous: true })
@@ -366,12 +366,12 @@ functionly deploy
 # Examples
 - https://github.com/jaystack/functionly-examples
 
+## Javascript
+- [greeter](https://github.com/jaystack/functionly-examples/tree/master/greeter)
+- [todoDB-es6](https://github.com/jaystack/functionly-examples/tree/master/todoDB-es6)
+
 ## Typescript
 - [todoDB](https://github.com/jaystack/functionly-examples/tree/master/todoDB)
 - [todoDB-mongo](https://github.com/jaystack/functionly-examples/tree/master/todoDB-mongo)
 - [todoDBAdvanced](https://github.com/jaystack/functionly-examples/tree/master/todoDBAdvanced)
 - [eventSource](https://github.com/jaystack/functionly-examples/tree/master/eventSource)
-
-## ES6
-- [greeter](https://github.com/jaystack/functionly-examples/tree/master/greeter)
-- [todoDB-es6](https://github.com/jaystack/functionly-examples/tree/master/todoDB-es6)
