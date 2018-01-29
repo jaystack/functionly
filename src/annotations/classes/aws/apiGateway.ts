@@ -4,7 +4,7 @@ import { rest, CorsConfig } from '../rest'
 
 export const defaultEndpoint = {
     method: 'get',
-    cors: false,
+    cors: true,
     authorization: 'AWS_IAM'
 }
 

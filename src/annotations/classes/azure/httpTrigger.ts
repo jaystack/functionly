@@ -4,7 +4,7 @@ import { rest, CorsConfig } from '../rest'
 
 export const defaultEndpoint = {
     methods: ['get'],
-    cors: false,
+    cors: true,
     authLevel: 'function'
 }
 

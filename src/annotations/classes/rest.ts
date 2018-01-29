@@ -11,7 +11,7 @@ export const rest = expandableDecorator<{ path: string, methods?: string[], cors
     name: 'rest',
     defaultValues: {
         methods: ['get'],
-        cors: false,
+        cors: true,
         anonymous: false
     }
 })
