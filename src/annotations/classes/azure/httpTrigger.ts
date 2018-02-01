@@ -1,10 +1,10 @@
 import { CLASS_HTTPTRIGGER } from '../../constants'
 import { getMetadata, defineMetadata } from '../../metadata'
-import { rest } from '../rest'
+import { rest, CorsConfig } from '../rest'
 
 export const defaultEndpoint = {
     methods: ['get'],
-    cors: false,
+    cors: true,
     authLevel: 'function'
 }
 
@@ -12,7 +12,7 @@ export const httpTrigger = (endpoint: {
     route: string,
     methods?: string[],
     cors?: boolean,
-    corsConfig?: { headers: string[] },
+    corsConfig?: CorsConfig,
     authLevel?: 'anonymous' | 'function' | 'admin'
 }) => {
     return (target: Function) => {

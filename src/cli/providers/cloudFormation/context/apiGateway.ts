@@ -64,9 +64,9 @@ export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', asy
         })
     }
 
-    for (const [endpointResourceName, { serviceDefinition, methods, headers }] of endpointsCors) {
+    for (const [endpointResourceName, { serviceDefinition, methods, headers, credentials, origin }] of endpointsCors) {
         await executor({
-            context: { ...context, endpointResourceName, serviceDefinition, methods, headers },
+            context: { ...context, endpointResourceName, serviceDefinition, methods, headers, credentials, origin },
             name: `ApiGateway-Method-Options-${endpointResourceName}`,
             method: setOptionsMethodResource
         })
@@ -127,13 +127,28 @@ export const apiGatewayMethod = async (context) => {
     if (cors) {
         let value = {
             serviceDefinition,
-            methods: ['OPTIONS'],
-            headers: ['Content-Type', 'Authorization', 'X-Requested-With', ...((corsConfig || {}).headers || [])]
+            methods: new Set(['OPTIONS']),
+            headers: ['Content-Type', 'Authorization', 'X-Requested-With', ...((corsConfig || {}).headers || [])],
+            origin: (corsConfig || {}).origin || '*',
+            credentials: (corsConfig || {}).credentials
         }
+
+        if (typeof value.credentials === 'undefined') value.credentials = true
+
         if (endpointsCors.has(endpoint.endpointResourceName)) {
             value = endpointsCors.get(endpoint.endpointResourceName)
         }
-        value.methods.push(method)
+
+        const corsMethods = ((corsConfig || {}).methods || [])
+        if (corsMethods.length) {
+            value.methods = new Set([...value.methods, ...corsMethods])
+        } else {
+            if (method.toLowerCase() === 'any') {
+                value.methods = new Set([...value.methods, 'DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT'])
+            } else {
+                value.methods.add(method)
+            }
+        }
         endpointsCors.set(endpoint.endpointResourceName, value)
     }
 
@@ -258,7 +273,7 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
 })
 
 export const setOptionsMethodResource = async (context) => {
-    const { endpointResourceName, serviceDefinition, methods, headers } = context
+    const { endpointResourceName, serviceDefinition, methods, headers, origin, credentials } = context
     const properties = {
         "AuthorizationType": "NONE",
         "HttpMethod": "OPTIONS",
@@ -284,10 +299,10 @@ export const setOptionsMethodResource = async (context) => {
                 {
                     "StatusCode": "200",
                     "ResponseParameters": {
-                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Origin": `'${origin}'`,
                         "method.response.header.Access-Control-Allow-Headers": `'${headers.join(',')}'`,
-                        "method.response.header.Access-Control-Allow-Methods": `'${methods.join(',')}'`,
-                        "method.response.header.Access-Control-Allow-Credentials": "'true'"
+                        "method.response.header.Access-Control-Allow-Methods": `'${[...methods].join(',')}'`,
+                        "method.response.header.Access-Control-Allow-Credentials": `'${credentials}'`
                     },
                     "ResponseTemplates": {
                         "application/json": ""
