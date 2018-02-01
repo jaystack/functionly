@@ -28,7 +28,7 @@ describe('invoke', () => {
 
                     expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({})
-                    expect(invokeConfig).is.undefined
+                    expect(invokeConfig).is.deep.equal({ context: {} })
                 }
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
@@ -62,7 +62,7 @@ describe('invoke', () => {
 
                     expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({ p1: 'p1' })
-                    expect(invokeConfig).is.undefined
+                    expect(invokeConfig).is.deep.equal({ context: {} })
                 }
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
@@ -96,7 +96,7 @@ describe('invoke', () => {
 
                     expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({ p1: 'p1' })
-                    expect(invokeConfig).is.undefined
+                    expect(invokeConfig).is.deep.equal({ context: {} })
                 }
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
@@ -130,7 +130,7 @@ describe('invoke', () => {
 
                     expect(serviceType).to.equal(A)
                     expect(params).to.deep.equal({})
-                    expect(invokeConfig).to.deep.equal({ a: 1, b: 2, c: 3 })
+                    expect(invokeConfig).to.deep.equal({ a: 1, b: 2, c: 3, context: {} })
                 }
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())

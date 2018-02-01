@@ -20,9 +20,9 @@ export class FunctionalService extends Resource {
         return invoker
     }
 
-    public static async onInject({ parameter }): Promise<any> {
+    public static async onInject({ parameter, context }): Promise<any> {
         const injectableType = container.resolveType(this)
-        return (...params) => injectableType.invoke(...params)
+        return (params?, invokeConfig?) => injectableType.invoke(params, { ...invokeConfig, context: context.context })
     }
 
     public static onDefineInjectTo(target) {

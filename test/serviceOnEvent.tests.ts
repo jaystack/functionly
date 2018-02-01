@@ -566,7 +566,7 @@ describe('service events', () => {
                         counter++
 
                         expect(params).to.deep.equal({ p1: 1, p2: 2 })
-                        expect(invokeConfig).to.deep.equal({ config: 1 })
+                        expect(invokeConfig).to.deep.equal({ config: 1, context: {} })
                     }
                 }
 

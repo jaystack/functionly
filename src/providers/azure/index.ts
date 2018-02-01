@@ -14,8 +14,8 @@ export const FUNCTIONLY_FUNCTION_KEY = 'FUNCTIONLY_FUNCTION_KEY'
 
 
 export class AzureProvider extends Provider {
-    public getInvoker(serviceType, params): Function {
-        const callContext = this.createCallContext(serviceType, 'handle')
+    public getInvoker(serviceType, params, initContext): Function {
+        const callContext = this.createCallContext(serviceType, 'handle', initContext)
 
         const invoker = async (context, req) => {
             try {

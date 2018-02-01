@@ -7,7 +7,7 @@ import { PostHook } from '../../classes/middleware/postHook'
 import { container } from '../../helpers/ioc'
 
 export abstract class Provider {
-    public getInvoker(serviceType, params): Function {
+    public getInvoker(serviceType, params, initContext): Function {
         const invoker = () => { }
         return invoker
     }
@@ -46,18 +46,18 @@ export abstract class Provider {
         return implementation(parameter, context, this)
     }
 
-    protected createCallContext(target, method) {
+    protected createCallContext(target, method, initContext) {
         const hooks = getMiddlewares(target)
         const parameters = this.getParameters(target, method)
 
         const preHooks = hooks.filter(h => h.prototype instanceof PreHook)
-            .map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle') }))
+            .map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle', initContext) }))
         const postHookInstances = hooks.filter(h => h.prototype instanceof PostHook)
-        const postHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle') }))
-        const catchHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'catch') }))
+        const postHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle', initContext) }))
+        const catchHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'catch', initContext) }))
 
         return async (context) => {
-            const preic: any = {}
+            const preic: any = { ...(initContext || {}) }
             const preContext = { context: preic, ...context }
 
             try {

@@ -7,8 +7,8 @@ import { container } from '../helpers/ioc'
 import { parse } from 'url'
 
 export class InProcProvider extends Provider {
-    public getInvoker(serviceType, params) {
-        const callContext = this.createCallContext(serviceType, 'handle')
+    public getInvoker(serviceType, params, initContext) {
+        const callContext = this.createCallContext(serviceType, 'handle', initContext)
 
         const invoker = async (invokeParams) => {
             const eventContext = { params: invokeParams }

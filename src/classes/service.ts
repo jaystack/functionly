@@ -29,14 +29,14 @@ export class Service extends Resource {
             parameterMapping
         })
 
-        const invoker = provider.getInvoker(this, undefined)
+        const invoker = provider.getInvoker(this, undefined, invokeConfig && invokeConfig.context)
 
         return await invoker(availableParams)
     }
 
-    public static async onInject({ parameter }): Promise<any> {
+    public static async onInject({ parameter, context }): Promise<any> {
         const injectableType = container.resolveType(this)
-        return (...params) => injectableType.invoke(...params)
+        return (params?, invokeConfig?) => injectableType.invoke(params, { ...(invokeConfig || {}), context: context.context })
     }
 
     public static onDefineInjectTo(target, targetKey, parameterIndex: number) {

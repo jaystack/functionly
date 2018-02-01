@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 
-import { getInvoker } from '../src/providers'
 import { FunctionalService, Resource, Service, Api } from '../src/classes'
 import { param, inject, injectable, serviceParams, request, functionalServiceName, functionName, provider, stage, InjectionScope } from '../src/annotations'
 import { parse } from 'url'
