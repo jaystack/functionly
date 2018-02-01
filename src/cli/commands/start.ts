@@ -118,7 +118,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
     return {
         commands({ commander }) {
             commander
-                .command('local [port] [path]')
+                .command('start [port] [path]')
                 .description('run functional service local')
                 .option('--stage <stage>', 'stage')
                 .action(async (port, path, command) => {
