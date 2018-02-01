@@ -17,9 +17,28 @@ export const getOwnMetadata = (metadataKey, target, propertyKey?) => {
 }
 
 export const getOverridableMetadata = (metadataKey, target, propertyKey) => {
-    if (!target.prototype || target.prototype.hasOwnProperty(propertyKey)) {
-        return getOwnMetadata(metadataKey, target, propertyKey)
+    if (!propertyKey) {
+        // parameter decorators in constructors
     } else {
-        return getMetadata(metadataKey, target, propertyKey)
+        // parameter decorators in static methods
+        if (target.hasOwnProperty(propertyKey)) {
+            return getOwnMetadata(metadataKey, target, propertyKey)
+        }
     }
+
+    return getParentMetadata(metadataKey, target, propertyKey)
+}
+
+export const getParentMetadata = (metadataKey, target, propertyKey) => {
+    if (target === Function) return
+    const value = getOwnMetadata(metadataKey, target, propertyKey)
+    if (typeof value === 'undefined') {
+        if (target.prototype && target.__proto__) {
+            return getParentMetadata(metadataKey, target.__proto__, propertyKey)
+        }
+        if (!target.prototype && target.constructor) {
+            return getParentMetadata(metadataKey, target.constructor, propertyKey)
+        }
+    }
+    return value
 }

@@ -45,10 +45,10 @@ export class ApiGateway extends EventSource {
         }
     }
 
-    public async resultTransform(err, result, event, serviceInstance) {
+    public async resultTransform(err, result, event, serviceType) {
         let headers = {}
-        const metadata = getMetadata(CLASS_APIGATEWAYKEY, serviceInstance) || []
-        if (serviceInstance && metadata.find(m => m.cors === true)) {
+        const metadata = getMetadata(CLASS_APIGATEWAYKEY, serviceType) || []
+        if (serviceType && metadata.find(m => m.cors === true)) {
             headers = {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Requested-With',

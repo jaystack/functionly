@@ -18,12 +18,12 @@ describe('hooks', () => {
         describe('general', () => {
             it("use", () => {
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_MIDDLEWAREKEY, BTestClass)
@@ -36,18 +36,18 @@ describe('hooks', () => {
             })
             it("use multiple param", () => {
                 class TestHook1 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook2 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook3 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook1, TestHook2, TestHook3)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_MIDDLEWAREKEY, BTestClass)
@@ -60,20 +60,20 @@ describe('hooks', () => {
             })
             it("multiple use", () => {
                 class TestHook1 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook2 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook3 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook1)
                 @use(TestHook2)
                 @use(TestHook3)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_MIDDLEWAREKEY, BTestClass)
@@ -86,29 +86,29 @@ describe('hooks', () => {
             })
             it("multiple use multiple param", () => {
                 class TestHook11 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook12 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook21 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook22 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook31 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
                 class TestHook32 extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook11, TestHook12)
                 @use(TestHook21, TestHook22)
                 @use(TestHook31, TestHook32)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_MIDDLEWAREKEY, BTestClass)
@@ -131,12 +131,12 @@ describe('hooks', () => {
                 class ATestClass extends FunctionalService { }
 
                 class TestHook extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
@@ -150,12 +150,12 @@ describe('hooks', () => {
                 class ATestClass extends Resource { }
 
                 class TestHook extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
@@ -169,12 +169,12 @@ describe('hooks', () => {
                 class ATestClass extends DynamoTable { }
 
                 class TestHook extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, BTestClass)
@@ -192,12 +192,12 @@ describe('hooks', () => {
                 class ATestClass extends SimpleNotificationService { }
 
                 class TestHook extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_SNSCONFIGURATIONKEY, BTestClass)
@@ -215,12 +215,12 @@ describe('hooks', () => {
                 class ATestClass extends S3Storage { }
 
                 class TestHook extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_S3CONFIGURATIONKEY, BTestClass)
@@ -240,17 +240,17 @@ describe('hooks', () => {
                 class ATestClass extends FunctionalService { }
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
@@ -264,17 +264,17 @@ describe('hooks', () => {
                 class ATestClass extends Resource { }
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const environmentMetadata = getMetadata(CLASS_ENVIRONMENTKEY, BTestClass)
@@ -288,17 +288,17 @@ describe('hooks', () => {
                 class ATestClass extends DynamoTable { }
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, BTestClass)
@@ -316,17 +316,17 @@ describe('hooks', () => {
                 class ATestClass extends SimpleNotificationService { }
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_SNSCONFIGURATIONKEY, BTestClass)
@@ -344,17 +344,17 @@ describe('hooks', () => {
                 class ATestClass extends S3Storage { }
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle( @inject(ATestClass) a) { }
+                    public static async handle( @inject(ATestClass) a) { }
                 }
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 @use(TestHook)
                 class BTestClass extends FunctionalService {
-                    public async handle() { }
+                    public static async handle() { }
                 }
 
                 const value = getMetadata(CLASS_S3CONFIGURATIONKEY, BTestClass)
@@ -373,7 +373,7 @@ describe('hooks', () => {
         it('prehook', async () => {
             let counter = 0
             class TestHook extends PreHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                 }
@@ -381,7 +381,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
                 }
@@ -401,7 +401,7 @@ describe('hooks', () => {
         it('posthook', async () => {
             let counter = 0
             class TestHook extends PostHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
                 }
@@ -409,7 +409,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                 }
@@ -429,21 +429,21 @@ describe('hooks', () => {
         it('posthook result chain', async () => {
             let counter = 0
             class TestPostHook1 extends PostHook {
-                async handle( @result result) {
+                public static async handle( @result result) {
                     counter++
 
                     return result + 1
                 }
             }
             class TestPostHook2 extends PostHook {
-                async handle( @result result) {
+                public static async handle( @result result) {
                     counter++
 
                     return result + 1
                 }
             }
             class TestPostHook3 extends PostHook {
-                async handle( @result result) {
+                public static async handle( @result result) {
                     counter++
 
                     return result + 1
@@ -454,7 +454,7 @@ describe('hooks', () => {
             @use(TestPostHook2)
             @use(TestPostHook3)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
 
@@ -478,7 +478,7 @@ describe('hooks', () => {
         it('posthook catch error in service', async () => {
             let counter = 0
             class TestHook extends PostHook {
-                public async catch() {
+                public static async catch() {
                     counter++
                     expect(counter).to.equal(2)
                 }
@@ -486,7 +486,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                     throw new Error('error')
@@ -507,14 +507,14 @@ describe('hooks', () => {
         it('posthook catch error in service with prehook', async () => {
             let counter = 0
             class TestPreHook extends PostHook {
-                public async catch() {
+                public static async catch() {
                     counter++
                     expect(counter).to.equal(1)
                 }
             }
 
             class TestCatchHook extends PostHook {
-                public async catch() {
+                public static async catch() {
                     counter++
                     expect(counter).to.equal(3)
                 }
@@ -523,7 +523,7 @@ describe('hooks', () => {
             @use(TestPreHook)
             @use(TestCatchHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
                     throw new Error('error')
@@ -544,14 +544,14 @@ describe('hooks', () => {
         it('posthook catch error in prehook', async () => {
             let counter = 0
             class TestHook extends PreHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                     throw new Error('error')
                 }
             }
             class TestCatchHook extends PostHook {
-                public async catch() {
+                public static async catch() {
                     counter++
                     expect(counter).to.equal(2)
                 }
@@ -560,7 +560,7 @@ describe('hooks', () => {
             @use(TestHook)
             @use(TestCatchHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     expect(true).to.equal(false, 'have to skip this')
                 }
             }
@@ -579,19 +579,19 @@ describe('hooks', () => {
         it('posthook catch error in posthook', async () => {
             let counter = 0
             class TestHook extends PreHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                 }
             }
             class TestCatchHook extends PostHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(3)
 
                     throw new Error('error')
                 }
-                public async catch() {
+                public static async catch() {
                     expect(true).to.equal(false, 'have to skip this')
                 }
             }
@@ -599,7 +599,7 @@ describe('hooks', () => {
             @use(TestHook)
             @use(TestCatchHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
                 }
@@ -622,27 +622,27 @@ describe('hooks', () => {
         it('posthook catch error in posthook handled', async () => {
             let counter = 0
             class TestHook extends PreHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                 }
             }
             class TestCatchHook extends PostHook {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(3)
 
                     throw new Error('error')
                 }
-                public async catch() {
+                public static async catch() {
                     expect(true).to.equal(false, 'have to skip this')
                 }
             }
             class TestCatchHook2 extends PostHook {
-                public async handle() {
+                public static async handle() {
                     expect(true).to.equal(false, 'have to skip this')
                 }
-                public async catch() {
+                public static async catch() {
                     counter++
                     expect(counter).to.equal(4)
 
@@ -654,7 +654,7 @@ describe('hooks', () => {
             @use(TestCatchHook)
             @use(TestCatchHook2)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -679,7 +679,7 @@ describe('hooks', () => {
 
             @injectable()
             class AuthHook extends PreHook {
-                public async handle( @param authorization, @param Authorization) {
+                public static async handle( @param authorization, @param Authorization) {
                     counter++
                     const auth = authorization || Authorization
                     if (!auth) throw new Error('auth')
@@ -687,13 +687,13 @@ describe('hooks', () => {
                 }
             }
             class PermissionHook extends PreHook {
-                public async handle( @inject(AuthHook) identity) {
+                public static async handle( @inject(AuthHook) identity) {
                     counter++
                     expect(identity).to.equal('me')
                 }
             }
             class ResultHook extends PostHook {
-                public async handle( @result result) {
+                public static async handle( @result result) {
                     counter++
                     expect(result).to.deep.equal([{ a: 1 }, { a: 2 }, { a: 3 }])
                     return result
@@ -707,7 +707,7 @@ describe('hooks', () => {
             @use(PermissionHook)
             @use(ResultHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
 
                     return [{ a: 1 }, { a: 2 }, { a: 3 }]
@@ -732,7 +732,7 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestHookLevel2 extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
                     }
@@ -740,7 +740,7 @@ describe('hooks', () => {
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(2)
                     }
@@ -748,7 +748,7 @@ describe('hooks', () => {
 
                 @use(TestHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(3)
                     }
@@ -769,7 +769,7 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestHookLevel2 extends PostHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(2)
                     }
@@ -777,7 +777,7 @@ describe('hooks', () => {
 
                 @use(TestHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
                     }
@@ -785,7 +785,7 @@ describe('hooks', () => {
 
                 @use(TestHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(3)
                     }
@@ -806,14 +806,14 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestPreHookLevel2 extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
                     }
                 }
 
                 class TestPostHookLevel2 extends PostHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(3)
                     }
@@ -822,7 +822,7 @@ describe('hooks', () => {
                 @use(TestPreHookLevel2)
                 @use(TestPostHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(2)
                     }
@@ -830,7 +830,7 @@ describe('hooks', () => {
 
                 @use(TestHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(4)
                     }
@@ -851,7 +851,7 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestPreHookLevel2 extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
 
@@ -860,7 +860,7 @@ describe('hooks', () => {
                 }
 
                 class TestPostHookLevel2 extends PostHook {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
@@ -868,13 +868,13 @@ describe('hooks', () => {
                 @use(TestPreHookLevel2)
                 @use(TestPostHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
 
                 class TestCatchHook extends PostHook {
-                    public async catch( @error e) {
+                    public static async catch( @error e) {
                         counter++
                         expect(counter).to.equal(2)
                         expect(e.message).to.equal('error')
@@ -884,7 +884,7 @@ describe('hooks', () => {
                 @use(TestHook)
                 @use(TestCatchHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
@@ -904,14 +904,14 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestPreHookLevel2 extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
                     }
                 }
 
                 class TestPostHookLevel2 extends PostHook {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
@@ -919,7 +919,7 @@ describe('hooks', () => {
                 @use(TestPreHookLevel2)
                 @use(TestPostHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(2)
 
@@ -928,7 +928,7 @@ describe('hooks', () => {
                 }
 
                 class TestCatchHook extends PostHook {
-                    catch( @error e) {
+                    public static async catch( @error e) {
                         counter++
                         expect(counter).to.equal(3)
                         expect(e.message).to.equal('error')
@@ -938,7 +938,7 @@ describe('hooks', () => {
                 @use(TestHook)
                 @use(TestCatchHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
@@ -958,14 +958,14 @@ describe('hooks', () => {
                 let counter = 0
 
                 class TestPreHookLevel2 extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(1)
                     }
                 }
 
                 class TestPostHookLevel2 extends PostHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(3)
 
@@ -976,14 +976,14 @@ describe('hooks', () => {
                 @use(TestPreHookLevel2)
                 @use(TestPostHookLevel2)
                 class TestHook extends PreHook {
-                    public async handle() {
+                    public static async handle() {
                         counter++
                         expect(counter).to.equal(2)
                     }
                 }
 
                 class TestCatchHook extends PostHook {
-                    catch( @error e) {
+                    public static async catch( @error e) {
                         counter++
                         expect(counter).to.equal(4)
                         expect(e.message).to.equal('error')
@@ -993,7 +993,7 @@ describe('hooks', () => {
                 @use(TestHook)
                 @use(TestCatchHook)
                 class TestFunctionalService extends FunctionalService {
-                    public async handle() {
+                    public static async handle() {
                         expect(true).to.equal(false, 'have to skip this')
                     }
                 }
@@ -1017,7 +1017,7 @@ describe('hooks', () => {
 
             @injectable()
             class TestHook extends PreHook {
-                async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                     return 'v1'
@@ -1026,7 +1026,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle( @inject(TestHook) p1) {
+                public static async handle( @inject(TestHook) p1) {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -1053,7 +1053,7 @@ describe('hooks', () => {
 
             @injectable()
             class TestHook extends PreHook {
-                async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                 }
@@ -1061,7 +1061,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle( @inject(TestHook) p1) {
+                public static async handle( @inject(TestHook) p1) {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -1087,7 +1087,7 @@ describe('hooks', () => {
             let counter = 0
 
             class TestHook extends PostHook {
-                async handle( @result res) {
+                public static async handle( @result res) {
                     counter++
                     expect(counter).to.equal(2)
                     return { ...res, p1: 'p1' }
@@ -1096,7 +1096,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
 
@@ -1120,7 +1120,7 @@ describe('hooks', () => {
             let counter = 0
 
             class TestHook extends PostHook {
-                async handle( @result res) {
+                public static async handle( @result res) {
                     counter++
                     expect(counter).to.equal(2)
                     return res
@@ -1128,7 +1128,7 @@ describe('hooks', () => {
             }
 
             class TestHook2 extends PostHook {
-                async catch( @error e) {
+                public static async catch( @error e) {
                     throw e
                 }
             }
@@ -1136,7 +1136,7 @@ describe('hooks', () => {
             @use(TestHook)
             @use(TestHook2)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
 
@@ -1163,7 +1163,7 @@ describe('hooks', () => {
             }
 
             class TestHook2 extends PostHook {
-                async catch( @error e) {
+                public static async catch( @error e) {
                     throw e
                 }
             }
@@ -1171,7 +1171,7 @@ describe('hooks', () => {
             @use(TestHook)
             @use(TestHook2)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
 
@@ -1196,7 +1196,7 @@ describe('hooks', () => {
 
             @injectable()
             class TestPreHook extends PreHook {
-                async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                     return 'p1'
@@ -1204,7 +1204,7 @@ describe('hooks', () => {
             }
 
             class TestPostHook extends PostHook {
-                async handle( @result res, @inject(TestPreHook) p1) {
+                public static async handle( @result res, @inject(TestPreHook) p1) {
                     counter++
                     expect(counter).to.equal(3)
                     return { ...res, p1 }
@@ -1214,7 +1214,7 @@ describe('hooks', () => {
             @use(TestPreHook)
             @use(TestPostHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -1239,7 +1239,7 @@ describe('hooks', () => {
 
             @injectable()
             class TestPreHook extends PreHook {
-                async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(1)
                     return 'p1'
@@ -1247,7 +1247,7 @@ describe('hooks', () => {
             }
 
             class TestPostHook extends PostHook {
-                async catch( @result res, @inject(TestPreHook) p1) {
+                public static async catch( @result res, @inject(TestPreHook) p1) {
                     counter++
                     expect(counter).to.equal(3)
                     return { ok: 1, p1 }
@@ -1257,7 +1257,7 @@ describe('hooks', () => {
             @use(TestPreHook)
             @use(TestPostHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     expect(counter).to.equal(2)
 
@@ -1282,14 +1282,14 @@ describe('hooks', () => {
 
             @injectable()
             class TestHook1 extends PreHook {
-                async handle() {
+                public static async handle() {
                     return 'v1'
                 }
             }
 
             @injectable()
             class TestHook2 extends PreHook {
-                async handle( @inject(TestHook1) p1) {
+                public static async handle( @inject(TestHook1) p1) {
                     expect(p1).to.equal('v1')
 
                     return 'v2'
@@ -1298,7 +1298,7 @@ describe('hooks', () => {
 
             @injectable()
             class TestHook3 extends PreHook {
-                async handle( @inject(TestHook1) p1, @inject(TestHook2) p2) {
+                public static async handle( @inject(TestHook1) p1, @inject(TestHook2) p2) {
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
 
@@ -1310,7 +1310,7 @@ describe('hooks', () => {
             @use(TestHook2)
             @use(TestHook3)
             class TestFunctionalService extends FunctionalService {
-                public async handle( @inject(TestHook1) p1, @inject(TestHook2) p2, @inject(TestHook3) p3) {
+                public static async handle( @inject(TestHook1) p1, @inject(TestHook2) p2, @inject(TestHook3) p3) {
                     counter++
 
                     expect(p1).to.equal('v1')
@@ -1335,7 +1335,7 @@ describe('hooks', () => {
         it('@error', async () => {
             let counter = 0
             class TestHook extends PostHook {
-                catch( @error e) {
+                public static async catch( @error e) {
                     counter++
                     expect(e).instanceOf(Error)
 
@@ -1345,7 +1345,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     throw new Error('custom error message')
                 }
@@ -1365,7 +1365,7 @@ describe('hooks', () => {
         it("@functionalServiceName", async () => {
             let counter = 0
             class TestHook extends PreHook {
-                async handle( @functionalServiceName serviceName) {
+                public static async handle( @functionalServiceName serviceName) {
                     counter++
                     expect(serviceName).to.equal('TestFunctionalService')
                 }
@@ -1373,7 +1373,7 @@ describe('hooks', () => {
 
             @use(TestHook)
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     return { ok: 1 }
                 }
@@ -1394,7 +1394,7 @@ describe('hooks', () => {
         it("@functionalServiceName with functionName decorator", async () => {
             let counter = 0
             class TestHook extends PreHook {
-                async handle( @functionalServiceName serviceName) {
+                public static async handle( @functionalServiceName serviceName) {
                     counter++
                     expect(serviceName).to.equal('MyTestFunctionalService')
                 }
@@ -1403,7 +1403,7 @@ describe('hooks', () => {
             @use(TestHook)
             @functionName('MyTestFunctionalService')
             class TestFunctionalService extends FunctionalService {
-                public async handle() {
+                public static async handle() {
                     counter++
                     return { ok: 1 }
                 }

@@ -3,8 +3,8 @@ import { getMiddlewares } from '../../annotations/classes/use'
 const { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY } = constants
 
 export class Hook {
-    public handle(...params);
-    public handle( @result res) {
+    public static handle(...params);
+    public static handle( @result res) {
         return res
     }
 

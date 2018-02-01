@@ -34,7 +34,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -71,7 +71,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
@@ -107,7 +107,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -151,7 +151,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -192,7 +192,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
@@ -217,13 +217,13 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    public static handle( @param p1, @param p2) {
                         counter++
 
                         return { ok: 1 }
                     }
 
-                    public async onHandle_local(req, res, next) {
+                    public static async onHandle_local(req, res, next) {
                         counter++
 
                         expect(req).to.deep.equal({ body: { p1: 1, p2: 2 } })
@@ -250,14 +250,14 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    public static handle( @param p1, @param p2) {
                         counter++
                         expect(false).to.equal(true, 'skippable code')
 
                         return { ok: 1 }
                     }
 
-                    public async onHandle_local(req, res, next) {
+                    public static async onHandle_local(req, res, next) {
                         counter++
 
                         expect(req).to.deep.equal({ body: { p1: 1, p2: 2 } })
@@ -304,7 +304,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -339,7 +339,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
@@ -373,7 +373,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -415,7 +415,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.instanceof(Resource)
                         expect(p1).to.instanceof(MockInjectable)
@@ -454,7 +454,7 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
                         expect(p1).to.not.instanceof(Resource)
                         expect(p1).to.not.instanceof(MockInjectable)
@@ -477,13 +477,13 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    public static async handle( @param p1, @param p2) {
                         counter++
 
                         return { ok: 1 }
                     }
 
-                    public async onHandle_aws(event, context, cb) {
+                    public static async onHandle_aws(event, context, cb) {
                         counter++
 
                         expect(event).to.deep.equal({ p1: 1, p2: 2 })
@@ -509,14 +509,14 @@ describe('service events', () => {
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
 
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    public static async handle( @param p1, @param p2) {
                         counter++
                         expect(false).to.equal(true, 'skippable code')
 
                         return { ok: 1 }
                     }
 
-                    public async onHandle_aws(event, context, cb) {
+                    public static async onHandle_aws(event, context, cb) {
                         counter++
 
                         expect(event).to.deep.equal({ p1: 1, p2: 2 })
@@ -544,7 +544,7 @@ describe('service events', () => {
 
     describe("mock", () => {
         class MockProvider extends LocalProvider {
-            public async invoke(serviceInstance, params, invokeConfig?): Promise<any> { }
+            public async invoke(serviceType, params, invokeConfig?): Promise<any> { }
         }
         before(() => {
             addProvider('mock', new MockProvider())
@@ -562,7 +562,7 @@ describe('service events', () => {
 
                 @injectable()
                 class MockInjectable extends FunctionalService {
-                    onInvoke({ params, invokeConfig }) {
+                    public static async onInvoke({ params, invokeConfig }) {
                         counter++
 
                         expect(params).to.deep.equal({ p1: 1, p2: 2 })
@@ -571,10 +571,10 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    async handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Resource)
-                        expect(p1).to.instanceof(MockInjectable)
+                        expect(p1.prototype).to.instanceof(Resource)
+                        expect(p1).to.equal(MockInjectable)
 
                         await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })
                     }
@@ -595,8 +595,8 @@ describe('service events', () => {
 
                 @injectable()
                 class MockInjectable extends FunctionalService {
-                    handle( @param p1) { }
-                    onInvoke_mock({ invokeParams, params, invokeConfig, parameterMapping, currentEnvironment, environmentMode }) {
+                    public static async handle( @param p1) { }
+                    static onInvoke_mock({ invokeParams, params, invokeConfig, parameterMapping, currentEnvironment, environmentMode }) {
                         counter++
 
                         expect(invokeParams).to.deep.equal({ p1: 1, p2: 2 })
@@ -614,10 +614,10 @@ describe('service events', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    async handle( @inject(MockInjectable) p1) {
+                    public static async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1).to.instanceof(Resource)
-                        expect(p1).to.instanceof(MockInjectable)
+                        expect(p1.prototype).to.instanceof(Resource)
+                        expect(p1).to.equal(MockInjectable)
 
                         await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })
                     }

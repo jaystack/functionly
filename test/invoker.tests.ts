@@ -33,7 +33,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                public async handle( @param p1, @param p2) {
+                public static async handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1', 'CustomService')
                     expect(p2).to.equal('p2', 'CustomService')
@@ -41,7 +41,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                public async handle( @param noparam, @inject(CustomService) myService) {
+                public static async handle( @param noparam, @inject(CustomService) myService) {
                     counter++
                     expect(noparam).to.undefined
                     expect(myService).to.instanceof(Function)
@@ -70,7 +70,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                public async handle( @param p1, @param p2) {
+                public static async handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1', 'CustomService')
                     expect(p2).to.equal('p2', 'CustomService')
@@ -94,7 +94,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                public async handle( @param p1, @inject(CustomApi) api) {
+                public static async handle( @param p1, @inject(CustomApi) api) {
                     counter++
                     expect(p1).to.undefined
                     expect(api).to.instanceof(CustomApi)
@@ -123,7 +123,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                public async handle( @param p1, @param p2) {
+                public static async handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1', 'CustomService')
                     expect(p2).to.equal('p2', 'CustomService')
@@ -161,7 +161,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                public async handle( @param p1, @inject(CustomApi) api) {
+                public static async handle( @param p1, @inject(CustomApi) api) {
                     counter++
                     expect(counter).to.equal(3)
                     expect(p1).to.undefined
@@ -185,19 +185,19 @@ describe('invoker', () => {
         })
 
         describe("injection modes", () => {
-            it("multiple inject transient api with transient service", async () => {
+            it("multiple inject transient api with a service", async () => {
                 let counter = 0
                 let instanceCreation = 0
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'local'
 
-                @injectable(InjectionScope.Transient)
+                @injectable()
                 class CustomService extends Service {
                     public constructor() {
                         super()
                         instanceCreation++
                     }
-                    public async handle( @param p1, @param p2) {
+                    public static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('p1', 'CustomService')
                         expect(p2).to.equal('p2', 'CustomService')
@@ -222,190 +222,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
-                        counter++
-                        expect(p1).to.undefined
-                        expect(api).to.instanceof(CustomApi)
-
-                        await api.myMethod('p1', 'p2')
-                    }
-                }
-
-                const invoker = MockService.createInvoker()
-                await invoker({}, {
-                    send: () => {
-                        expect(counter).to.equal(3)
-                        expect(instanceCreation).to.equal(6)
-                    }
-                }, (e) => {
-                    expect(null).to.equal(e)
-                    throw e
-                })
-
-                expect(counter).to.equal(3)
-                expect(instanceCreation).to.equal(6)
-            })
-
-            it("multiple inject transient api with singleton service", async () => {
-                let counter = 0
-                let instanceCreation = 0
-
-                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
-
-                @injectable(InjectionScope.Singleton)
-                class CustomService extends Service {
-                    public constructor() {
-                        super()
-                        instanceCreation++
-                    }
-                    public async handle( @param p1, @param p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomService')
-                        expect(p2).to.equal('p2', 'CustomService')
-                    }
-                }
-
-                @injectable(InjectionScope.Transient)
-                class CustomApi extends Api {
-                    private _myService
-                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
-                        super()
-                        instanceCreation++
-                        this._myService = myService
-                    }
-                    public async myMethod(p1, p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomApi')
-                        expect(p2).to.equal('p2', 'CustomApi')
-
-                        await this._myService({ p1, p2 })
-                    }
-                }
-
-                class MockService extends FunctionalService {
-                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
-                        counter++
-                        expect(p1).to.undefined
-                        expect(api).to.instanceof(CustomApi)
-
-                        await api.myMethod('p1', 'p2')
-                    }
-                }
-
-                const invoker = MockService.createInvoker()
-                await invoker({}, {
-                    send: () => {
-                        expect(counter).to.equal(3)
-                        expect(instanceCreation).to.equal(3)
-                    }
-                }, (e) => {
-                    expect(null).to.equal(e)
-                    throw e
-                })
-
-                expect(counter).to.equal(3)
-                expect(instanceCreation).to.equal(3)
-            })
-
-            it("multiple inject singleton api with transient service", async () => {
-                let counter = 0
-                let instanceCreation = 0
-
-                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
-
-                @injectable(InjectionScope.Transient)
-                class CustomService extends Service {
-                    public constructor() {
-                        super()
-                        instanceCreation++
-                    }
-                    public async handle( @param p1, @param p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomService')
-                        expect(p2).to.equal('p2', 'CustomService')
-                    }
-                }
-
-                @injectable(InjectionScope.Singleton)
-                class CustomApi extends Api {
-                    private _myService
-                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
-                        super()
-                        instanceCreation++
-                        this._myService = myService
-                    }
-                    public async myMethod(p1, p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomApi')
-                        expect(p2).to.equal('p2', 'CustomApi')
-
-                        await this._myService({ p1, p2 })
-                    }
-                }
-
-                class MockService extends FunctionalService {
-                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
-                        counter++
-                        expect(p1).to.undefined
-                        expect(api).to.instanceof(CustomApi)
-
-                        await api.myMethod('p1', 'p2')
-                    }
-                }
-
-                const invoker = MockService.createInvoker()
-                await invoker({}, {
-                    send: () => {
-                        expect(counter).to.equal(3)
-                        expect(instanceCreation).to.equal(3)
-                    }
-                }, (e) => {
-                    expect(null).to.equal(e)
-                    throw e
-                })
-
-                expect(counter).to.equal(3)
-                expect(instanceCreation).to.equal(3)
-            })
-
-            it("multiple inject singleton api with singleton service", async () => {
-                let counter = 0
-                let instanceCreation = 0
-
-                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
-
-                @injectable(InjectionScope.Singleton)
-                class CustomService extends Service {
-                    public constructor() {
-                        super()
-                        instanceCreation++
-                    }
-                    public async handle( @param p1, @param p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomService')
-                        expect(p2).to.equal('p2', 'CustomService')
-                    }
-                }
-
-                @injectable(InjectionScope.Singleton)
-                class CustomApi extends Api {
-                    private _myService
-                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
-                        super()
-                        instanceCreation++
-                        this._myService = myService
-                    }
-                    public async myMethod(p1, p2) {
-                        counter++
-                        expect(p1).to.equal('p1', 'CustomApi')
-                        expect(p2).to.equal('p2', 'CustomApi')
-
-                        await this._myService({ p1, p2 })
-                    }
-                }
-
-                class MockService extends FunctionalService {
-                    public async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                    public static async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
                         counter++
                         expect(p1).to.undefined
                         expect(api).to.instanceof(CustomApi)
@@ -428,6 +245,67 @@ describe('invoker', () => {
                 expect(counter).to.equal(3)
                 expect(instanceCreation).to.equal(2)
             })
+
+            it("multiple inject singleton api with a service", async () => {
+                let counter = 0
+                let instanceCreation = 0
+
+                process.env.FUNCTIONAL_ENVIRONMENT = 'local'
+
+                @injectable(InjectionScope.Transient)
+                class CustomService extends Service {
+                    public constructor() {
+                        super()
+                        instanceCreation++
+                    }
+                    public static async handle( @param p1, @param p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomService')
+                        expect(p2).to.equal('p2', 'CustomService')
+                    }
+                }
+
+                @injectable(InjectionScope.Singleton)
+                class CustomApi extends Api {
+                    private _myService
+                    public constructor( @inject(CustomService) myService, @inject(CustomService) myService2) {
+                        super()
+                        instanceCreation++
+                        this._myService = myService
+                    }
+                    public async myMethod(p1, p2) {
+                        counter++
+                        expect(p1).to.equal('p1', 'CustomApi')
+                        expect(p2).to.equal('p2', 'CustomApi')
+
+                        await this._myService({ p1, p2 })
+                    }
+                }
+
+                class MockService extends FunctionalService {
+                    public static async handle( @param p1, @inject(CustomApi) api, @inject(CustomApi) api2) {
+                        counter++
+                        expect(p1).to.undefined
+                        expect(api).to.instanceof(CustomApi)
+
+                        await api.myMethod('p1', 'p2')
+                    }
+                }
+
+                const invoker = MockService.createInvoker()
+                await invoker({}, {
+                    send: () => {
+                        expect(counter).to.equal(3)
+                        expect(instanceCreation).to.equal(1)
+                    }
+                }, (e) => {
+                    expect(null).to.equal(e)
+                    throw e
+                })
+
+                expect(counter).to.equal(3)
+                expect(instanceCreation).to.equal(1)
+            })
         })
     })
 
@@ -443,7 +321,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                 }
             }
@@ -462,7 +340,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     return { ok: 1 }
                 }
@@ -483,7 +361,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     throw new Error('error in handle')
                 }
@@ -507,7 +385,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
@@ -534,7 +412,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
@@ -561,7 +439,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
@@ -588,7 +466,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('v1')
                     expect(p2).to.equal('v2')
@@ -615,7 +493,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('v1')
                     expect(p2).to.undefined
@@ -641,7 +519,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param p1, @param p2, @param p3, @param p4) {
+                static handle( @param p1, @param p2, @param p3, @param p4) {
                     counter++
                     expect(p1).to.equal('body')
                     expect(p2).to.equal('query')
@@ -685,7 +563,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             class MockService extends FunctionalService {
-                handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
+                static handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
                     counter++
                     expect(p1).to.equal('query')
                     expect(p2).to.equal('params')
@@ -733,7 +611,7 @@ describe('invoker', () => {
             class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(MockInjectable) p2) {
+                static handle( @param p1, @inject(MockInjectable) p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.instanceof(Resource)
@@ -757,7 +635,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1')
                     expect(p2).to.equal('p2')
@@ -765,7 +643,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(CustomService) p2) {
+                static handle( @param p1, @inject(CustomService) p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.instanceof(Function)
@@ -802,7 +680,7 @@ describe('invoker', () => {
             const next = (e) => { e && done(e) }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @serviceParams p2) {
+                static handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('req').that.to.equal(req)
@@ -849,7 +727,7 @@ describe('invoker', () => {
             const next = (e) => { e && done(e) }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(parse(req.originalUrl))
                     expect(r).to.have.property('method', req.method)
@@ -900,7 +778,7 @@ describe('invoker', () => {
             const next = (e) => { e && done(e) }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(req._parsedUrl)
                     expect(r).to.have.property('method', req.method)
@@ -947,7 +825,7 @@ describe('invoker', () => {
             const next = (e) => { expect(true).to.equal(false, e.message) }
 
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
 
                     return {
@@ -983,7 +861,7 @@ describe('invoker', () => {
             const next = (e) => { expect(true).to.equal(false, e.message) }
 
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MockService')
@@ -1014,7 +892,7 @@ describe('invoker', () => {
 
             @functionName('MyMockService')
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MyMockService')
@@ -1044,7 +922,7 @@ describe('invoker', () => {
             const next = (e) => { expect(true).to.equal(false, e.message) }
 
             class MockService extends FunctionalService {
-                handle( @provider provider) {
+                static handle( @provider provider) {
                     counter++
 
                     expect(provider).to.equal('local')
@@ -1075,7 +953,7 @@ describe('invoker', () => {
             const next = (e) => { expect(true).to.equal(false, e.message) }
 
             class MockService extends FunctionalService {
-                handle( @stage stage) {
+                static handle( @stage stage) {
                     counter++
 
                     expect(stage).to.equal('dev')
@@ -1103,7 +981,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                 }
             }
@@ -1120,7 +998,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     return { ok: 1 }
                 }
@@ -1139,7 +1017,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     throw new Error('error in handle')
                 }
@@ -1161,7 +1039,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1186,7 +1064,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1209,7 +1087,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1237,7 +1115,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1266,7 +1144,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1295,7 +1173,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1324,7 +1202,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1353,7 +1231,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2) {
+                    static async handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -1382,7 +1260,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param p1, @param p2, @param p3, @param p4) {
+                    static async handle( @param p1, @param p2, @param p3, @param p4) {
                         counter++
                         expect(p1).to.equal('body')
                         expect(p2).to.equal('queryStringParameters')
@@ -1427,7 +1305,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle( @param({ source: 'event.event.queryStringParameters' }) p1, @param({ source: 'event.event.pathParameters' }) p2, @param({ source: 'event.event.headers' }) p3, @param p4) {
+                    static async handle( @param({ source: 'event.event.queryStringParameters' }) p1, @param({ source: 'event.event.pathParameters' }) p2, @param({ source: 'event.event.headers' }) p3, @param p4) {
                         counter++
                         expect(p1).to.equal('queryStringParameters')
                         expect(p2).to.equal('pathParameters')
@@ -1472,7 +1350,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle() {
+                    static async handle() {
                         counter++
                         return { ok: 1 }
                     }
@@ -1501,7 +1379,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle() {
+                    static async handle() {
                         counter++
                         return {
                             statusCode: 200,
@@ -1532,7 +1410,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle() {
+                    static async handle() {
                         counter++
                         return {
                             statusCode: 500,
@@ -1569,7 +1447,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'aws'
                 class MockService extends FunctionalService {
-                    async handle() {
+                    static async handle() {
                         counter++
                         throw new MyError('error in handle')
                     }
@@ -1613,7 +1491,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param s3, @param('s3.object.key') p2) {
+                    static handle( @param s3, @param('s3.object.key') p2) {
                         counter++
                         expect(s3).to.deep.equal(awsEvent.Records[0].s3)
                         expect(p2).to.equal('filename')
@@ -1648,7 +1526,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param s3, @param({ name: 'event.event.Records', source: null }) p2) {
+                    static handle( @param s3, @param({ name: 'event.event.Records', source: null }) p2) {
                         counter++
                         expect(s3).to.deep.equal(awsEvent.Records[0].s3)
                         expect(p2).to.have.lengthOf(1);
@@ -1681,7 +1559,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param Sns, @param('Sns.Message') p2) {
+                    static handle( @param Sns, @param('Sns.Message') p2) {
                         counter++
                         expect(Sns).to.deep.equal(awsEvent.Records[0].Sns)
                         expect(p2).to.equal('message')
@@ -1713,7 +1591,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle( @param Sns, @param({ name: 'event.event.Records', source: null }) p2) {
+                    static handle( @param Sns, @param({ name: 'event.event.Records', source: null }) p2) {
                         counter++
                         expect(Sns).to.deep.equal(awsEvent.Records[0].Sns)
                         expect(p2).to.have.lengthOf(1);
@@ -1758,7 +1636,7 @@ describe('invoker', () => {
                 }
 
                 class MockService extends FunctionalService {
-                    handle() {
+                    static handle() {
                         counter++
 
                         return {
@@ -1789,7 +1667,7 @@ describe('invoker', () => {
             class MockInjectable extends Resource { }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(MockInjectable) p2) {
+                static handle( @param p1, @inject(MockInjectable) p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.instanceof(Resource)
@@ -1812,7 +1690,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1')
                     expect(p2).to.equal('p2')
@@ -1820,7 +1698,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(CustomService) p2) {
+                static handle( @param p1, @inject(CustomService) p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.instanceof(Function)
@@ -1853,7 +1731,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @serviceParams p2) {
+                static handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('event').that.to.equal(awsEvent)
@@ -1899,7 +1777,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
                     expect(r).to.have.property('method', awsEvent.httpMethod)
@@ -1946,7 +1824,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
                     expect(r).to.have.property('method', awsEvent.httpMethod)
@@ -1993,7 +1871,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(parse(awsEvent.path))
                     expect(r).to.have.property('method', awsEvent.httpMethod)
@@ -2031,7 +1909,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
 
                     return {
@@ -2066,7 +1944,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MockService')
@@ -2096,7 +1974,7 @@ describe('invoker', () => {
 
             @functionName('MyMockService')
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MyMockService')
@@ -2125,7 +2003,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @provider provider) {
+                static handle( @provider provider) {
                     counter++
 
                     expect(provider).to.equal('aws')
@@ -2155,7 +2033,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @stage stage) {
+                static handle( @stage stage) {
                     counter++
 
                     expect(stage).to.equal('dev')
@@ -2183,7 +2061,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                 }
             }
@@ -2203,7 +2081,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     return { ok: 1 }
                 }
@@ -2227,7 +2105,7 @@ describe('invoker', () => {
 
             process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
                     ex = new Error('error in handle')
                     throw ex
@@ -2252,7 +2130,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -2280,7 +2158,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -2308,7 +2186,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -2336,7 +2214,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2) {
+                    static handle( @param p1, @param p2) {
                         counter++
                         expect(p1).to.equal('v1')
                         expect(p2).to.equal('v2')
@@ -2364,7 +2242,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param p1, @param p2, @param p3, @param p4) {
+                    static handle( @param p1, @param p2, @param p3, @param p4) {
                         counter++
                         expect(p1).to.equal('body')
                         expect(p2).to.equal('queryStringParameters')
@@ -2408,7 +2286,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
+                    static handle( @param({ source: 'event.req.query' }) p1, @param({ source: 'event.req.params' }) p2, @param({ source: 'event.req.headers' }) p3, @param p4) {
                         counter++
                         expect(p1).to.equal('queryStringParameters')
                         expect(p2).to.equal('pathParameters')
@@ -2452,7 +2330,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle() {
+                    static handle() {
                         counter++
                         return { ok: 1 }
                     }
@@ -2475,7 +2353,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle() {
+                    static handle() {
                         counter++
                         return {
                             status: 200,
@@ -2501,7 +2379,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle() {
+                    static handle() {
                         counter++
                         return {
                             status: 500,
@@ -2528,7 +2406,7 @@ describe('invoker', () => {
 
                 process.env.FUNCTIONAL_ENVIRONMENT = 'azure'
                 class MockService extends FunctionalService {
-                    handle() {
+                    static handle() {
                         counter++
                         ex = new Error('error in handle')
                         throw ex
@@ -2555,7 +2433,7 @@ describe('invoker', () => {
 
             @injectable()
             class CustomService extends Service {
-                handle( @param p1, @param p2) {
+                static handle( @param p1, @param p2) {
                     counter++
                     expect(p1).to.equal('p1')
                     expect(p2).to.equal('p2')
@@ -2563,7 +2441,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @inject(CustomService) p2) {
+                static handle( @param p1, @inject(CustomService) p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.instanceof(Function)
@@ -2595,7 +2473,7 @@ describe('invoker', () => {
             const req = {}
 
             class MockService extends FunctionalService {
-                handle( @param p1, @serviceParams p2) {
+                static handle( @param p1, @serviceParams p2) {
                     counter++
                     expect(p1).to.undefined
                     expect(p2).to.have.property('context').that.to.equal(context)
@@ -2638,7 +2516,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle( @param p1, @request r) {
+                static handle( @param p1, @request r) {
                     counter++
                     expect(r).to.have.property('url').that.deep.equal(parse(req.originalUrl))
                     expect(r).to.have.property('method', req.method)
@@ -2671,7 +2549,7 @@ describe('invoker', () => {
             }
 
             class MockService extends FunctionalService {
-                handle() {
+                static handle() {
                     counter++
 
                     return {
@@ -2709,7 +2587,7 @@ describe('invoker', () => {
             const req = {}
 
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MockService')
@@ -2737,7 +2615,7 @@ describe('invoker', () => {
 
             @functionName('MyMockService')
             class MockService extends FunctionalService {
-                handle( @functionalServiceName serviceName) {
+                static handle( @functionalServiceName serviceName) {
                     counter++
 
                     expect(serviceName).to.equal('MyMockService')
@@ -2764,7 +2642,7 @@ describe('invoker', () => {
             const req = {}
 
             class MockService extends FunctionalService {
-                handle( @provider provider) {
+                static handle( @provider provider) {
                     counter++
 
                     expect(provider).to.equal('azure')
@@ -2792,7 +2670,7 @@ describe('invoker', () => {
             const req = {}
 
             class MockService extends FunctionalService {
-                handle( @stage stage) {
+                static handle( @stage stage) {
                     counter++
 
                     expect(stage).to.equal('dev')

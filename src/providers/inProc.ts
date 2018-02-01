@@ -7,8 +7,8 @@ import { container } from '../helpers/ioc'
 import { parse } from 'url'
 
 export class InProcProvider extends Provider {
-    public getInvoker(serviceInstance, params) {
-        const callContext = this.createCallContext(serviceInstance, 'handle')
+    public getInvoker(serviceType, params) {
+        const callContext = this.createCallContext(serviceType, 'handle')
 
         const invoker = async (invokeParams) => {
             const eventContext = { params: invokeParams }
@@ -16,18 +16,18 @@ export class InProcProvider extends Provider {
             let result
             let error
             try {
-                result = await callContext({ event: eventContext, serviceInstance })
+                result = await callContext({ event: eventContext, serviceType })
             } catch (err) {
                 error = err
             }
-            const response = await this.resultTransform(error, result, eventContext, serviceInstance)
+            const response = await this.resultTransform(error, result, eventContext, serviceType)
 
             return response
         }
         return invoker
     }
 
-    protected resultTransform(error, result, eventContext, serviceInstance) {
+    protected resultTransform(error, result, eventContext, serviceType) {
         if (error) throw error
 
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {

@@ -7,12 +7,12 @@ import { PostHook } from '../../classes/middleware/postHook'
 import { container } from '../../helpers/ioc'
 
 export abstract class Provider {
-    public getInvoker(serviceInstance, params): Function {
+    public getInvoker(serviceType, params): Function {
         const invoker = () => { }
         return invoker
     }
 
-    public async invoke(serviceInstance, params, invokeConfig?): Promise<any> {
+    public async invoke(serviceType, params, invokeConfig?): Promise<any> {
 
     }
 
@@ -47,14 +47,14 @@ export abstract class Provider {
     }
 
     protected createCallContext(target, method) {
-        const hooks = getMiddlewares(target).map(m => container.resolve(m))
-        const parameters = this.getParameters(target.constructor, method)
+        const hooks = getMiddlewares(target)
+        const parameters = this.getParameters(target, method)
 
-        const preHooks = hooks.filter(h => h instanceof PreHook)
-            .map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'handle') }))
-        const postHookInstances = hooks.filter(h => h instanceof PostHook)
-        const postHooks = postHookInstances.map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'handle') }))
-        const catchHooks = postHookInstances.map(h => ({ hookKey: h.constructor.name, hook: this.createCallContext(h, 'catch') }))
+        const preHooks = hooks.filter(h => h.prototype instanceof PreHook)
+            .map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle') }))
+        const postHookInstances = hooks.filter(h => h.prototype instanceof PostHook)
+        const postHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'handle') }))
+        const catchHooks = postHookInstances.map(h => ({ hookKey: h.name, hook: this.createCallContext(h, 'catch') }))
 
         return async (context) => {
             const preic: any = {}
@@ -151,7 +151,7 @@ Provider.addParameterDecoratorImplementation("result", async (parameter, context
     return context.context && context.context.result
 })
 Provider.addParameterDecoratorImplementation("functionalServiceName", async (parameter, context, provider) => {
-    return context.serviceInstance && getFunctionName(context.serviceInstance)
+    return context.serviceType && getFunctionName(context.serviceType)
 })
 Provider.addParameterDecoratorImplementation("provider", async (parameter, context, provider) => {
     return process.env.FUNCTIONAL_ENVIRONMENT

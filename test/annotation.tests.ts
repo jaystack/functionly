@@ -1467,15 +1467,93 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('type', 'inject')
             })
 
-            it("overrided class method no inject", () => {
+            it("overrided class constructor", () => {
                 @injectable()
                 class ATestClass { }
 
                 class BaseBTestClass {
-                    method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                    constructor( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
                 }
                 class BTestClass extends BaseBTestClass {
-                    method() { }
+                    constructor( @inject(ATestClass) a) { super(a, a) }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, undefined)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
+
+            it("overrided static class method", () => {
+                @injectable()
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    static method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    static method( @inject(ATestClass) a) { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
+
+            // non static methods are not supported
+            // it("overrided class method no inject", () => {
+            //     @injectable()
+            //     class ATestClass { }
+
+            //     class BaseBTestClass {
+            //         method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+            //     }
+            //     class BTestClass extends BaseBTestClass {
+            //         method() { }
+            //     }
+
+            //     const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+            //     expect(value).to.undefined
+            // })
+
+            it("overrided class constructor no inject", () => {
+                @injectable()
+                class ATestClass { }
+                
+                class BaseBTestClass {
+                    constructor( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    constructor() { super(null, null) }
+                }
+                
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, undefined)
+                // pass the base class params if there is not defined inject in the new ctor
+                // expect(value).to.undefined
+
+                expect(value).to.have.lengthOf(2);
+            })
+
+            it("overrided static class method no inject", () => {
+                @injectable()
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    static method( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
+                }
+                class BTestClass extends BaseBTestClass {
+                    static method() { }
                 }
 
                 const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
@@ -1488,6 +1566,50 @@ describe('annotations', () => {
 
                 class BaseBTestClass {
                     method( @inject(ATestClass) a) { }
+                }
+                class BTestClass extends BaseBTestClass {
+
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
+
+            it("not overrided class constructor", () => {
+                @injectable()
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    constructor( @inject(ATestClass) a) { }
+                }
+                class BTestClass extends BaseBTestClass {
+
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, undefined)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('serviceType', ATestClass)
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'inject')
+            })
+
+            it("not overrided static class method", () => {
+                @injectable()
+                class ATestClass { }
+
+                class BaseBTestClass {
+                    static method( @inject(ATestClass) a) { }
                 }
                 class BTestClass extends BaseBTestClass {
 
@@ -1816,14 +1938,89 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('type', 'param')
             })
 
-            it("overrided class method no param", () => {
+            it("overrided class constructor", () => {
 
                 class BaseParamClass {
-                    method( @param p1, @param p2) { }
+                    constructor( @param p1, @param p2) { }
                 }
 
                 class ParamClass extends BaseParamClass {
-                    method() { }
+                    constructor( @param name) { super(name, name) }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, undefined)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+            })
+
+            it("overrided static class method", () => {
+
+                class BaseParamClass {
+                    static method( @param p1, @param p2) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+                    static method( @param name) { }
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+            })
+
+            // non static methods are not supported
+            // it("overrided class method no param", () => {
+
+            //     class BaseParamClass {
+            //         method( @param p1, @param p2) { }
+            //     }
+
+            //     class ParamClass extends BaseParamClass {
+            //         method() { }
+            //     }
+
+            //     const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+            //     expect(value).to.undefined
+            // })
+
+
+            it("overrided class constructor no param", () => {
+                
+                class BaseParamClass {
+                    constructor( @param p1, @param p2) { }
+                }
+                
+                class ParamClass extends BaseParamClass {
+                    constructor() { super(null, null) }
+                }
+                
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, undefined)
+                // pass the base class params if there is not defined inject in the new ctor
+                // expect(value).to.undefined
+
+                expect(value).to.have.lengthOf(2);
+            })
+
+            it("overrided static class method no param", () => {
+
+                class BaseParamClass {
+                    static method( @param p1, @param p2) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+                    static method() { }
                 }
 
                 const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
@@ -1834,6 +2031,48 @@ describe('annotations', () => {
 
                 class BaseParamClass {
                     method( @param name) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, 'method')
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+            })
+
+            it("not overrided class constructor", () => {
+
+                class BaseParamClass {
+                    constructor( @param name) { }
+                }
+
+                class ParamClass extends BaseParamClass {
+
+                }
+
+                const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, undefined)
+
+                expect(value).to.have.lengthOf(1);
+
+                const metadata = value[0]
+
+                expect(metadata).to.have.property('from', 'name')
+                expect(metadata).to.have.property('parameterIndex', 0)
+                expect(metadata).to.have.property('type', 'param')
+            })
+
+            it("not overrided static class method", () => {
+
+                class BaseParamClass {
+                    static method( @param name) { }
                 }
 
                 class ParamClass extends BaseParamClass {

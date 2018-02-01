@@ -2,21 +2,28 @@ import { Resource } from './resource'
 import { getInvoker, invoke } from '../providers'
 import { defineMetadata, getMetadata, constants, getFunctionName } from '../annotations'
 const { CLASS_ENVIRONMENTKEY } = constants
+import { container } from '../helpers/ioc'
 
 export const FUNCTIONAL_SERVICE_PREFIX = 'FUNCTIONAL_SERVICE_'
 
 export class FunctionalService extends Resource {
-    public handle(...params) {
+    public static handle(...params) {
 
     }
 
-    public async invoke(params?, invokeConfig?) {
+    public static async invoke(params?, invokeConfig?) {
         return await invoke(this, params, invokeConfig)
     }
 
     public static createInvoker(...params) {
         let invoker = getInvoker(this, params)
         return invoker
+    }
+
+    public static async onInject({ parameter }): Promise<any> {
+        const injectableType = container.resolveType(this)
+        // return (...params) => injectableType.invoke(...params)
+        return injectableType
     }
 
     public static onDefineInjectTo(target) {

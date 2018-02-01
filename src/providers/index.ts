@@ -39,11 +39,11 @@ export const getInvoker = (serviceType, params) => {
 
     const currentEnvironment = environments[environment]
 
-    const serviceInstance = container.resolve(serviceType, ...params)
-    const invoker = currentEnvironment.getInvoker(serviceInstance, params)
+    const resolvedServiceType = container.resolveType(serviceType)
+    const invoker = currentEnvironment.getInvoker(resolvedServiceType, params)
 
     const invokeHandler = async (...params) => {
-        const onHandleResult = await callExtension(serviceInstance, `onHandle_${environment}`, ...params)
+        const onHandleResult = await callExtension(resolvedServiceType, `onHandle_${environment}`, ...params)
         if (typeof onHandleResult !== 'undefined') {
             return onHandleResult
         }
@@ -54,14 +54,14 @@ export const getInvoker = (serviceType, params) => {
         enumerable: false,
         configurable: false,
         writable: false,
-        value: serviceType,
+        value: resolvedServiceType,
     })
 
     return invokeHandler
 }
 
-export const invoke = async (serviceInstance, params?, invokeConfig?) => {
-    await callExtension(serviceInstance, 'onInvoke', {
+export const invoke = async (serviceType, params?, invokeConfig?) => {
+    await callExtension(serviceType, 'onInvoke', {
         params,
         invokeConfig,
     })
@@ -75,14 +75,14 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
     let currentEnvironment = invokeEnvironments[environmentMode]
 
     const availableParams = {}
-    const parameterMapping = (getOverridableMetadata(PARAMETER_PARAMKEY, serviceInstance.constructor, 'handle') || [])
+    const parameterMapping = (getOverridableMetadata(PARAMETER_PARAMKEY, serviceType, 'handle') || [])
     parameterMapping.forEach((target) => {
         if (params && target && target.type === 'param') {
             availableParams[target.from] = params[target.from]
         }
     })
 
-    await callExtension(serviceInstance, `onInvoke_${environmentMode}`, {
+    await callExtension(serviceType, `onInvoke_${environmentMode}`, {
         invokeParams: params,
         params: availableParams,
         invokeConfig,
@@ -91,5 +91,5 @@ export const invoke = async (serviceInstance, params?, invokeConfig?) => {
         environmentMode
     })
 
-    return await currentEnvironment.invoke(serviceInstance, availableParams, invokeConfig)
+    return await currentEnvironment.invoke(serviceType, availableParams, invokeConfig)
 }

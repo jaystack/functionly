@@ -1,5 +1,5 @@
 import { PARAMETER_PARAMKEY, CLASS_ENVIRONMENTKEY, CLASS_INJECTABLEKEY } from '../constants'
-import { defineMetadata, getOwnMetadata, getOverridableMetadata } from '../metadata'
+import { defineMetadata, getOwnMetadata } from '../metadata'
 import { getFunctionName } from '../classes/functionName'
 
 export const inject = (type: any, ...params): any => {
@@ -8,7 +8,7 @@ export const inject = (type: any, ...params): any => {
             throw new Error(`type '${getFunctionName(type)}' not marked as injectable`)
         }
 
-        const existingParameters: any[] = getOverridableMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
+        const existingParameters: any[] = getOwnMetadata(PARAMETER_PARAMKEY, target, targetKey) || [];
 
         existingParameters.push({
             serviceType: type,

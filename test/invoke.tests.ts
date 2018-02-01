@@ -23,10 +23,10 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
-                    expect(serviceInstance).to.instanceof(A)
+                    expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({})
                     expect(invokeConfig).is.undefined
                 }
@@ -35,11 +35,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle() { }
+                public static async handle() { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({})
                 }
@@ -57,10 +57,10 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
-                    expect(serviceInstance).to.instanceof(A)
+                    expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({ p1: 'p1' })
                     expect(invokeConfig).is.undefined
                 }
@@ -69,11 +69,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -91,10 +91,10 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
-                    expect(serviceInstance).to.instanceof(A)
+                    expect(serviceType).to.equal(A)
                     expect(params).to.have.deep.equal({ p1: 'p1' })
                     expect(invokeConfig).is.undefined
                 }
@@ -103,11 +103,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1', p2: 'p2' })
                 }
@@ -125,10 +125,10 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
-                    expect(serviceInstance).to.instanceof(A)
+                    expect(serviceType).to.equal(A)
                     expect(params).to.deep.equal({})
                     expect(invokeConfig).to.deep.equal({ a: 1, b: 2, c: 3 })
                 }
@@ -137,11 +137,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle() { }
+                public static async handle() { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({}, { a: 1, b: 2, c: 3 })
                 }
@@ -159,7 +159,7 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
                     expect(false).to.equal(true, 'unknown provider have to select')
@@ -169,11 +169,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle() { }
+                public static async handle() { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({})
                 }
@@ -195,7 +195,7 @@ describe('invoke', () => {
             let counter = 0
 
             class TestProvider extends LocalProvider {
-                public async invoke(serviceInstance, params, invokeConfig?) {
+                public async invoke(serviceType, params, invokeConfig?) {
                     counter++
 
                     expect(false).to.equal(true, 'unknown provider have to select')
@@ -205,11 +205,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle() { }
+                public static async handle() { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({}, { mode: 'unknown' })
                 }
@@ -275,7 +275,7 @@ describe('invoke', () => {
                 const myDecorator = createParameterDecorator('myDecorator')
 
                 class A extends FunctionalService {
-                    public async handle( @myDecorator p1) {
+                    public static async handle( @myDecorator p1) {
                         counter++
 
                         expect(p1).to.deep.equal({ instance: 1 })
@@ -316,7 +316,7 @@ describe('invoke', () => {
                 const myDecorator = createParameterDecorator('myDecorator')
 
                 class A extends FunctionalService {
-                    public async handle( @myDecorator p1) {
+                    public static async handle( @myDecorator p1) {
                         counter++
 
                         expect(p1).to.deep.equal({ instance: 1 })
@@ -348,7 +348,7 @@ describe('invoke', () => {
                 const myDecorator = createParameterDecorator('myDecorator')
 
                 class A extends FunctionalService {
-                    public async handle( @myDecorator p1) {
+                    public static async handle( @myDecorator p1) {
                         expect(false).to.equal(true, 'error not catched')
                     }
                 }
@@ -399,11 +399,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -437,11 +437,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', methods: ['post'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -472,11 +472,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', methods: ['get', 'post'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -510,11 +510,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', methods: ['post', 'get'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -545,11 +545,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', authLevel: 'anonymous' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -583,11 +583,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', methods: ['post'], authLevel: 'anonymous' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -619,11 +619,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -656,11 +656,11 @@ describe('invoke', () => {
             @httpTrigger({ route: '/v1/a1', authLevel: 'anonymous' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -707,11 +707,11 @@ describe('invoke', () => {
             @rest({ path: '/v1/a1' })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -745,11 +745,11 @@ describe('invoke', () => {
             @rest({ path: '/v1/a1', methods: ['post'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -780,11 +780,11 @@ describe('invoke', () => {
             @rest({ path: '/v1/a1', methods: ['get', 'post'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -818,11 +818,11 @@ describe('invoke', () => {
             @rest({ path: '/v1/a1', methods: ['post', 'get'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -856,11 +856,11 @@ describe('invoke', () => {
             @rest({ path: '/v1/a1', methods: ['any'] })
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }
@@ -899,11 +899,11 @@ describe('invoke', () => {
 
             @injectable()
             class A extends FunctionalService {
-                public async handle( @param p1) { }
+                public static async handle( @param p1) { }
             }
 
             class B extends FunctionalService {
-                public async handle( @inject(A) a: A) {
+                public static async handle( @inject(A) a) {
                     counter++
                     const aResult = await a.invoke({ p1: 'p1' })
                 }

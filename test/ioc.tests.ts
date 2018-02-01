@@ -269,7 +269,7 @@ describe('IOC', () => {
         container.registerType(A, AOtherApi)
 
         class B extends FunctionalService {
-            public async handle( @inject(A) a: A) {
+            public static async handle( @inject(A) a: A) {
                 counter++
 
                 expect(a).is.instanceof(AOtherApi)
@@ -291,7 +291,7 @@ describe('IOC', () => {
 
         @injectable()
         class A extends Service {
-            public async handle() {
+            public static async handle() {
                 counter++
                 expect(false).to.equal(true, 'remap required')
             }
@@ -299,7 +299,7 @@ describe('IOC', () => {
 
         @injectable()
         class AOtherService extends Service {
-            public async handle() {
+            public static async handle() {
                 counter++
             }
         }
@@ -307,7 +307,7 @@ describe('IOC', () => {
         container.registerType(A, AOtherService)
 
         class B extends FunctionalService {
-            public async handle( @inject(A) a) {
+            public static async handle( @inject(A) a) {
                 counter++
 
                 await a()

@@ -7,8 +7,8 @@ import { container } from '../helpers/ioc'
 import { parse } from 'url'
 
 export class LocalProvider extends Provider {
-    public getInvoker(serviceInstance, params) {
-        const callContext = this.createCallContext(serviceInstance, 'handle')
+    public getInvoker(serviceType, params) {
+        const callContext = this.createCallContext(serviceType, 'handle')
 
         const invoker = async (req, res, next) => {
             try {
@@ -17,11 +17,11 @@ export class LocalProvider extends Provider {
                 let result
                 let error
                 try {
-                    result = await callContext({ event: eventContext, serviceInstance })
+                    result = await callContext({ event: eventContext, serviceType })
                 } catch (err) {
                     error = err
                 }
-                const response = await this.resultTransform(error, result, eventContext, serviceInstance)
+                const response = await this.resultTransform(error, result, eventContext, serviceType)
 
                 res.send(response)
                 return response
@@ -32,7 +32,7 @@ export class LocalProvider extends Provider {
         return invoker
     }
 
-    protected resultTransform(error, result, eventContext, serviceInstance) {
+    protected resultTransform(error, result, eventContext, serviceType) {
         if (error) throw error
 
         if (result && typeof result.status === 'number' && result.hasOwnProperty('data')) {
@@ -50,9 +50,9 @@ export class LocalProvider extends Provider {
         return result
     }
 
-    public async invoke(serviceInstance, params, invokeConfig?) {
+    public async invoke(serviceType, params, invokeConfig?) {
 
-        const httpAttr = (getMetadata(rest.environmentKey, serviceInstance) || [])[0]
+        const httpAttr = (getMetadata(rest.environmentKey, serviceType) || [])[0]
         if (!httpAttr) {
             throw new Error('missing http configuration')
         }
@@ -72,9 +72,9 @@ export class LocalProvider extends Provider {
         }
 
 
-        const isLoggingEnabled = getMetadata(CLASS_LOGKEY, serviceInstance)
+        const isLoggingEnabled = getMetadata(CLASS_LOGKEY, serviceType)
         if (isLoggingEnabled) {
-            console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceInstance)}`, JSON.stringify(invokeParams, null, 2))
+            console.log(`${new Date().toISOString()} request to ${getFunctionName(serviceType)}`, JSON.stringify(invokeParams, null, 2))
         }
 
         return await this.invokeExec(invokeParams)

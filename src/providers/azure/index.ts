@@ -14,8 +14,8 @@ export const FUNCTIONLY_FUNCTION_KEY = 'FUNCTIONLY_FUNCTION_KEY'
 
 
 export class AzureProvider extends Provider {
-    public getInvoker(serviceInstance, params): Function {
-        const callContext = this.createCallContext(serviceInstance, 'handle')
+    public getInvoker(serviceType, params): Function {
+        const callContext = this.createCallContext(serviceType, 'handle')
 
         const invoker = async (context, req) => {
             try {
@@ -26,11 +26,11 @@ export class AzureProvider extends Provider {
                 let result
                 let error
                 try {
-                    result = await callContext({ eventSourceHandler, event: eventContext, serviceInstance })
+                    result = await callContext({ eventSourceHandler, event: eventContext, serviceType })
                 } catch (err) {
                     error = err
                 }
-                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceInstance)
+                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceType)
 
                 context.res = response
                 return response
@@ -44,9 +44,9 @@ export class AzureProvider extends Provider {
         return invoker
     }
 
-    public async invoke(serviceInstance, params, invokeConfig?) {
+    public async invoke(serviceType, params, invokeConfig?) {
 
-        const httpAttr = (getMetadata(CLASS_HTTPTRIGGER, serviceInstance) || [])[0]
+        const httpAttr = (getMetadata(CLASS_HTTPTRIGGER, serviceType) || [])[0]
         if (!httpAttr) {
             throw new Error('missing http configuration')
         }

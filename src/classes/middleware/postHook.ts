@@ -3,8 +3,8 @@ import { error, getMetadata, constants } from '../../annotations'
 const { PARAMETER_PARAMKEY } = constants
 
 export class PostHook extends Hook {
-    public catch(...params);
-    public catch( @error error) {
+    public static catch(...params);
+    public static catch( @error error) {
         throw error
     }
 

@@ -9,13 +9,13 @@ import { container } from '../helpers/ioc'
 const provider = container.resolve(InProcProvider)
 
 export class Service extends Resource {
-    public handle(...params) {
+    public static handle(...params) {
 
     }
 
-    public async invoke(params?, invokeConfig?) {
+    public static async invoke(params?, invokeConfig?) {
         const availableParams = {}
-        const parameterMapping = (getOverridableMetadata(PARAMETER_PARAMKEY, this.constructor, 'handle') || [])
+        const parameterMapping = (getOverridableMetadata(PARAMETER_PARAMKEY, this, 'handle') || [])
         parameterMapping.forEach((target) => {
             if (params && target && target.type === 'param') {
                 availableParams[target.from] = params[target.from]
@@ -35,8 +35,8 @@ export class Service extends Resource {
     }
 
     public static async onInject({ parameter }): Promise<any> {
-        const service = container.resolve(this)
-        return (...params) => service.invoke(...params)
+        const injectableType = container.resolveType(this)
+        return (...params) => injectableType.invoke(...params)
     }
 
     public static onDefineInjectTo(target, targetKey, parameterIndex: number) {

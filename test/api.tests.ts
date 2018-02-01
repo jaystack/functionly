@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { FunctionalService, DynamoTable, DocumentClientApi, S3Storage, S3Api, SimpleNotificationService, SNSApi } from '../src/classes'
 import { injectable, dynamoTable, inject, s3Storage, sns } from '../src/annotations'
-import { container } from '../src//helpers/ioc'
+import { container } from '../src/helpers/ioc'
 
 describe('api', () => {
     describe('DynamoTable', () => {
@@ -24,7 +24,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.DTClass_TABLE_NAME = 'DTClass-table'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -79,7 +79,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             process.env.FUNCTIONAL_STAGE = 'customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -135,7 +135,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.DTClass_TABLE_NAME = 'DTClass-table-other'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -191,7 +191,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.DTClass_TABLE_NAME = 'ATable'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -247,7 +247,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.DTCLASS_ENV_NAME = 'DTClass-table'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -303,7 +303,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.DTClass_TABLE_NAME = 'custom-table-name'
             class Home extends FunctionalService {
-                public async handle( @inject(DTClass) a: DTClass) {
+                public static async handle( @inject(DTClass) a: DTClass) {
                     counter++
 
                     await a.put({
@@ -369,7 +369,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.S3StorageClass_S3_BUCKET = 's3storageclass-bucket'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -424,7 +424,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             process.env.FUNCTIONAL_STAGE = 'customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -480,7 +480,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.S3StorageClass_S3_BUCKET = 's3storageclass-bucket-custom'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -536,7 +536,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.S3StorageClass_S3_BUCKET = 'custom-name'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -592,7 +592,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.S3StorageClass_ENV_NAME = 's3storageclass-other'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -648,7 +648,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_STAGE = 'customstage'
             process.env.S3StorageClass_S3_BUCKET = 'custom-bucket-name'
             class Home extends FunctionalService {
-                public async handle( @inject(S3StorageClass) a: S3StorageClass) {
+                public static async handle( @inject(S3StorageClass) a: S3StorageClass) {
                     counter++
 
                     await a.getObject({
@@ -717,7 +717,7 @@ describe('api', () => {
             process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic123456789-customstage'
             process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({
@@ -774,7 +774,7 @@ describe('api', () => {
             process.env.FUNCTIONAL_ENVIRONMENT = 'local'
             process.env.FUNCTIONAL_STAGE = 'customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({
@@ -833,7 +833,7 @@ describe('api', () => {
             process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic'
             process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({
@@ -892,7 +892,7 @@ describe('api', () => {
             process.env.SNSTopicClass_SNS_TOPICNAME = 'custom-name123456789-customstage'
             process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:custom-name123456789-customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({
@@ -951,7 +951,7 @@ describe('api', () => {
             process.env.SNSTopicClass_ENV_NAME = 'SNSTopicClass-topic123456789-customstage'
             process.env.SNSTopicClass_ENV_NAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic123456789-customstage'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({
@@ -1010,7 +1010,7 @@ describe('api', () => {
             process.env.SNSTopicClass_SNS_TOPICNAME = 'SNSTopicClass-topic'
             process.env.SNSTopicClass_SNS_TOPICNAME_ARN = 'arn:aws:sns:Z:1:SNSTopicClass-topic'
             class Home extends FunctionalService {
-                public async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
+                public static async handle( @inject(SNSTopicClass) a: SNSTopicClass) {
                     counter++
 
                     await a.publish({

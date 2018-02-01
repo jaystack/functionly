@@ -28,8 +28,8 @@ const eventSourceHandlers = [
 
 
 export class AWSProvider extends Provider {
-    public getInvoker(serviceInstance, params): Function {
-        const callContext = this.createCallContext(serviceInstance, 'handle')
+    public getInvoker(serviceType, params): Function {
+        const callContext = this.createCallContext(serviceType, 'handle')
 
         const invoker = async (event, context, cb) => {
             try {
@@ -40,11 +40,11 @@ export class AWSProvider extends Provider {
                 let result
                 let error
                 try {
-                    result = await callContext({ eventSourceHandler, event: eventContext, serviceInstance })
+                    result = await callContext({ eventSourceHandler, event: eventContext, serviceType })
                 } catch (err) {
                     error = err
                 }
-                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceInstance)
+                const response = await eventSourceHandler.resultTransform(error, result, eventContext, serviceType)
 
                 cb(null, response)
                 return response
@@ -55,10 +55,10 @@ export class AWSProvider extends Provider {
         return invoker
     }
 
-    public async invoke(serviceInstance, params, invokeConfig?) {
+    public async invoke(serviceType, params, invokeConfig?) {
         initAWSSDK()
 
-        const funcName = getFunctionName(serviceInstance)
+        const funcName = getFunctionName(serviceType)
         const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
 
         const invokeParams = {
