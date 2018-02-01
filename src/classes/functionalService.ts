@@ -22,8 +22,7 @@ export class FunctionalService extends Resource {
 
     public static async onInject({ parameter }): Promise<any> {
         const injectableType = container.resolveType(this)
-        // return (...params) => injectableType.invoke(...params)
-        return injectableType
+        return (...params) => injectableType.invoke(...params)
     }
 
     public static onDefineInjectTo(target) {

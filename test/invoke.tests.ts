@@ -41,7 +41,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({})
+                    const aResult = await a({})
                 }
             }
 
@@ -75,7 +75,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -109,7 +109,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1', p2: 'p2' })
+                    const aResult = await a({ p1: 'p1', p2: 'p2' })
                 }
             }
 
@@ -143,7 +143,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({}, { a: 1, b: 2, c: 3 })
+                    const aResult = await a({}, { a: 1, b: 2, c: 3 })
                 }
             }
 
@@ -175,7 +175,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({})
+                    const aResult = await a({})
                 }
             }
 
@@ -211,7 +211,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({}, { mode: 'unknown' })
+                    const aResult = await a({}, { mode: 'unknown' })
                 }
             }
 
@@ -405,7 +405,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -443,7 +443,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -478,7 +478,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -516,7 +516,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -551,7 +551,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -589,7 +589,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -625,7 +625,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -662,7 +662,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -713,7 +713,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -751,7 +751,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -786,7 +786,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -824,7 +824,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -862,7 +862,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 
@@ -905,7 +905,7 @@ describe('invoke', () => {
             class B extends FunctionalService {
                 public static async handle( @inject(A) a) {
                     counter++
-                    const aResult = await a.invoke({ p1: 'p1' })
+                    const aResult = await a({ p1: 'p1' })
                 }
             }
 

@@ -573,10 +573,8 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     public static async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1.prototype).to.instanceof(Resource)
-                        expect(p1).to.equal(MockInjectable)
 
-                        await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })
+                        await p1({ p1: 1, p2: 2 }, { config: 1 })
                     }
                 }
 
@@ -616,10 +614,8 @@ describe('service events', () => {
                 class MockService extends FunctionalService {
                     public static async handle( @inject(MockInjectable) p1) {
                         counter++
-                        expect(p1.prototype).to.instanceof(Resource)
-                        expect(p1).to.equal(MockInjectable)
 
-                        await p1.invoke({ p1: 1, p2: 2 }, { config: 1 })
+                        await p1({ p1: 1, p2: 2 }, { config: 1 })
                     }
                 }
 
