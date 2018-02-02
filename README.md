@@ -329,7 +329,7 @@ npm install functionly -g
 docker run -d --name dynamodb -p 8000:8000 peopleperhour/dynamodb
 ```
 2. Deploy will create the tables in DynamoDB
-> Note: Create the [functionly.json](https://raw.githubusercontent.com/jaystack/functionly-examples/master/todoDB/functionly.json) in the project for short commands. Also, you don't have to pass all arguments.
+> Note: Create the [functionly.json](#functionly-configuration) in the project for short commands. Also, you don't have to pass all arguments.
 ```sh
 functionly deploy local
 ```
@@ -344,7 +344,7 @@ functionly start
 
 > [Set up](http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html) AWS Credentials before deployment.
 
-> Note: Create the [functionly.json](https://raw.githubusercontent.com/jaystack/functionly-examples/master/todoDB/functionly.json) in the project for short commands. Also, you don't have to pass all arguments. As the `deployTarget` is configured as `aws` (the default value configured) then the deploy command will use this as deployment target.
+> Note: Create the [functionly.json](#functionly-configuration) in the project for short commands. Also, you don't have to pass all arguments. As the `deployTarget` is configured as `aws` (the default value configured) then the deploy command will use this as deployment target.
 
 Functionly will create the package and deploy the application to AWS. The package is a [CloudFormation](https://aws.amazon.com/cloudformation/) template, it contains all the AWS resources so AWS can create or update the application's resources based on the template.
 ```sh
