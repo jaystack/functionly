@@ -7,18 +7,18 @@ export interface CorsConfig {
     credentials?: boolean
 }
 
-export const rest = expandableDecorator<{ path: string, methods?: string[], cors?: boolean, corsConfig?: CorsConfig, anonymous?: boolean }>({
+export const rest = expandableDecorator<{ path: string, methods?: string[], cors?: boolean, corsConfig?: CorsConfig, authenticated?: boolean }>({
     name: 'rest',
     defaultValues: {
         methods: ['get'],
         cors: true,
-        anonymous: false
+        authenticated: false
     }
 })
 
 export interface IHttpMethod {
     (path: string): Function
-    (config: { path: string, cors?: boolean, corsConfig?: CorsConfig, anonymous?: boolean }): Function
+    (config: { path: string, cors?: boolean, corsConfig?: CorsConfig, authenticated?: boolean }): Function
 }
 
 export const resolveParam = (p: any, defaults) => {

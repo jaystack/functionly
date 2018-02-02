@@ -212,7 +212,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.property('method', 'get')
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('authorization', 'NONE')
             })
             it("method", () => {
                 @apiGateway({ path: '/v1/test', method: 'post' })
@@ -227,7 +227,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.property('method', 'post')
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('authorization', 'NONE')
             })
             it("cors", () => {
                 @apiGateway({ path: '/v1/test', cors: false })
@@ -242,7 +242,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.property('method', 'get')
                 expect(metadata).to.have.property('cors', false)
-                expect(metadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('authorization', 'NONE')
             })
             it("corsConfig", () => {
                 @apiGateway({ path: '/v1/test', corsConfig: { headers: ['X-test'] } })
@@ -258,10 +258,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('method', 'get')
                 expect(metadata).to.have.property('cors', true)
                 expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
-                expect(metadata).to.have.property('authorization', 'AWS_IAM')
+                expect(metadata).to.have.property('authorization', 'NONE')
             })
             it("authorization", () => {
-                @apiGateway({ path: '/v1/test', authorization: 'NONE' })
+                @apiGateway({ path: '/v1/test', authorization: 'AWS_IAM' })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(CLASS_APIGATEWAYKEY, ApiGatewayTestClass)
@@ -273,7 +273,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.property('method', 'get')
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authorization', 'NONE')
+                expect(metadata).to.have.property('authorization', 'AWS_IAM')
             })
         })
         describe("httpTrigger", () => {
@@ -290,7 +290,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('route', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authLevel', 'function')
+                expect(metadata).to.have.property('authLevel', 'anonymous')
             })
             it("method", () => {
                 @httpTrigger({ route: '/v1/test', methods: ['post'] })
@@ -305,7 +305,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('route', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['post'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authLevel', 'function')
+                expect(metadata).to.have.property('authLevel', 'anonymous')
             })
             it("cors", () => {
                 @httpTrigger({ route: '/v1/test', cors: false })
@@ -320,7 +320,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('route', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', false)
-                expect(metadata).to.have.property('authLevel', 'function')
+                expect(metadata).to.have.property('authLevel', 'anonymous')
             })
 
             it("corsConfig", () => {
@@ -337,10 +337,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
                 expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
-                expect(metadata).to.have.property('authLevel', 'function')
+                expect(metadata).to.have.property('authLevel', 'anonymous')
             })
             it("authorization", () => {
-                @httpTrigger({ route: '/v1/test', authLevel: 'anonymous' })
+                @httpTrigger({ route: '/v1/test', authLevel: 'function' })
                 class HttpTriggerTestClass { }
 
                 const value = getMetadata(CLASS_HTTPTRIGGER, HttpTriggerTestClass)
@@ -353,7 +353,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('route', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('authLevel', 'anonymous')
+                expect(metadata).to.have.property('authLevel', 'function')
             })
         })
         describe("rest", () => {
@@ -370,7 +370,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("method", () => {
                 @rest({ path: '/v1/test', methods: ['post'] })
@@ -385,7 +385,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['post'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("cors", () => {
                 @rest({ path: '/v1/test', cors: false })
@@ -400,7 +400,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', false)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
 
             it("corsConfig", () => {
@@ -417,10 +417,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
                 expect(metadata).to.have.deep.property('corsConfig', { headers: ['X-test'] })
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("authorization", () => {
-                @rest({ path: '/v1/test', anonymous: true })
+                @rest({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -432,7 +432,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("httpGet", () => {
@@ -449,10 +449,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("config", () => {
-                @httpGet({ path: '/v1/test', anonymous: true })
+                @httpGet({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -464,7 +464,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['get'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("httpPost", () => {
@@ -481,10 +481,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['post'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("config", () => {
-                @httpPost({ path: '/v1/test', anonymous: true })
+                @httpPost({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -496,7 +496,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['post'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("httpPut", () => {
@@ -513,10 +513,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['put'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("config", () => {
-                @httpPut({ path: '/v1/test', anonymous: true })
+                @httpPut({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -528,7 +528,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['put'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("httpPatch", () => {
@@ -545,10 +545,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['patch'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("config", () => {
-                @httpPatch({ path: '/v1/test', anonymous: true })
+                @httpPatch({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -560,7 +560,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['patch'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("httpDelete", () => {
@@ -577,10 +577,10 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['delete'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', false)
+                expect(metadata).to.have.property('authenticated', false)
             })
             it("config", () => {
-                @httpDelete({ path: '/v1/test', anonymous: true })
+                @httpDelete({ path: '/v1/test', authenticated: true })
                 class ApiGatewayTestClass { }
 
                 const value = getMetadata(rest.environmentKey, ApiGatewayTestClass)
@@ -592,7 +592,7 @@ describe('annotations', () => {
                 expect(metadata).to.have.property('path', '/v1/test')
                 expect(metadata).to.have.deep.property('methods', ['delete'])
                 expect(metadata).to.have.property('cors', true)
-                expect(metadata).to.have.property('anonymous', true)
+                expect(metadata).to.have.property('authenticated', true)
             })
         })
         describe("dynamoTable", () => {

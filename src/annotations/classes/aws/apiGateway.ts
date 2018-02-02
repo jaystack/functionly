@@ -5,7 +5,7 @@ import { rest, CorsConfig } from '../rest'
 export const defaultEndpoint = {
     method: 'get',
     cors: true,
-    authorization: 'AWS_IAM'
+    authorization: 'NONE'
 }
 
 export const apiGateway = (endpoint: {
@@ -26,7 +26,7 @@ rest.extension('aws', (target, config) => {
             method,
             cors: config.cors,
             corsConfig: config.corsConfig,
-            authorization: config.anonymous ? 'NONE' : 'AWS_IAM'
+            authorization: config.authenticated ? 'AWS_IAM' : 'NONE'
          })
          decorator(target)
     }

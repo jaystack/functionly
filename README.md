@@ -7,7 +7,7 @@ Defining a rest service which listens on `/hello-world`:
 ```js
 import { FunctionalService, rest, description, param } from 'functionly'
 
-@rest({ path: '/hello-world', anonymous: true })
+@rest({ path: '/hello-world' })
 @description('hello world service')
 export class HelloWorld extends FunctionalService {
     static async handle(@param name = 'world') {
@@ -105,10 +105,10 @@ export class HelloWorld extends FunctionalService {
     static async handle() {}
 }
 ```
-If you want your service to be accessible with a web request over a rest interface then you have to decorate  it with the [rest]() decorator. We need a `path` and have to set the `anonymous` property to `true` because we want to call it without authentication.
+If you want your service to be accessible with a web request over a rest interface then you have to decorate  it with the [rest]() decorator. We have to set the `path` property to define the rest endpoint.
 If we do not set the `methods` property that means it will accept `GET` requests. (default: `methods: ['get']`)
 ```js
-@rest({ path: '/hello-world', anonymous: true })
+@rest({ path: '/hello-world' })
 ```
 Define a [description]() for the `HelloWorld`, which will make it easier to find in the AWS Lambda list.
 ```js
@@ -118,7 +118,7 @@ Now we have to create the business logic.
 ```js
 import { FunctionalService, rest, description } from 'functionly'
 
-@rest({ path: '/hello-world', anonymous: true })
+@rest({ path: '/hello-world' })
 @description('hello world service')
 export class HelloWorld extends FunctionalService {
     static async handle() {
@@ -135,7 +135,7 @@ In the `handle` method if you use the `@param` property decorator for a paramete
 ```js
 import { FunctionalService, rest, description, param } from 'functionly'
 
-@rest({ path: '/hello-world', anonymous: true })
+@rest({ path: '/hello-world' })
 @description('hello world service')
 export class HelloWorld extends FunctionalService {
     static async handle(@param name = 'world') {
@@ -172,10 +172,10 @@ export class GetAllTodos extends TodoService {
     static async handle() {}
 }
 ```
-If you want your service to be accessible with a web request over a rest interface then you have to decorate it with the [rest]() decorator. We need a `path` and have to set the `cors` and the `anonymous` properties to `true` because we want to call it without authentication and from another domain.
+If you want your service to be accessible with a web request over a rest interface then you have to decorate it with the [rest]() decorator. We have to set the `path` property to define the rest endpoint.
 If we do not set the `methods` property that means it will accept `GET` requests. (default: `methods: ['get']`)
 ```js
-@rest({ path: '/getAllTodos', cors: true, anonymous: true })
+@rest({ path: '/getAllTodos' })
 ```
 Define a [description]() for the `TodoService`, which will make it easier to find in the AWS Lambda list.
 ```js
@@ -185,7 +185,7 @@ Now we have to create the business logic. We want to read the todo items, so we 
 ```js
 import { rest, description, inject } from 'functionly'
 
-@rest({ path: '/getAllTodos', cors: true, anonymous: true })
+@rest({ path: '/getAllTodos' })
 @description('get all Todo service')
 export class GetAllTodos extends TodoService {
     static async handle(@inject(TodoTable) db) {
@@ -204,7 +204,7 @@ We need a service to create todo items, so let's do this. We will also define a 
 ```js
 import { rest, description } from 'functionly'
 
-@rest({ path: '/createTodo', methods: ['post'], anonymous: true, cors: true })
+@rest({ path: '/createTodo', methods: ['post'] })
 @description('create Todo service')
 export class CreateTodo extends TodoService {
     static async handle() {}
@@ -214,7 +214,7 @@ We need some values to create a new todo item: `name`, `description` and `status
 ```js
 import { rest, description, param } from 'functionly'
 
-@rest({ path: '/createTodo', methods: ['post'], anonymous: true, cors: true })
+@rest({ path: '/createTodo', methods: ['post'] })
 @description('create Todo service')
 export class CreateTodo extends TodoService {
     static async handle(@param name, @param description, @param staus) {}
@@ -225,7 +225,7 @@ The business logic: save a new todo item. [Inject]() the `TodoTable` and save a 
 import { generate } from 'shortid'
 import { rest, description, param } from 'functionly'
 
-@rest({ path: '/createTodo', methods: ['post'], anonymous: true, cors: true })
+@rest({ path: '/createTodo', methods: ['post'] })
 @description('create Todo service')
 export class CreateTodo extends TodoService {
     static async handle(@param name, @param description, @param status, @inject(TodoTable) db) {
@@ -289,7 +289,7 @@ export class PersistTodo extends Service {
 ```js
 import { rest, description, param, inject } from 'functionly'
 
-@rest({ path: '/createTodo', methods: ['post'], anonymous: true, cors: true })
+@rest({ path: '/createTodo', methods: ['post'] })
 @description('create Todo service')
 export class CreateTodo extends TodoService {
     static async handle( 

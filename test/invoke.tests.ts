@@ -396,7 +396,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @httpTrigger({ route: '/v1/a1' })
+            @httpTrigger({ route: '/v1/a1', authLevel: 'function' })
             @injectable()
             class A extends FunctionalService {
                 public static async handle( @param p1) { }
@@ -434,7 +434,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @httpTrigger({ route: '/v1/a1', methods: ['post'] })
+            @httpTrigger({ route: '/v1/a1', methods: ['post'], authLevel: 'function' })
             @injectable()
             class A extends FunctionalService {
                 public static async handle( @param p1) { }
@@ -469,7 +469,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @httpTrigger({ route: '/v1/a1', methods: ['get', 'post'] })
+            @httpTrigger({ route: '/v1/a1', methods: ['get', 'post'], authLevel: 'function' })
             @injectable()
             class A extends FunctionalService {
                 public static async handle( @param p1) { }
@@ -507,7 +507,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @httpTrigger({ route: '/v1/a1', methods: ['post', 'get'] })
+            @httpTrigger({ route: '/v1/a1', methods: ['post', 'get'], authLevel: 'function' })
             @injectable()
             class A extends FunctionalService {
                 public static async handle( @param p1) { }
@@ -616,7 +616,7 @@ describe('invoke', () => {
             }
             addProvider(FUNCTIONAL_ENVIRONMENT, new TestProvider())
 
-            @httpTrigger({ route: '/v1/a1' })
+            @httpTrigger({ route: '/v1/a1', authLevel: 'function' })
             @injectable()
             class A extends FunctionalService {
                 public static async handle( @param p1) { }

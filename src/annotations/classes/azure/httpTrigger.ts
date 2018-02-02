@@ -5,7 +5,7 @@ import { rest, CorsConfig } from '../rest'
 export const defaultEndpoint = {
     methods: ['get'],
     cors: true,
-    authLevel: 'function'
+    authLevel: 'anonymous'
 }
 
 export const httpTrigger = (endpoint: {
@@ -28,7 +28,7 @@ rest.extension('azure', (target, config) => {
         methods: config.methods,
         cors: config.cors,
         corsConfig: config.corsConfig,
-        authLevel: config.anonymous ? 'anonymous' : 'function'
+        authLevel: config.authenticated ? 'function' : 'anonymous'
     })
     decorator(target)
 })
