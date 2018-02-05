@@ -63,7 +63,7 @@ export default (api) => {
 
             for (const tableConfig of context.tableConfigs) {
                 const properties = { TableName: tableConfig.tableName, ...tableConfig.nativeConfig }
-                dynamoStatement.Resource.push("arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/" + properties.TableName)
+                dynamoStatement.Resource.push("arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/" + properties.TableName + '-' + context.stage)
             }
 
             context.serverless.provider.iamRoleStatements.push(dynamoStatement)
@@ -146,28 +146,30 @@ export default (api) => {
 
         for (const tableDefinition of context.tableConfigs) {
             await executor({
-                context: { ...context, tableConfig },
+                context: { ...context, tableConfig: tableDefinition },
                 name: 'tableConfig',
-                method: tableConfig
+                method: tableConfiguration
             })
         }
 
     }
 
-    const tableConfig = async ({ tableConfig, serverless }) => {
+    const tableConfiguration = async ({ stage, tableConfig, serverless }) => {
         const properties = {
             ...__dynamoDBDefaults,
             TableName: tableConfig.tableName,
             ...tableConfig.nativeConfig
         }
 
+        const resName = properties.TableName
+        properties.TableName += '-' + stage
 
         const tableResource = {
             "Type": "AWS::DynamoDB::Table",
             "Properties": properties
         }
 
-        const name = normalizeName(properties.TableName)
+        const name = normalizeName(resName)
 
         serverless.resources.Resources[name] = tableResource
     }

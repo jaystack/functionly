@@ -40,7 +40,7 @@ export const dynamoTable = (tableConfig?: {
         ...tableConfig,
         environmentKey: templatedKey,
         tableName: templatedValue,
-        definedBy: target.name
+        definedBy: target
     })
 
     defineMetadata(CLASS_DYNAMOTABLECONFIGURATIONKEY, [...tableDefinitions], target)

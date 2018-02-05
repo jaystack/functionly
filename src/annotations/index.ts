@@ -1,6 +1,7 @@
 export { templates, applyTemplates } from './templates'
 export { injectable, InjectionScope } from './classes/injectable'
 export { apiGateway } from './classes/aws/apiGateway'
+export { cloudFormation } from './classes/aws/cloudFormation'
 export { cloudWatchEvent } from './classes/aws/cloudWatchEvent'
 export { httpTrigger } from './classes/azure/httpTrigger'
 export { rest, httpGet, httpPost, httpPut, httpPatch, httpDelete, IHttpMethod } from './classes/rest'

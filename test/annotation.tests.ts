@@ -608,7 +608,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("empty", () => {
@@ -623,7 +623,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("tableName", () => {
@@ -638,7 +638,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("environmentKey", () => {
@@ -653,7 +653,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'myenvkey')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("nativeConfig", () => {
@@ -675,7 +675,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal({
                     ...__dynamoDBDefaults,
                     ProvisionedThroughput: {
@@ -698,7 +698,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("empty", () => {
@@ -713,7 +713,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'DynamoTableTestClass-table')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("tableName", () => {
@@ -728,7 +728,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("environmentKey", () => {
@@ -743,7 +743,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'myenvkey')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal(__dynamoDBDefaults);
             })
             it("nativeConfig", () => {
@@ -765,7 +765,7 @@ describe('annotations', () => {
 
                 expect(metadata).to.have.property('tableName', 'mytablename')
                 expect(metadata).to.have.property('environmentKey', 'DynamoTableTestClass_TABLE_NAME')
-                expect(metadata).to.have.property('definedBy', DynamoTableTestClass.name)
+                expect(metadata).to.have.property('definedBy', DynamoTableTestClass)
                 expect(metadata).to.have.deep.property('nativeConfig').that.deep.equal({
                     ...__dynamoDBDefaults,
                     ProvisionedThroughput: {

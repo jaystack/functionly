@@ -1,10 +1,13 @@
 import { defaultsDeep } from 'lodash'
-import { __dynamoDBDefaults } from '../../../../annotations'
+import { __dynamoDBDefaults, getMetadata, constants } from '../../../../annotations'
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
+import { cloudFormation } from '../../../../annotations/classes/aws/cloudFormation';
 
 export const DYNAMODB_TABLE_STACK = 'DynamoDBTableStack'
+
+const { CLASS_CLOUDFORMATION } = constants
 
 export const tableResources = ExecuteStep.register('DynamoDB-Tables', async (context) => {
     await executor({
@@ -52,13 +55,21 @@ export const tableResource = async (context) => {
         "Properties": properties
     }
 
-    const tableResourceName = `Dynamo${tableConfig.tableName}`
-    const resourceName = setResource(context, tableResourceName, dynamoDb, DYNAMODB_TABLE_STACK, true)
+    tableConfig.tableStackName = DYNAMODB_TABLE_STACK
+    let tableResourceName = `Dynamo${tableConfig.tableName}`
+
+    const cloudFormationConfig = getMetadata(CLASS_CLOUDFORMATION, tableConfig.definedBy)
+    if (cloudFormationConfig) {
+        tableConfig.tableStackName = cloudFormationConfig.stack
+        tableResourceName = cloudFormationConfig.resourceName || tableResourceName
+    }
+
+    const resourceName = setResource(context, tableResourceName, dynamoDb, tableConfig.tableStackName, true)
 
     await setStackParameter({
         ...context,
         resourceName,
-        sourceStackName: DYNAMODB_TABLE_STACK
+        sourceStackName: tableConfig.tableStackName
     })
 
     tableConfig.resourceName = resourceName
@@ -80,7 +91,7 @@ export const tableSubscribers = ExecuteStep.register('DynamoDB-Table-Subscriptio
 
 export const tableSubscriber = async (context) => {
     const { tableConfig, subscriber } = context
-    
+
     if (tableConfig.exists) return
 
     const properties = {
@@ -105,7 +116,7 @@ export const tableSubscriber = async (context) => {
     await setStackParameter({
         ...context,
         resourceName: tableConfig.resourceName,
-        sourceStackName: DYNAMODB_TABLE_STACK,
+        sourceStackName: tableConfig.tableStackName,
         targetStackName: getStackName(subscriber.serviceDefinition),
         attr: 'StreamArn'
     })
@@ -122,7 +133,7 @@ export const tableSubscriber = async (context) => {
 
 export const dynamoStreamingPolicy = async (context) => {
     const { tableConfig, serviceDefinition } = context
-    
+
     if (tableConfig.exists) return
 
     let policy = serviceDefinition.roleResource.Properties.Policies.find(p => p.PolicyDocument.Statement[0].Action.includes('dynamodb:GetRecords'))
