@@ -9,7 +9,7 @@ import { executor } from '../../context'
 import { cloudFormationInit, cloudFormationMerge } from './context/cloudFormationInit'
 import {
     tableResources, lambdaResources, roleResources, s3DeploymentBucket, s3DeploymentBucketParameter,
-    apiGateway, sns, s3, cloudWatchEvent, initStacks, lambdaLogResources, S3_DEPLOYMENT_BUCKET_RESOURCE_NAME, tableSubscribers
+    apiGateway, sns, s3, cloudWatchEvent, initStacks, lambdaLogResources, getDeploymentBucketResourceName, tableSubscribers
 } from './context/resources'
 import { uploadTemplate, persistCreateTemplate } from './context/uploadTemplate'
 
@@ -38,7 +38,8 @@ export const cloudFormation = {
             }
         }
         if (!context.awsBucket) {
-            const bucketData = await executor({ ...context, LogicalResourceId: S3_DEPLOYMENT_BUCKET_RESOURCE_NAME }, describeStackResouce)
+            const logicalResourceId = await getDeploymentBucketResourceName()
+            const bucketData = await executor({ ...context, LogicalResourceId: logicalResourceId }, describeStackResouce)
             context.awsBucket = bucketData.StackResourceDetail.PhysicalResourceId
         }
 

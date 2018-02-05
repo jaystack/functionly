@@ -4,7 +4,7 @@ import { ExecuteStep, executor } from '../../../context'
 import { collectMetadata } from '../../../utilities/collectMetadata'
 import { setResource } from '../utils'
 import { createStack, setStackParameter, getStackName } from './stack'
-import { S3_DEPLOYMENT_BUCKET_RESOURCE_NAME } from './s3StorageDeployment'
+import { getDeploymentBucketResourceName } from './s3StorageDeployment'
 
 export const S3_STORAGE_STACK = 'S3Stack'
 
@@ -17,7 +17,7 @@ export const s3DeploymentBucket = ExecuteStep.register('S3-Deployment-Bucket', a
         "Type": "AWS::S3::Bucket"
     }
 
-    const bucketResourceName = S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
+    const bucketResourceName = await getDeploymentBucketResourceName()
     const resourceName = setResource(context, bucketResourceName, s3BucketResource)
 
     context.CloudFormationTemplate.Outputs[`${resourceName}Name`] = {
@@ -30,7 +30,7 @@ export const s3DeploymentBucket = ExecuteStep.register('S3-Deployment-Bucket', a
 
 
 export const s3DeploymentBucketParameter = ExecuteStep.register('S3-Deployment-Bucket-Parameter', async (context) => {
-    const resourceName = S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
+    const resourceName = await getDeploymentBucketResourceName()
     await setStackParameter({
         ...context,
         resourceName

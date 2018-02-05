@@ -1,7 +1,13 @@
-export const S3_DEPLOYMENT_BUCKET_RESOURCE_NAME = 'FunctionlyDeploymentBucket'
+import { projectConfig } from '../../../project/config'
+
+const S3_DEPLOYMENT_BUCKET_RESOURCE_NAME = 'FunctionlyDeploymentBucket'
+
+export const getDeploymentBucketResourceName = async () => {
+    return projectConfig.awsBucketResourceName || S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
+}
 
 export const getBucketReference = async (context) => {
     return context.__userAWSBucket ? context.awsBucket : {
-        "Ref": S3_DEPLOYMENT_BUCKET_RESOURCE_NAME
+        "Ref": await getDeploymentBucketResourceName()
     }
 }
