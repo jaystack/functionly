@@ -62,6 +62,14 @@ export const tableResource = async (context) => {
     if (cloudFormationConfig) {
         tableConfig.tableStackName = cloudFormationConfig.stack
         tableResourceName = cloudFormationConfig.resourceName || tableResourceName
+
+        if (tableConfig.tableStackName) {
+            await executor({
+                context: { ...context, stackName: tableConfig.tableStackName },
+                name: `CloudFormation-Stack-init-${tableConfig.tableStackName}`,
+                method: createStack
+            })
+        }
     }
 
     const resourceName = setResource(context, tableResourceName, dynamoDb, tableConfig.tableStackName, true)
