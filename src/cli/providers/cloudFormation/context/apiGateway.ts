@@ -2,7 +2,9 @@ import { getMetadata, constants } from '../../../../annotations'
 const { CLASS_APIGATEWAYKEY } = constants
 import { ExecuteStep, executor } from '../../../context'
 import { setResource } from '../utils'
-import { setStackParameter, getStackName } from './stack'
+import { setStackParameter, getStackName, createStack } from './stack'
+
+import { projectConfig } from '../../../project/config'
 
 export const API_GATEWAY_REST_API = 'ApiGatewayRestApi'
 
@@ -20,17 +22,28 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
         }
     }
 
-    const resourceName = setResource(context, API_GATEWAY_REST_API, RestApi)
+    context.ApiGatewayStackName = projectConfig.ApiGatewayStackName || null
+    if (context.ApiGatewayStackName) {
+        await executor({
+            context: { ...context, stackName: context.ApiGatewayStackName },
+            name: `CloudFormation-Stack-init-${context.ApiGatewayStackName}`,
+            method: createStack
+        })
+    }
+
+    const resourceName = setResource(context, API_GATEWAY_REST_API, RestApi, context.ApiGatewayStackName, true)
 
     await setStackParameter({
         ...context,
-        resourceName
+        resourceName,
+        sourceStackName: context.ApiGatewayStackName
     })
 
     await setStackParameter({
         ...context,
         resourceName,
-        attr: 'RootResourceId'
+        attr: 'RootResourceId',
+        sourceStackName: context.ApiGatewayStackName
     })
 
     context.CloudFormationTemplate.Outputs[`ServiceEndpoint`] = {
@@ -39,9 +52,14 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
                 "",
                 [
                     "https://",
-                    {
-                        "Ref": resourceName
-                    },
+                    context.ApiGatewayStackName ? {
+                        "Fn::GetAtt": [
+                            context.ApiGatewayStackName,
+                            "Outputs." + resourceName
+                        ]
+                    } : {
+                            "Ref": resourceName
+                        },
                     ".execute-api.",
                     context.awsRegion,
                     ".amazonaws.com/",
@@ -258,9 +276,14 @@ export const gatewayDeployment = ExecuteStep.register('ApiGateway-Deployment', a
     const ApiGatewayDeployment = {
         "Type": "AWS::ApiGateway::Deployment",
         "Properties": {
-            "RestApiId": {
-                "Ref": API_GATEWAY_REST_API
-            },
+            "RestApiId": context.ApiGatewayStackName ? {
+                "Fn::GetAtt": [
+                    context.ApiGatewayStackName,
+                    "Outputs." + API_GATEWAY_REST_API
+                ]
+            } : {
+                    "Ref": API_GATEWAY_REST_API
+                },
             "StageName": context.stage
         },
         "DependsOn": [
