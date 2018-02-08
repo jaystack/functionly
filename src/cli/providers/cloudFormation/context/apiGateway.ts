@@ -9,9 +9,32 @@ import { projectConfig } from '../../../project/config'
 export const API_GATEWAY_REST_API = 'ApiGatewayRestApi'
 
 export const apiGateway = ExecuteStep.register('ApiGateway', async (context) => {
-    await executor(context, gatewayRestApi)
     await executor(context, gatewayResources)
-    await executor(context, gatewayDeployment)
+})
+
+export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', async (context) => {
+    const endpointsCors = new Map<string, any>()
+    const endpoints = new Map<string, any>()
+    for (const serviceDefinition of context.publishedFunctions) {
+        await executor({
+            context: { ...context, serviceDefinition, endpointsCors, endpoints },
+            name: `ApiGateway-Methods-${serviceDefinition.service.name}`,
+            method: apiGatewayMethods
+        })
+    }
+
+    for (const [endpointResourceName, { serviceDefinition, methods, headers, credentials, origin }] of endpointsCors) {
+        await executor({
+            context: { ...context, endpointResourceName, serviceDefinition, methods, headers, credentials, origin },
+            name: `ApiGateway-Method-Options-${endpointResourceName}`,
+            method: setOptionsMethodResource
+        })
+    }
+
+    if (endpoints.size) {
+        await executor(context, gatewayRestApi)
+        await executor(context, gatewayDeployment)
+    }
 })
 
 export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (context) => {
@@ -71,26 +94,6 @@ export const gatewayRestApi = ExecuteStep.register('ApiGateway-RestApi', async (
 
 })
 
-export const gatewayResources = ExecuteStep.register('ApiGateway-Resources', async (context) => {
-    const endpointsCors = new Map<string, any>()
-    const endpoints = new Map<string, any>()
-    for (const serviceDefinition of context.publishedFunctions) {
-        await executor({
-            context: { ...context, serviceDefinition, endpointsCors, endpoints },
-            name: `ApiGateway-Methods-${serviceDefinition.service.name}`,
-            method: apiGatewayMethods
-        })
-    }
-
-    for (const [endpointResourceName, { serviceDefinition, methods, headers, credentials, origin }] of endpointsCors) {
-        await executor({
-            context: { ...context, endpointResourceName, serviceDefinition, methods, headers, credentials, origin },
-            name: `ApiGateway-Method-Options-${endpointResourceName}`,
-            method: setOptionsMethodResource
-        })
-    }
-})
-
 export const apiGatewayMethods = async (context) => {
     const { serviceDefinition } = context
 
@@ -121,7 +124,7 @@ export const apiGatewayMethod = async (context) => {
             endpoint = endpoints.get(pathFragment)
         } else {
             endpoint = await executor({
-                context: { ...context, pathFragment, rootPathFragment, endpoints, pathPart },
+                context: { ...context, pathFragment, rootPathFragment, pathPart },
                 name: `ApiGateway-ResourcePath-${pathFragment}`,
                 method: apiGatewayPathPart
             })
