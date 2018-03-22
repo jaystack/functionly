@@ -41,6 +41,7 @@ test
 /src
 main.js
 main.js.map
+tsconfig.json
 
 __test/**/*
 

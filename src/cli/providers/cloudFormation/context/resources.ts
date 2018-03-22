@@ -177,21 +177,21 @@ export const logPolicy = async (context) => {
                 "Action": [
                     "logs:CreateLogStream",
                 ],
-                "Resource": logGroupNames.map(n => {
-                    return {
-                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:" + n + ":*"
+                "Resource": [
+                    {
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*-" + context.stage + ":*"
                     }
-                })
+                ]
             }, {
                 "Effect": "Allow",
                 "Action": [
                     "logs:PutLogEvents"
                 ],
-                "Resource": logGroupNames.map(n => {
-                    return {
-                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:" + n + ":*:*"
+                "Resource": [
+                    {
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*-" + context.stage + ":*:*"
                     }
-                })
+                ]
             }]
         }
     }
