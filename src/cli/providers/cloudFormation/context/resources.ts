@@ -179,7 +179,7 @@ export const logPolicy = async (context) => {
                 ],
                 "Resource": [
                     {
-                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*-" + context.stage + ":*"
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/" + context.projectName + "-*-" + context.stage + ":*"
                     }
                 ]
             }, {
@@ -189,7 +189,7 @@ export const logPolicy = async (context) => {
                 ],
                 "Resource": [
                     {
-                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*-" + context.stage + ":*:*"
+                        "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/" + context.projectName + "-*-" + context.stage + ":*:*"
                     }
                 ]
             }]
@@ -276,7 +276,7 @@ export const lambdaResource = async (context) => {
             S3Key: context.S3Zip
         },
         Description: serviceDefinition[CLASS_DESCRIPTIONKEY] || getMetadata(CLASS_DESCRIPTIONKEY, serviceDefinition.service),
-        FunctionName: `${getFunctionName(serviceDefinition.service)}-${context.stage}`,
+        FunctionName: `${context.projectName}-${getFunctionName(serviceDefinition.service)}-${context.stage}`,
         Handler: serviceDefinition.handler,
         MemorySize: serviceDefinition[CLASS_AWSMEMORYSIZEKEY] || getMetadata(CLASS_AWSMEMORYSIZEKEY, serviceDefinition.service),
         Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
@@ -335,7 +335,7 @@ export const lambdaLogResource = async (context) => {
     const functionName = getFunctionName(serviceDefinition.service)
 
     const properties: any = {
-        "LogGroupName": `/aws/lambda/${functionName}-${context.stage}`
+        "LogGroupName": `/aws/lambda/${context.projectName}-${functionName}-${context.stage}`
     };
 
     const lambdaResource = {

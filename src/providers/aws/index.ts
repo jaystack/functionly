@@ -62,7 +62,7 @@ export class AWSProvider extends Provider {
         const resolvedFuncName = process.env[`FUNCTIONAL_SERVICE_${funcName.toUpperCase()}`] || funcName
 
         const invokeParams = {
-            FunctionName: resolvedFuncName,
+            FunctionName: `${process.env.FUNCTIONAL_PROJECTNAME}-${resolvedFuncName}`,
             Payload: JSON.stringify(params)
         };
 

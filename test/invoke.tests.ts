@@ -9,6 +9,7 @@ import { httpTrigger, inject, injectable, param, rest, createParameterDecorator 
 
 describe('invoke', () => {
     const FUNCTIONAL_ENVIRONMENT = 'custom'
+    const FUNCTIONAL_PROJECTNAME = 'my-test-project'
 
     describe('general', () => {
         beforeEach(() => {
@@ -878,9 +879,11 @@ describe('invoke', () => {
     describe('aws', () => {
         beforeEach(() => {
             process.env.FUNCTIONAL_ENVIRONMENT = FUNCTIONAL_ENVIRONMENT
+            process.env.FUNCTIONAL_PROJECTNAME = FUNCTIONAL_PROJECTNAME
         })
         afterEach(() => {
             delete process.env.FUNCTIONAL_ENVIRONMENT
+            delete process.env.FUNCTIONAL_PROJECTNAME
             removeProvider(FUNCTIONAL_ENVIRONMENT)
         })
 
@@ -891,7 +894,7 @@ describe('invoke', () => {
                 public async invokeExec(config: any): Promise<any> {
                     counter++
 
-                    expect(config).to.have.property('FunctionName', 'A')
+                    expect(config).to.have.property('FunctionName', `my-test-project-A`)
                     expect(config).to.have.property('Payload', JSON.stringify({ p1: 'p1' }))
                 }
             }

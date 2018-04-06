@@ -13,7 +13,7 @@ try {
     if (packageJson && packageJson.version) {
         projectConfig.version = packageJson.version
     }
-    if (packageJson && packageJson.name) {
+    if (!projectConfig.name && packageJson && packageJson.name) {
         projectConfig.name = packageJson.name
     }
 } catch (e) { }
