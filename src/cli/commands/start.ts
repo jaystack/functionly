@@ -27,7 +27,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
     const startLocal = async (context) => {
         let app = express()
         app.use(bodyParser.json({ limit: '10mb' }))
-
+        app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
         console.log("")
         for (let serviceDefinition of context.publishedFunctions) {
             let httpMetadata = getMetadata(rest.environmentKey, serviceDefinition.service) || []
