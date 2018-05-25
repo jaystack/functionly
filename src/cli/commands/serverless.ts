@@ -221,6 +221,7 @@ export default (api) => {
                         console.log(`done`)
                     } catch (e) {
                         console.log(`error`, e)
+                        process.exit(1)
                     }
                 });
         },

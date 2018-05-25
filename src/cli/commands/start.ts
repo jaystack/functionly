@@ -153,6 +153,7 @@ export default ({ createContext, annotations: { getMetadata, constants, getFunct
                         console.log(`Compilation complete.`)
                     } catch (e) {
                         console.log(`error`, e)
+                        process.exit(1)
                     }
                 });
         }

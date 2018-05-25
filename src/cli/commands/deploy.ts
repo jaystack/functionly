@@ -33,6 +33,7 @@ export default ({ createContext, executor, ExecuteStep, projectConfig, requireVa
                         console.log(`done`)
                     } catch (e) {
                         console.log(`error`, e)
+                        process.exit(1)
                     }
                 });
         }

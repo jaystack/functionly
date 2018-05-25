@@ -28,6 +28,7 @@ export default ({ createContext, executor, ExecuteStep, annotations: { getMetada
                         console.log(`done`)
                     } catch (e) {
                         console.log(`error`, e)
+                        process.exit(1)
                     }
                 });
         }
