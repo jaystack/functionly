@@ -1,8 +1,13 @@
 import { CLASS_AWSMEMORYSIZEKEY, CLASS_AWSTIMEOUTKEY, CLASS_AWSRUNTIMEKEY } from '../../constants'
 import { defineMetadata } from '../../metadata'
 
+export enum AwsType {
+  NodeJs6 = 'nodejs6.10',
+  NodeJs8 = 'nodejs8.10'
+}
+
 export const aws = (config: {
-    type?: 'nodejs6.10',
+    type?: string | AwsType,
     memorySize?: number,
     timeout?: number
 }) => (target: Function) => {
