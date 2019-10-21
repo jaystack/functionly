@@ -1269,14 +1269,14 @@ describe('annotations', () => {
         })
         describe("aws", () => {
             it("type", () => {
-                @aws({ type: 'nodejs8.10' })
+                @aws({ type: 'nodejs10.x' })
                 class RuntimeTestClass { }
 
                 const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
                 const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
                 const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
 
-                expect(runtimeValue).to.equal('nodejs8.10')
+                expect(runtimeValue).to.equal('nodejs10.x')
                 expect(memoryValue).to.undefined
                 expect(timeoutValue).to.undefined
             })
@@ -1305,14 +1305,14 @@ describe('annotations', () => {
                 expect(timeoutValue).to.equal(3)
             })
             it("all", () => {
-                @aws({ type: 'nodejs8.10', memorySize: 100, timeout: 3 })
+                @aws({ type: 'nodejs10.x', memorySize: 100, timeout: 3 })
                 class RuntimeTestClass { }
 
                 const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
                 const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
                 const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
 
-                expect(runtimeValue).to.equal('nodejs8.10')
+                expect(runtimeValue).to.equal('nodejs10.x')
                 expect(memoryValue).to.equal(100)
                 expect(timeoutValue).to.equal(3)
             })
