@@ -43,7 +43,7 @@ export const uploadToAws = ExecuteStep.register('S3-Upload', async (context) => 
     return new Promise<any>((resolve, reject) => {
         const version = context.version ? `${context.version}/` : ''
         const folderPah = context.version ? `${context.version}/${context.date.toISOString()}` : `${context.date.toISOString()}`
-        const binary = new Buffer(context.upload.data, 'binary')
+        const binary = Buffer.from(context.upload.data, 'binary')
         let params = {
             ...config.S3,
             Bucket: context.awsBucket,

@@ -180,5 +180,5 @@ export const addEnvironmentSetting = (name, value, site) => {
 export const persistHostJson = async (context) => {
     const { deploymentFolder } = context
     const host = JSON.stringify(context.ARMHost, null, 4)
-    writeFile(join(`${context.projectName || 'functionly'}-${context.stage}`, 'host.json'), new Buffer(host, 'utf8'), deploymentFolder)
+    writeFile(join(`${context.projectName || 'functionly'}-${context.stage}`, 'host.json'), Buffer.from(host, 'utf8'), deploymentFolder)
 }

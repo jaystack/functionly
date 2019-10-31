@@ -143,11 +143,11 @@ export const persistFunction = (context) => {
     const basePath = join(context.projectFolder, functionResource.name)
 
     for (const file in functionResource.properties.files) {
-        writeFile(join(basePath, file), new Buffer(functionResource.properties.files[file], 'utf8'), deploymentFolder)
+        writeFile(join(basePath, file), Buffer.from(functionResource.properties.files[file], 'utf8'), deploymentFolder)
     }
 
     const bindings = JSON.stringify(functionResource.properties.config, null, 4)
-    writeFile(join(basePath, 'function.json'), new Buffer(bindings, 'utf8'), deploymentFolder)
+    writeFile(join(basePath, 'function.json'), Buffer.from(bindings, 'utf8'), deploymentFolder)
 
     const idx = site.resources.indexOf(functionResource)
     site.resources.splice(idx, 1)
