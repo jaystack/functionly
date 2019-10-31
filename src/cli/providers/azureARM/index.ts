@@ -56,5 +56,5 @@ export const azure = {
 export const persistFile = async (context) => {
     const fileName = projectConfig.name ? `${projectConfig.name}.template.json` : 'azurearm.template.json'
     const templateData = JSON.stringify(context.ARMTemplate, null, 2);
-    writeFile(fileName, new Buffer(templateData, 'binary'))
+    writeFile(fileName, Buffer.from(templateData, 'binary'))
 }

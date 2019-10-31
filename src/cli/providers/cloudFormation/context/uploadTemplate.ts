@@ -6,7 +6,7 @@ import { projectConfig } from '../../../project/config'
 export const persistCreateTemplate = ExecuteStep.register('PersistCreateTemplate', async (context) => {
     const templateData = JSON.stringify(context.CloudFormationTemplate, null, 2);
     const fileName = projectConfig.name ? `${projectConfig.name}.create.template.json` : 'cloudformation.create.template.json'
-    writeFile(fileName, new Buffer(templateData, 'binary'))
+    writeFile(fileName, Buffer.from(templateData, 'binary'))
 })
 
 export const uploadTemplate = ExecuteStep.register('UploadTemplate', async (context) => {
