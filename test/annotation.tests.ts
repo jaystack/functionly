@@ -1269,14 +1269,14 @@ describe('annotations', () => {
         })
         describe("aws", () => {
             it("type", () => {
-                @aws({ type: 'nodejs10.x' })
+                @aws({ type: 'nodejs12.x' })
                 class RuntimeTestClass { }
 
                 const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
                 const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
                 const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
 
-                expect(runtimeValue).to.equal('nodejs10.x')
+                expect(runtimeValue).to.equal('nodejs12.x')
                 expect(memoryValue).to.undefined
                 expect(timeoutValue).to.undefined
             })
@@ -1305,14 +1305,14 @@ describe('annotations', () => {
                 expect(timeoutValue).to.equal(3)
             })
             it("all", () => {
-                @aws({ type: 'nodejs10.x', memorySize: 100, timeout: 3 })
+                @aws({ type: 'nodejs12.x', memorySize: 100, timeout: 3 })
                 class RuntimeTestClass { }
 
                 const runtimeValue = getMetadata(CLASS_AWSRUNTIMEKEY, RuntimeTestClass)
                 const memoryValue = getMetadata(CLASS_AWSMEMORYSIZEKEY, RuntimeTestClass)
                 const timeoutValue = getMetadata(CLASS_AWSTIMEOUTKEY, RuntimeTestClass)
 
-                expect(runtimeValue).to.equal('nodejs10.x')
+                expect(runtimeValue).to.equal('nodejs12.x')
                 expect(memoryValue).to.equal(100)
                 expect(timeoutValue).to.equal(3)
             })
@@ -1530,14 +1530,14 @@ describe('annotations', () => {
             it("overrided class constructor no inject", () => {
                 @injectable()
                 class ATestClass { }
-                
+
                 class BaseBTestClass {
                     constructor( @inject(ATestClass) p1, @inject(ATestClass) p2) { }
                 }
                 class BTestClass extends BaseBTestClass {
                     constructor() { super(null, null) }
                 }
-                
+
                 const value = getOverridableMetadata(PARAMETER_PARAMKEY, BTestClass, undefined)
                 // pass the base class params if there is not defined inject in the new ctor
                 // expect(value).to.undefined
@@ -1997,15 +1997,15 @@ describe('annotations', () => {
 
 
             it("overrided class constructor no param", () => {
-                
+
                 class BaseParamClass {
                     constructor( @param p1, @param p2) { }
                 }
-                
+
                 class ParamClass extends BaseParamClass {
                     constructor() { super(null, null) }
                 }
-                
+
                 const value = getOverridableMetadata(PARAMETER_PARAMKEY, ParamClass, undefined)
                 // pass the base class params if there is not defined inject in the new ctor
                 // expect(value).to.undefined

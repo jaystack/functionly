@@ -34,7 +34,7 @@ export const createLambdaFunction = ExecuteStep.register('CreateLambdaFunction',
             MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
             Publish: true,
             Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs10.x",
+            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs12.x",
             Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
             Environment: {
                 Variables: getMetadata(constants.CLASS_ENVIRONMENTKEY, context.serviceDefinition.service)
@@ -118,7 +118,7 @@ export const updateLambdaFunctionConfiguration = ExecuteStep.register('UpdateLam
             Handler: context.serviceDefinition.handler,
             MemorySize: getMetadata(constants.CLASS_AWSMEMORYSIZEKEY, context.serviceDefinition.service),
             Role: getMetadata(constants.CLASS_ROLEKEY, context.serviceDefinition.service),
-            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs10.x",
+            Runtime: getMetadata(constants.CLASS_AWSRUNTIMEKEY, context.serviceDefinition.service) || "nodejs12.x",
             Timeout: getMetadata(constants.CLASS_AWSTIMEOUTKEY, context.serviceDefinition.service),
             VpcConfig: {
             }
