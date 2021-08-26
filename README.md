@@ -1,7 +1,7 @@
 # functionly
 
-The `functionly library` lets you build `serverless` nodejs applications in an innovative, functional, and fun by abstraction way. 
-Use the JavaScript language and the JSON syntax to describe infrastructure and entities, service dependencies, and to implement service code. Deploy your solution to cloud providers, or run containerized on your onprem servers, or locally during development time using the `functionly CLI`. 
+The `functionly library` lets you build `serverless` nodejs applications in an innovative, functional, and fun by abstraction way.
+Use the JavaScript language and the JSON syntax to describe infrastructure and entities, service dependencies, and to implement service code. Deploy your solution to cloud providers, or run containerized on your onprem servers, or locally during development time using the `functionly CLI`.
 
 Defining a rest service which listens on `/hello-world`:
 ```js
@@ -114,7 +114,7 @@ Define a [description]() for the `HelloWorld`, which will make it easier to find
 ```js
 @description('hello world service')
 ```
-Now we have to create the business logic. 
+Now we have to create the business logic.
 ```js
 import { FunctionalService, rest, description } from 'functionly'
 
@@ -151,12 +151,12 @@ Define a base class for FunctionalService to set basic Lambda settings in the AW
 ```js
 import { FunctionalService, aws } from 'functionly'
 
-@aws({ type: 'nodejs10.x', memorySize: 512, timeout: 3 })
+@aws({ type: 'nodejs12.x', memorySize: 512, timeout: 3 })
 export class TodoService extends FunctionalService { }
 ```
 
 ### Create a dynamo table
-We need a DynamoTable, called `TodoTable` because we want to store todo items.  
+We need a DynamoTable, called `TodoTable` because we want to store todo items.
 ```js
 import { DynamoTable, dynamoTable, injectable } from 'functionly'
 
@@ -181,7 +181,7 @@ Define a [description]() for the `TodoService`, which will make it easier to fin
 ```js
 @description('get all Todo service')
 ```
-Now we have to create the business logic. We want to read the todo items, so we need to inject the `TodoTable`. Get the items from it and return from our service. 
+Now we have to create the business logic. We want to read the todo items, so we need to inject the `TodoTable`. Get the items from it and return from our service.
 ```js
 import { rest, description, inject } from 'functionly'
 
@@ -292,10 +292,10 @@ import { rest, description, param, inject } from 'functionly'
 @rest({ path: '/createTodo', methods: ['post'] })
 @description('create Todo service')
 export class CreateTodo extends TodoService {
-    static async handle( 
-        @param name, 
-        @param description, 
-        @param status, 
+    static async handle(
+        @param name,
+        @param description,
+        @param status,
         @inject(ValidateTodo) validateTodo,
         @inject(PersistTodo) persistTodo
     ) {
@@ -317,7 +317,7 @@ npm install
 ```
 
 # Run and Deploy with CLI
-The CLI helps you to deploy and run the application. 
+The CLI helps you to deploy and run the application.
 1. CLI install
 ```sh
 npm install functionly -g
