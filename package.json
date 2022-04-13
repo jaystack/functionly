@@ -37,7 +37,7 @@
     "typescript": "^2.3.0"
   },
   "dependencies": {
-    "async": "^2.1.2",
+    "async": "^3.2.2",
     "aws-sdk": "^2.49.0",
     "body-parser": "^1.17.1",
     "commander": "^2.9.0",
