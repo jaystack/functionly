@@ -2,7 +2,7 @@ import { CLASS_AWSMEMORYSIZEKEY, CLASS_AWSTIMEOUTKEY, CLASS_AWSRUNTIMEKEY } from
 import { defineMetadata } from '../../metadata'
 
 export const aws = (config: {
-    type?: 'nodejs8.10'|'nodejs12.x',
+    type?: 'nodejs12.x'|'nodejs16.x',
     memorySize?: number,
     timeout?: number
 }) => (target: Function) => {
