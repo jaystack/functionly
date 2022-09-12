@@ -151,7 +151,7 @@ Define a base class for FunctionalService to set basic Lambda settings in the AW
 ```js
 import { FunctionalService, aws } from 'functionly'
 
-@aws({ type: 'nodejs12.x', memorySize: 512, timeout: 3 })
+@aws({ type: 'nodejs16.x', memorySize: 512, timeout: 3 })
 export class TodoService extends FunctionalService { }
 ```
 

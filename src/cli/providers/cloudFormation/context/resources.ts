@@ -284,7 +284,7 @@ export const lambdaResource = async (context) => {
         Handler: serviceDefinition.handler,
         MemorySize: serviceDefinition[CLASS_AWSMEMORYSIZEKEY] || getMetadata(CLASS_AWSMEMORYSIZEKEY, serviceDefinition.service),
         Role: serviceDefinition[CLASS_ROLEKEY] || getMetadata(CLASS_ROLEKEY, serviceDefinition.service),
-        Runtime: serviceDefinition[CLASS_AWSRUNTIMEKEY] || getMetadata(CLASS_AWSRUNTIMEKEY, serviceDefinition.service) || "nodejs12.x",
+        Runtime: serviceDefinition[CLASS_AWSRUNTIMEKEY] || getMetadata(CLASS_AWSRUNTIMEKEY, serviceDefinition.service) || "nodejs16.x",
         Timeout: serviceDefinition[CLASS_AWSTIMEOUTKEY] || getMetadata(CLASS_AWSTIMEOUTKEY, serviceDefinition.service),
         Environment: {
             Variables: serviceDefinition[CLASS_ENVIRONMENTKEY] || getMetadata(CLASS_ENVIRONMENTKEY, serviceDefinition.service)
