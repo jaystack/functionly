@@ -93,7 +93,7 @@ export default (api) => {
 
         const def = serverless.functions[functionName] = {
             handler: `${nameKey}.${serviceDefinition.exportName}`,
-            runtime: getMetadata(CLASS_AWSRUNTIMEKEY, serviceDefinition.service) || "nodejs16.x"
+            runtime: getMetadata(CLASS_AWSRUNTIMEKEY, serviceDefinition.service) || "nodejs20.x"
         }
 
         await executor({ context, name: 'funtionEnvironments', method: funtionEnvironments })
