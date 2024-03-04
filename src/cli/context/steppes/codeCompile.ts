@@ -110,9 +110,6 @@ export const bundleConfig = ExecuteStep.register('WebpackBundleConfig', async (c
     })
 
     const externals = {}
-    if (context.deployTarget === 'aws') {
-        externals['aws-sdk'] = 'commonjs aws-sdk'
-    }
 
     let compile = {}
     if (projectConfig.compile) {
