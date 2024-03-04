@@ -15,11 +15,8 @@ jobs:
       - name: Build and Test with Coverage
         run: |
           docker run --rm \
-          -e PROPERTIES="BUILD_ID:${{ github.run_number }}" \
-          -w "/app" \ 
-          -v $PWD:/app \
-          node:8 bash -c "\
-            npm i --no-save -q; \
-            npm run build; \
-            npm run coverage -- --reporter mocha-junit-reporter; \
-            chown -R $(id -u):$(id -g) ."
+            -e PROPERTIES="BUILD_ID:${{ github.run_number }}" \
+            -w "/app" \
+            -v $PWD:/app \
+            node:8 bash -c "npm i --no-save -q; npm run build; npm run coverage -- --reporter mocha-junit-reporter; chown -R $(id -u):$(id -g) ."
+
