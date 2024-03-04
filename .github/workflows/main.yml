@@ -1,0 +1,25 @@
+name: Functionly build and publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Build and Test with Coverage
+        run: |
+          docker run --rm \
+          -e PROPERTIES="BUILD_ID:${{ github.run_number }}" \
+          -w "/app" \ 
+          -v $PWD:/app \
+          node:8 bash -c "\
+            npm i --no-save -q; \
+            npm run build; \
+            npm run coverage -- --reporter mocha-junit-reporter; \
+            chown -R $(id -u):$(id -g) ."
