@@ -27,11 +27,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "8"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false # never use caching in release builds
       - name: Install dependencies
-        run: npm i --no-save -q
+        run: npm ci
       - name: Auto Increment Version, and Publish to npmjs
         run: |
           git config --global user.email "jaystack-ci@jaystack.com"
@@ -58,7 +58,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "8"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false # never use caching in release builds
 
@@ -95,7 +95,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "8"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false # never use caching in release builds
 
