@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false # never use caching in release builds
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -41,14 +41,15 @@ jobs:
           git config --global user.email "jaystack-ci@jaystack.com"
           git config --global user.name "jaystack-ci"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
-          npm publish --tag dev --provenance --access public
+          npm version ${{ inputs.version_type }} -m "Auto-increment version: %s"
+          npm publish --tag dev
 
       - name: Git operations
         run: |
           git tag -f dev
           git push -f --tags
           git push
+
   stage:
     needs: dev
     runs-on: ubuntu-latest
@@ -63,18 +64,11 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false # never use caching in release builds
 
       - name: Extract package version
         id: package_version
-        run: echo "::set-output name=VERSION::$(jq -r .version package.json)"
+        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
         shell: bash
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "jaystack-ci@jaystack.com"
-          git config --global user.name "jaystack-ci"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
       - name: Create and push git tag
         run: |
@@ -98,18 +92,11 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false # never use caching in release builds
 
       - name: Extract package version
         id: package_version
-        run: echo "::set-output name=VERSION::$(jq -r .version package.json)"
+        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
         shell: bash
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "jaystack-ci@jaystack.com"
-          git config --global user.name "jaystack-ci"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
       - name: Create and push git tag
         run: |
