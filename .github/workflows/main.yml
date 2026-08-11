@@ -33,15 +33,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build
+        run: npm run build
+
       - name: Auto Increment Version, and Publish to npmjs
         run: |
           git config --global user.email "jaystack-ci@jaystack.com"
           git config --global user.name "jaystack-ci"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
-          npm publish --tag dev
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm publish --tag dev --provenance --access public
 
       - name: Git operations
         run: |
