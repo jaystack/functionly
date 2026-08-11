@@ -2,6 +2,16 @@ name: Functionly build and publish
 
 on:
   workflow_dispatch:
+    inputs:
+      version_type:
+        description: Version type publish
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   dev:
@@ -9,11 +19,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: '8' 
+          node-version: "8"
       - name: Install dependencies
         run: npm i --no-save -q
       - name: Setup .npmrc for npmjs
@@ -25,7 +35,7 @@ jobs:
           git config --global user.email "jaystack-ci@jaystack.com"
           git config --global user.name "jaystack-ci"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          npm version patch -m "Auto-increment version: %s" --force
+          npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -41,9 +51,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
-          ref: 'refs/tags/dev'
+          ref: "refs/tags/dev"
 
       - name: Configure npm
         run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
@@ -78,9 +88,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
-          ref: 'refs/tags/stage'
+          ref: "refs/tags/stage"
 
       - name: Configure npm
         run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
@@ -107,4 +117,3 @@ jobs:
         run: npm dist-tag add functionly@${{ steps.package_version.outputs.VERSION }} latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
