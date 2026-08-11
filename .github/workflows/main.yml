@@ -13,6 +13,10 @@ on:
           - minor
           - major
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   dev:
     runs-on: ubuntu-latest
@@ -24,12 +28,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: "8"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never use caching in release builds
       - name: Install dependencies
         run: npm i --no-save -q
-      - name: Setup .npmrc for npmjs
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Auto Increment Version, and Publish to npmjs
         run: |
           git config --global user.email "jaystack-ci@jaystack.com"
@@ -37,8 +39,6 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
           npm publish --tag dev
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Git operations
         run: |
           git tag -f dev
@@ -55,10 +55,12 @@ jobs:
         with:
           ref: "refs/tags/dev"
 
-      - name: Configure npm
-        run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "8"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never use caching in release builds
 
       - name: Extract package version
         id: package_version
@@ -78,8 +80,6 @@ jobs:
 
       - name: Publish to npm
         run: npm dist-tag add functionly@${{ steps.package_version.outputs.VERSION }} stage
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   live:
     needs: stage
@@ -92,10 +92,12 @@ jobs:
         with:
           ref: "refs/tags/stage"
 
-      - name: Configure npm
-        run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "8"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never use caching in release builds
 
       - name: Extract package version
         id: package_version
@@ -115,5 +117,3 @@ jobs:
 
       - name: Publish to npm
         run: npm dist-tag add functionly@${{ steps.package_version.outputs.VERSION }} latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
