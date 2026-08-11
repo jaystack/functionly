@@ -41,7 +41,7 @@ jobs:
           git config --global user.email "jaystack-ci@jaystack.com"
           git config --global user.name "jaystack-ci"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          npm version ${{ inputs.version_type }} -m "Auto-increment version: %s"
+          npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
           npm publish --tag dev
 
       - name: Git operations
