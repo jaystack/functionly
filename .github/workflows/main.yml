@@ -14,8 +14,9 @@ on:
           - major
 
 jobs:
-  dev:
+  live:
     runs-on: ubuntu-latest
+    environment: live
     permissions:
       id-token: write # Required for OIDC
       contents: write # Required for pushing tags
@@ -41,70 +42,10 @@ jobs:
           git config --global user.name "jaystack-ci"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           npm version ${{ inputs.version_type }} -m "Auto-increment version: %s" --force
-          npm publish --tag dev --provenance
+          npm publish --provenance
 
       - name: Git operations
         run: |
-          git tag -f dev
-          git push -f --tags
-          git push
-
-  stage:
-    needs: dev
-    runs-on: ubuntu-latest
-    environment: stage
-    permissions:
-      id-token: write # Required for OIDC
-      contents: write # Required for pushing tags
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: "refs/tags/dev"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24"
-
-      - name: Extract package version
-        id: package_version
-        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Create and push git tag
-        run: |
-          git tag -f stage
-          git push -f --tags
-
-      - name: Publish to npm
-        run: npm dist-tag add functionly@${{ steps.package_version.outputs.VERSION }} stage
-
-  live:
-    needs: stage
-    runs-on: ubuntu-latest
-    environment: live
-    permissions:
-      id-token: write # Required for OIDC
-      contents: write # Required for pushing tags
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: "refs/tags/stage"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24"
-
-      - name: Extract package version
-        id: package_version
-        run: echo "VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Create and push git tag
-        run: |
           git tag -f latest
           git push -f --tags
-
-      - name: Publish to npm
-        run: npm dist-tag add functionly@${{ steps.package_version.outputs.VERSION }} latest
+          git push
