@@ -5,6 +5,12 @@
     "outDir": "lib",
     "module": "commonjs",
     "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "config": [
+        "src/types/config-shim"
+      ]
+    },
     "declaration": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
