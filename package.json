@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "async": "^2.1.2",
-    "aws-sdk": "^2.49.0",
+    "aws-sdk": "^2.1693.0",
     "body-parser": "^1.17.1",
     "commander": "^2.9.0",
     "config": "^5.0.0",
